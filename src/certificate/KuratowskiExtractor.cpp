@@ -12,58 +12,6 @@
 
 namespace ht {
 
-int KuratowskiExtractor::maxOriginalEdgeId(const PreparedPalmTree& prepared) {
-    int maxId = -1;
-
-    for (const Dart& dart : prepared.darts) {
-        if (dart.originalEdgeId > maxId) {
-            maxId = dart.originalEdgeId;
-        }
-    }
-
-    return maxId;
-}
-
-void KuratowskiExtractor::addUniqueOriginalEdgeFromDart(
-    const PreparedPalmTree& prepared,
-    int dartId,
-    std::vector<char>& seen,
-    std::vector<int>& originalEdgeIds
-) {
-    if (dartId < 0 || dartId >= static_cast<int>(prepared.darts.size())) {
-        return;
-    }
-
-    const int originalEdgeId = prepared.darts[dartId].originalEdgeId;
-
-    if (originalEdgeId < 0 || originalEdgeId >= static_cast<int>(seen.size())) {
-        return;
-    }
-
-    if (seen[originalEdgeId]) {
-        return;
-    }
-
-    seen[originalEdgeId] = 1;
-    originalEdgeIds.push_back(originalEdgeId);
-}
-
-void KuratowskiExtractor::addUniqueOriginalEdgesFromDarts(
-    const PreparedPalmTree& prepared,
-    const std::vector<int>& dartIds,
-    std::vector<char>& seen,
-    std::vector<int>& originalEdgeIds
-) {
-    for (int dartId : dartIds) {
-        addUniqueOriginalEdgeFromDart(
-            prepared,
-            dartId,
-            seen,
-            originalEdgeIds
-        );
-    }
-}
-
 KuratowskiCertificate KuratowskiExtractor::notImplementedCertificate() const {
     KuratowskiCertificate certificate;
     certificate.type = KuratowskiType::Unknown;
