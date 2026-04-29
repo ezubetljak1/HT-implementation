@@ -17,26 +17,28 @@ struct PathNode {
 
     PathNodeKind kind = PathNodeKind::TreePath;
 
-    // Parent in PATR(G,T). -1 for artificial/root path.
+    // Parent in PATR(G,T). -1 for root path.
     int parent = -1;
 
-    // Children in PATR(G,T), this is SEGLIST(definingDart) at the path-node level.
+    // Children in PATR(G,T), this is SEGLIST(definingDart) at path-node level.
     std::vector<int> children;
 
-    // PATH(f): directed darts forming the path.
+    // PATH(f). For now this is represented by the defining dart.
+    // Total size over all nodes is O(E).
     std::vector<int> pathDarts;
 
-    // CYCLE(f): tree path + closing back edge.
+    // IMPORTANT:
+    // These are intentionally not eagerly materialized by PathTreeBuilder.
+    // Eagerly building CYCLE(f) and SEG(f) for every node can become non-linear.
+    // They are kept as optional/debug fields for later targeted certificate extraction.
     std::vector<int> cycleDarts;
-
-    // SEG(f): PATH(f) plus all descendants. Filled after tree is built.
     std::vector<int> segmentDarts;
 
-    // TAIL(f) and HEAD(f) in Williamson's notation.
+    // TAIL(f) and HEAD(f) in Williamson-style notation.
     int tailVertex = -1;
     int headVertex = -1;
 
-    // RANGE/HEAD vertices on parent cycle. Initially approximate but explicit.
+    // RANGE/HEAD sets are also not eagerly materialized for every node.
     std::vector<int> rangeVertices;
     std::vector<int> headVertices;
 
@@ -44,6 +46,12 @@ struct PathNode {
     int low2 = -1;
     int low1Vertex = -1;
     int low2Vertex = -1;
+
+    // Linear implicit representation of SEG(f):
+    // SEG(f) corresponds to the subtree interval
+    // preorderNodes[preorder, subtreeEnd).
+    int preorder = -1;
+    int subtreeEnd = -1;
 };
 
 struct PathTree {
@@ -54,6 +62,9 @@ struct PathTree {
 
     // vertex -> tree dart from parent to this vertex
     std::vector<int> treeDartFromParent;
+
+    // DFS preorder of the path tree nodes.
+    std::vector<int> preorderNodes;
 
     int rootNode = -1;
 };

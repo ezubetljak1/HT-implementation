@@ -1,6 +1,5 @@
 #include "ht/certificate/PathTreeBuilder.hpp"
 
-#include <algorithm>
 #include <stdexcept>
 
 namespace ht {
@@ -11,8 +10,9 @@ PathTree PathTreeBuilder::build(const PreparedPalmTree& prepared) const {
 
     builder.initialize();
     builder.buildTreeDartFromParentIndex();
-    builder.buildNodesFromOrderedDarts();
-    builder.fillSegments();
+    builder.createNodesFromOrderedDarts();
+    builder.assignParentsAndChildren();
+    builder.assignSubtreeIntervals();
 
     return builder.tree_;
 }
@@ -56,45 +56,38 @@ void PathTreeBuilder::buildTreeDartFromParentIndex() {
 
 int PathTreeBuilder::createNode(
     int definingDart,
-    PathNodeKind kind,
-    int parentNode
+    PathNodeKind kind
 ) {
+    if (definingDart < 0 || definingDart >= static_cast<int>(prepared_->darts.size())) {
+        throw std::runtime_error("Invalid defining dart in createNode.");
+    }
+
+    if (tree_.nodeByDefiningDart[definingDart] != -1) {
+        return tree_.nodeByDefiningDart[definingDart];
+    }
+
     PathNode node;
     node.id = static_cast<int>(tree_.nodes.size());
     node.definingDart = definingDart;
     node.kind = kind;
-    node.parent = parentNode;
 
-    fillTailHead(node);
-    fillCycleData(node);
-    fillRangeAndHead(node);
-    fillLowValues(node);
+    fillBasicPathData(node);
 
     tree_.nodes.push_back(node);
-
-    if (definingDart >= 0) {
-        tree_.nodeByDefiningDart[definingDart] = node.id;
-    }
-
-    if (parentNode != -1) {
-        tree_.nodes[parentNode].children.push_back(node.id);
-    }
+    tree_.nodeByDefiningDart[definingDart] = node.id;
 
     return node.id;
 }
 
-void PathTreeBuilder::buildNodesFromOrderedDarts() {
+void PathTreeBuilder::createNodesFromOrderedDarts() {
     if (prepared_->rootTreeDart == -1) {
         return;
     }
 
-    const int root = createNode(
+    tree_.rootNode = createNode(
         prepared_->rootTreeDart,
-        PathNodeKind::TreePath,
-        -1
+        PathNodeKind::TreePath
     );
-
-    tree_.rootNode = root;
 
     for (int v = 0; v < prepared_->n; ++v) {
         for (int dartId : prepared_->orderedOut[v]) {
@@ -104,18 +97,57 @@ void PathTreeBuilder::buildNodesFromOrderedDarts() {
 
             const Dart& d = dart(dartId);
 
+            if (!d.isTree && !d.isBack) {
+                continue;
+            }
+
             PathNodeKind kind =
                 d.isTree ? PathNodeKind::TreePath : PathNodeKind::BackPath;
 
-            const int parentNode = findParentNodeForDart(dartId);
+            createNode(dartId, kind);
+        }
+    }
+}
 
-            createNode(dartId, kind, parentNode);
+void PathTreeBuilder::assignParentsAndChildren() {
+    if (tree_.rootNode == -1) {
+        return;
+    }
+
+    for (PathNode& node : tree_.nodes) {
+        if (node.id == tree_.rootNode) {
+            node.parent = -1;
+            continue;
+        }
+
+        node.parent = findParentNodeForDart(node.definingDart);
+
+        if (node.parent < 0 || node.parent >= static_cast<int>(tree_.nodes.size())) {
+            node.parent = tree_.rootNode;
+        }
+
+        if (node.parent == node.id) {
+            node.parent = tree_.rootNode;
+        }
+    }
+
+    for (PathNode& node : tree_.nodes) {
+        node.children.clear();
+    }
+
+    for (const PathNode& node : tree_.nodes) {
+        if (node.parent != -1) {
+            tree_.nodes[node.parent].children.push_back(node.id);
         }
     }
 }
 
 int PathTreeBuilder::findParentNodeForDart(int dartId) const {
     const Dart& d = dart(dartId);
+
+    if (tree_.rootNode == -1) {
+        return -1;
+    }
 
     if (d.isTree) {
         const int parentVertex = d.from;
@@ -124,9 +156,7 @@ int PathTreeBuilder::findParentNodeForDart(int dartId) const {
             return tree_.rootNode;
         }
 
-        const int parentOfParent = prepared_->parent[parentVertex];
-
-        if (parentOfParent == -1) {
+        if (prepared_->parent[parentVertex] == -1) {
             return tree_.rootNode;
         }
 
@@ -136,9 +166,9 @@ int PathTreeBuilder::findParentNodeForDart(int dartId) const {
             return tree_.rootNode;
         }
 
-        const int node = tree_.nodeByDefiningDart[parentTreeDart];
+        const int parentNode = tree_.nodeByDefiningDart[parentTreeDart];
 
-        return node == -1 ? tree_.rootNode : node;
+        return parentNode == -1 ? tree_.rootNode : parentNode;
     }
 
     if (d.isBack) {
@@ -154,207 +184,62 @@ int PathTreeBuilder::findParentNodeForDart(int dartId) const {
             return tree_.rootNode;
         }
 
-        const int node = tree_.nodeByDefiningDart[parentTreeDart];
+        const int parentNode = tree_.nodeByDefiningDart[parentTreeDart];
 
-        return node == -1 ? tree_.rootNode : node;
+        return parentNode == -1 ? tree_.rootNode : parentNode;
     }
 
     return tree_.rootNode;
 }
 
-std::vector<int> PathTreeBuilder::buildTreePathDarts(
-    int ancestor,
-    int descendant
-) const {
-    std::vector<int> reversedPath;
-
-    int current = descendant;
-
-    while (current != ancestor) {
-        if (current < 0 || current >= prepared_->n) {
-            throw std::runtime_error("Invalid vertex while building tree path.");
-        }
-
-        const int treeDart = tree_.treeDartFromParent[current];
-
-        if (treeDart == -1) {
-            throw std::runtime_error("Missing tree dart while building tree path.");
-        }
-
-        reversedPath.push_back(treeDart);
-
-        current = prepared_->parent[current];
-
-        if (current == -1) {
-            throw std::runtime_error("Ancestor was not found while building tree path.");
-        }
-    }
-
-    std::reverse(reversedPath.begin(), reversedPath.end());
-    return reversedPath;
-}
-
-std::vector<int> PathTreeBuilder::buildCycleDartsForTreeDart(int treeDartId) const {
-    const Dart& start = dart(treeDartId);
-
-    if (!start.isTree) {
-        throw std::runtime_error("Expected tree dart in buildCycleDartsForTreeDart.");
-    }
-
-    std::vector<int> spine;
-    spine.push_back(treeDartId);
-
-    int current = start.to;
-    int closingBack = -1;
-    int w0 = -1;
-
-    while (true) {
-        if (current < 0 || current >= prepared_->n) {
-            throw std::runtime_error("Invalid vertex while following cycle spine.");
-        }
-
-        if (prepared_->orderedOut[current].empty()) {
-            throw std::runtime_error("Missing first outgoing dart while building cycle.");
-        }
-
-        const int first = prepared_->orderedOut[current].front();
-        const Dart& firstDart = dart(first);
-
-        if (firstDart.isBack) {
-            closingBack = first;
-            w0 = firstDart.to;
-            break;
-        }
-
-        if (!firstDart.isTree) {
-            throw std::runtime_error("First outgoing dart is neither tree nor back.");
-        }
-
-        spine.push_back(first);
-        current = firstDart.to;
-    }
-
-    std::vector<int> cycle = buildTreePathDarts(w0, start.from);
-
-    cycle.insert(cycle.end(), spine.begin(), spine.end());
-    cycle.push_back(closingBack);
-
-    return cycle;
-}
-
-std::vector<int> PathTreeBuilder::buildCycleDartsForBackDart(int backDartId) const {
-    const Dart& back = dart(backDartId);
-
-    if (!back.isBack) {
-        throw std::runtime_error("Expected back dart in buildCycleDartsForBackDart.");
-    }
-
-    std::vector<int> cycle = buildTreePathDarts(back.to, back.from);
-    cycle.push_back(backDartId);
-
-    return cycle;
-}
-
-void PathTreeBuilder::fillTailHead(PathNode& node) const {
+void PathTreeBuilder::fillBasicPathData(PathNode& node) const {
     const Dart& d = dart(node.definingDart);
 
     node.tailVertex = d.from;
     node.headVertex = d.to;
-}
 
-void PathTreeBuilder::fillCycleData(PathNode& node) const {
-    const Dart& d = dart(node.definingDart);
+    node.pathDarts.clear();
+    node.pathDarts.push_back(node.definingDart);
 
-    if (d.isTree) {
-        node.pathDarts.push_back(node.definingDart);
-        node.cycleDarts = buildCycleDartsForTreeDart(node.definingDart);
-        return;
-    }
+    // Keep these empty in the linear builder.
+    // They should be materialized only for a selected failure/certificate case.
+    node.cycleDarts.clear();
+    node.segmentDarts.clear();
+    node.rangeVertices.clear();
+    node.headVertices.clear();
 
-    if (d.isBack) {
-        node.pathDarts.push_back(node.definingDart);
-        node.cycleDarts = buildCycleDartsForBackDart(node.definingDart);
-        return;
-    }
-
-    throw std::runtime_error("Path node defining dart is neither tree nor back.");
-}
-
-void PathTreeBuilder::fillRangeAndHead(PathNode& node) const {
-    std::vector<char> seenVertex(static_cast<std::size_t>(prepared_->n), 0);
-
-    for (int dartId : node.cycleDarts) {
-        const Dart& d = dart(dartId);
-
-        if (d.from >= 0 && d.from < prepared_->n && !seenVertex[d.from]) {
-            seenVertex[d.from] = 1;
-            node.rangeVertices.push_back(d.from);
-        }
-
-        if (d.to >= 0 && d.to < prepared_->n && !seenVertex[d.to]) {
-            seenVertex[d.to] = 1;
-            node.rangeVertices.push_back(d.to);
-        }
-    }
-
-    node.headVertices = node.rangeVertices;
-
-    node.headVertices.erase(
-        std::remove(node.headVertices.begin(), node.headVertices.end(), node.tailVertex),
-        node.headVertices.end()
-    );
-}
-
-void PathTreeBuilder::fillLowValues(PathNode& node) const {
     node.low1 = -1;
     node.low2 = -1;
     node.low1Vertex = -1;
     node.low2Vertex = -1;
-
-    for (int vertex : node.headVertices) {
-        const int dfs = prepared_->number[vertex];
-
-        if (node.low1 == -1 || dfs < node.low1) {
-            node.low2 = node.low1;
-            node.low2Vertex = node.low1Vertex;
-
-            node.low1 = dfs;
-            node.low1Vertex = vertex;
-        } else if (dfs != node.low1 && (node.low2 == -1 || dfs < node.low2)) {
-            node.low2 = dfs;
-            node.low2Vertex = vertex;
-        }
-    }
 }
 
-void PathTreeBuilder::appendUniqueDart(std::vector<int>& target, int dartId) const {
-    for (int existing : target) {
-        if (existing == dartId) {
-            return;
-        }
+void PathTreeBuilder::assignSubtreeIntervals() {
+    tree_.preorderNodes.clear();
+
+    if (tree_.rootNode == -1) {
+        return;
     }
 
-    target.push_back(dartId);
+    int timer = 0;
+    assignSubtreeIntervalsDfs(tree_.rootNode, timer);
 }
 
-void PathTreeBuilder::collectSegmentDartsDfs(int nodeId, std::vector<int>& output) const {
-    const PathNode& node = tree_.nodes[nodeId];
-
-    for (int dartId : node.pathDarts) {
-        appendUniqueDart(output, dartId);
+void PathTreeBuilder::assignSubtreeIntervalsDfs(int nodeId, int& timer) {
+    if (nodeId < 0 || nodeId >= static_cast<int>(tree_.nodes.size())) {
+        throw std::runtime_error("Invalid path-tree node id during DFS interval assignment.");
     }
+
+    PathNode& node = tree_.nodes[nodeId];
+
+    node.preorder = timer++;
+    tree_.preorderNodes.push_back(nodeId);
 
     for (int child : node.children) {
-        collectSegmentDartsDfs(child, output);
+        assignSubtreeIntervalsDfs(child, timer);
     }
-}
 
-void PathTreeBuilder::fillSegments() {
-    for (PathNode& node : tree_.nodes) {
-        std::vector<int> segmentDarts;
-        collectSegmentDartsDfs(node.id, segmentDarts);
-        node.segmentDarts = segmentDarts;
-    }
+    node.subtreeEnd = timer;
 }
 
 } // namespace ht

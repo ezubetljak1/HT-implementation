@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "ht/certificate/PathTree.hpp"
 #include "ht/preprocess/PreparedPalmTree.hpp"
 
@@ -22,29 +20,17 @@ private:
 
     int createNode(
         int definingDart,
-        PathNodeKind kind,
-        int parentNode
+        PathNodeKind kind
     );
 
-    void buildNodesFromOrderedDarts();
+    void createNodesFromOrderedDarts();
+    void assignParentsAndChildren();
     int findParentNodeForDart(int dartId) const;
 
-    std::vector<int> buildTreePathDarts(
-        int ancestor,
-        int descendant
-    ) const;
+    void fillBasicPathData(PathNode& node) const;
 
-    std::vector<int> buildCycleDartsForTreeDart(int treeDartId) const;
-    std::vector<int> buildCycleDartsForBackDart(int backDartId) const;
-
-    void fillTailHead(PathNode& node) const;
-    void fillCycleData(PathNode& node) const;
-    void fillRangeAndHead(PathNode& node) const;
-    void fillLowValues(PathNode& node) const;
-
-    void fillSegments();
-    void appendUniqueDart(std::vector<int>& target, int dartId) const;
-    void collectSegmentDartsDfs(int nodeId, std::vector<int>& output) const;
+    void assignSubtreeIntervals();
+    void assignSubtreeIntervalsDfs(int nodeId, int& timer);
 };
 
 } // namespace ht

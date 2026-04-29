@@ -36,15 +36,22 @@ HT_TEST(PathTreeBuilderBuildsNodesForK33) {
     assert(tree.rootNode != -1);
     assert(!tree.nodes.empty());
     assert(tree.nodeByDefiningDart.size() == prepared.darts.size());
+    assert(tree.preorderNodes.size() == tree.nodes.size());
 
     for (const PathNode& node : tree.nodes) {
         assert(node.id >= 0);
         assert(node.definingDart >= 0);
         assert(!node.pathDarts.empty());
-        assert(!node.cycleDarts.empty());
-        assert(!node.segmentDarts.empty());
         assert(node.tailVertex >= 0);
         assert(node.headVertex >= 0);
+
+        assert(node.preorder >= 0);
+        assert(node.subtreeEnd > node.preorder);
+        assert(node.subtreeEnd <= static_cast<int>(tree.nodes.size()));
+
+        // These are intentionally lazy/not materialized by the linear builder.
+        assert(node.cycleDarts.empty());
+        assert(node.segmentDarts.empty());
     }
 }
 
@@ -58,6 +65,7 @@ HT_TEST(PathTreeBuilderBuildsNodesForSubdividedK5) {
 
     assert(tree.rootNode != -1);
     assert(!tree.nodes.empty());
+    assert(tree.preorderNodes.size() == tree.nodes.size());
 
     bool foundNodeWithChildren = false;
 
@@ -67,8 +75,8 @@ HT_TEST(PathTreeBuilderBuildsNodesForSubdividedK5) {
         }
 
         assert(!node.pathDarts.empty());
-        assert(!node.cycleDarts.empty());
-        assert(!node.segmentDarts.empty());
+        assert(node.preorder >= 0);
+        assert(node.subtreeEnd > node.preorder);
     }
 
     assert(foundNodeWithChildren);
