@@ -31,6 +31,23 @@ public:
     ) const;
 
 private:
+    struct DfsInterval {
+        int startDfs = -1;
+        int endDfs = -1;
+
+        bool valid() const {
+            return startDfs != -1
+                && endDfs != -1
+                && startDfs <= endDfs;
+        }
+    };
+
+    struct DfsRange {
+        int startDfs = -1;
+        int endDfs = -1;
+        int ownerNode = -1;
+    };
+
     static bool directlyLinkedEitherDirection(
         const PreparedPalmTree& prepared,
         const SegmentMetadataTable& metadata,
@@ -55,30 +72,33 @@ private:
         int highExclusiveDfs
     );
 
+    static DfsInterval intervalForNode(
+        const PreparedPalmTree& prepared,
+        const SegmentMetadataTable& metadata,
+        int nodeId
+    );
+
     static bool tryDiscoverSegment(
         const PathTree& pathTree,
         const WilliamsonFList& fList,
         const WilliamsonContext& context,
-        int currentNode,
+        int ownerNode,
         int candidateNode,
         std::vector<char>& visitedNode,
-        std::vector<int>& parentNode,
-        std::vector<int>& queue,
-        int& queueTail
+        std::vector<int>& parentNode
+    );
+
+    static void enqueueNewIntervalParts(
+        const DfsInterval& interval,
+        int ownerNode,
+        int& coveredMinDfs,
+        int& coveredMaxDfs,
+        std::vector<DfsRange>& rangeQueue,
+        int& rangeTail
     );
 
     static std::vector<int> buildVertexByDfs(
         const PreparedPalmTree& prepared
-    );
-
-    static int findNextDfs(
-        std::vector<int>& nextDfs,
-        int value
-    );
-
-    static void markDfsProcessed(
-        std::vector<int>& nextDfs,
-        int value
     );
 
     static std::vector<int> reconstructPath(

@@ -89,14 +89,10 @@ WilliamsonSegfoPath WilliamsonSegfoPathBuilder::buildPathFromFList(
     std::vector<int> vertexByDfs =
         buildVertexByDfs(prepared);
 
-    std::vector<int> nextDfs(
-        static_cast<std::size_t>(prepared.n + 2),
+    std::vector<char> processedDfs(
+        static_cast<std::size_t>(prepared.n + 1),
         0
     );
-
-    for (int i = 0; i < static_cast<int>(nextDfs.size()); ++i) {
-        nextDfs[i] = i;
-    }
 
     std::vector<char> visitedNode(
         static_cast<std::size_t>(pathTree.nodes.size()),
@@ -108,96 +104,114 @@ WilliamsonSegfoPath WilliamsonSegfoPathBuilder::buildPathFromFList(
         -1
     );
 
-    std::vector<int> queue(
-        static_cast<std::size_t>(pathTree.nodes.size()),
-        -1
+    // Each discovered segment can extend the covered DFS interval at most twice:
+    // once to the left and once to the right. Therefore 2 * nodes + constant is enough.
+    std::vector<DfsRange> rangeQueue(
+        static_cast<std::size_t>(2 * pathTree.nodes.size() + 4)
     );
 
-    int queueHead = 0;
-    int queueTail = 0;
+    int rangeHead = 0;
+    int rangeTail = 0;
+
+    const DfsInterval startInterval =
+        intervalForNode(
+            prepared,
+            metadata,
+            context.bNode
+        );
+
+    if (!startInterval.valid()) {
+        result.message = "B segment has no valid DFS interval for SEGFO traversal.";
+        return result;
+    }
+
+    int coveredMinDfs = startInterval.startDfs;
+    int coveredMaxDfs = startInterval.endDfs;
 
     visitedNode[context.bNode] = 1;
-    queue[queueTail++] = context.bNode;
+    rangeQueue[rangeTail++] =
+        DfsRange{
+            startInterval.startDfs,
+            startInterval.endDfs,
+            context.bNode
+        };
 
-    while (queueHead < queueTail) {
-        const int currentNode = queue[queueHead++];
+    while (rangeHead < rangeTail) {
+        const DfsRange range = rangeQueue[rangeHead++];
 
-        if (currentNode < 0 || currentNode >= static_cast<int>(pathTree.nodes.size())) {
-            result.message = "Invalid node reached during SEGFO frontier traversal.";
+        if (range.startDfs < 1 || range.endDfs > prepared.n) {
+            result.message = "Invalid DFS range reached during SEGFO frontier traversal.";
             return result;
         }
 
-        const SegmentMetadata& currentMetadata =
-            metadataForNode(metadata, currentNode);
-
-        if (currentMetadata.low1Dfs == -1 || currentMetadata.tailDfsNumber == -1) {
-            continue;
-        }
-
-        int startDfs = currentMetadata.low1Dfs + 1;
-        int endDfs = currentMetadata.tailDfsNumber - 1;
-
-        if (startDfs < 1) {
-            startDfs = 1;
-        }
-
-        if (endDfs > prepared.n) {
-            endDfs = prepared.n;
-        }
-
-        int dfs = findNextDfs(nextDfs, startDfs);
-
-        while (dfs <= endDfs) {
-            const int currentDfs = dfs;
-
-            markDfsProcessed(nextDfs, currentDfs);
-
-            if (currentDfs >= 0
-                && currentDfs < static_cast<int>(vertexByDfs.size())) {
-                const int vertex = vertexByDfs[currentDfs];
-
-                if (vertex >= 0 && vertex < prepared.n) {
-                    for (int candidateNode : fList.fxListByVertex[vertex]) {
-                        const bool discovered =
-                            tryDiscoverSegment(
-                                pathTree,
-                                fList,
-                                context,
-                                currentNode,
-                                candidateNode,
-                                visitedNode,
-                                parentNode,
-                                queue,
-                                queueTail
-                            );
-
-                        if (!discovered) {
-                            continue;
-                        }
-
-                        if (candidateNode == context.aNode) {
-                            result.valid = true;
-                            result.segmentPathNodes =
-                                reconstructPath(
-                                    context.bNode,
-                                    context.aNode,
-                                    parentNode
-                                );
-
-                            result.message =
-                                "Built SEGFO path using FLIST/FxLIST frontier.";
-                            return result;
-                        }
-                    }
-                }
+        for (int dfs = range.startDfs; dfs <= range.endDfs; ++dfs) {
+            if (processedDfs[dfs]) {
+                continue;
             }
 
-            dfs = findNextDfs(nextDfs, currentDfs);
+            processedDfs[dfs] = 1;
+
+            const int vertex = vertexByDfs[dfs];
+
+            if (vertex < 0 || vertex >= prepared.n) {
+                continue;
+            }
+
+            for (int candidateNode : fList.fxListByVertex[vertex]) {
+                const bool discovered =
+                    tryDiscoverSegment(
+                        pathTree,
+                        fList,
+                        context,
+                        range.ownerNode,
+                        candidateNode,
+                        visitedNode,
+                        parentNode
+                    );
+
+                if (!discovered) {
+                    continue;
+                }
+
+                if (candidateNode == context.aNode) {
+                    result.valid = true;
+                    result.segmentPathNodes =
+                        reconstructPath(
+                            context.bNode,
+                            context.aNode,
+                            parentNode
+                        );
+
+                    result.message =
+                        "Built SEGFO path using explicit FLIST/FxLIST interval frontier.";
+                    return result;
+                }
+
+                const DfsInterval candidateInterval =
+                    intervalForNode(
+                        prepared,
+                        metadata,
+                        candidateNode
+                    );
+
+                if (!candidateInterval.valid()) {
+                    continue;
+                }
+
+                enqueueNewIntervalParts(
+                    candidateInterval,
+                    candidateNode,
+                    coveredMinDfs,
+                    coveredMaxDfs,
+                    rangeQueue,
+                    rangeTail
+                );
+            }
         }
     }
 
     result.message =
-        "No SEGFO path found by FLIST/FxLIST frontier construction.";
+        "No SEGFO path found by explicit FLIST/FxLIST interval frontier.";
 
     return result;
 }
@@ -281,16 +295,46 @@ bool WilliamsonSegfoPathBuilder::hasHeadInOpenDfsInterval(
     return false;
 }
 
+WilliamsonSegfoPathBuilder::DfsInterval
+WilliamsonSegfoPathBuilder::intervalForNode(
+    const PreparedPalmTree& prepared,
+    const SegmentMetadataTable& metadata,
+    int nodeId
+) {
+    const SegmentMetadata& segment =
+        metadataForNode(metadata, nodeId);
+
+    if (segment.low1Dfs == -1 || segment.tailDfsNumber == -1) {
+        return {};
+    }
+
+    DfsInterval interval;
+    interval.startDfs = segment.low1Dfs + 1;
+    interval.endDfs = segment.tailDfsNumber - 1;
+
+    if (interval.startDfs < 1) {
+        interval.startDfs = 1;
+    }
+
+    if (interval.endDfs > prepared.n) {
+        interval.endDfs = prepared.n;
+    }
+
+    if (!interval.valid()) {
+        return {};
+    }
+
+    return interval;
+}
+
 bool WilliamsonSegfoPathBuilder::tryDiscoverSegment(
     const PathTree& pathTree,
     const WilliamsonFList& fList,
     const WilliamsonContext& context,
-    int currentNode,
+    int ownerNode,
     int candidateNode,
     std::vector<char>& visitedNode,
-    std::vector<int>& parentNode,
-    std::vector<int>& queue,
-    int& queueTail
+    std::vector<int>& parentNode
 ) {
     if (candidateNode < 0 || candidateNode >= static_cast<int>(pathTree.nodes.size())) {
         return false;
@@ -310,13 +354,51 @@ bool WilliamsonSegfoPathBuilder::tryDiscoverSegment(
     }
 
     visitedNode[candidateNode] = 1;
-    parentNode[candidateNode] = currentNode;
-
-    if (queueTail < static_cast<int>(queue.size())) {
-        queue[queueTail++] = candidateNode;
-    }
+    parentNode[candidateNode] = ownerNode;
 
     return true;
+}
+
+void WilliamsonSegfoPathBuilder::enqueueNewIntervalParts(
+    const DfsInterval& interval,
+    int ownerNode,
+    int& coveredMinDfs,
+    int& coveredMaxDfs,
+    std::vector<DfsRange>& rangeQueue,
+    int& rangeTail
+) {
+    if (!interval.valid()) {
+        return;
+    }
+
+    const int oldMin = coveredMinDfs;
+    const int oldMax = coveredMaxDfs;
+
+    if (interval.startDfs < oldMin) {
+        if (rangeTail < static_cast<int>(rangeQueue.size())) {
+            rangeQueue[rangeTail++] =
+                DfsRange{
+                    interval.startDfs,
+                    oldMin - 1,
+                    ownerNode
+                };
+        }
+
+        coveredMinDfs = interval.startDfs;
+    }
+
+    if (interval.endDfs > oldMax) {
+        if (rangeTail < static_cast<int>(rangeQueue.size())) {
+            rangeQueue[rangeTail++] =
+                DfsRange{
+                    oldMax + 1,
+                    interval.endDfs,
+                    ownerNode
+                };
+        }
+
+        coveredMaxDfs = interval.endDfs;
+    }
 }
 
 std::vector<int> WilliamsonSegfoPathBuilder::buildVertexByDfs(
@@ -336,46 +418,6 @@ std::vector<int> WilliamsonSegfoPathBuilder::buildVertexByDfs(
     }
 
     return vertexByDfs;
-}
-
-int WilliamsonSegfoPathBuilder::findNextDfs(
-    std::vector<int>& nextDfs,
-    int value
-) {
-    if (value < 0) {
-        value = 0;
-    }
-
-    if (value >= static_cast<int>(nextDfs.size())) {
-        return static_cast<int>(nextDfs.size());
-    }
-
-    if (nextDfs[value] == value) {
-        return value;
-    }
-
-    nextDfs[value] =
-        findNextDfs(
-            nextDfs,
-            nextDfs[value]
-        );
-
-    return nextDfs[value];
-}
-
-void WilliamsonSegfoPathBuilder::markDfsProcessed(
-    std::vector<int>& nextDfs,
-    int value
-) {
-    if (value < 0 || value >= static_cast<int>(nextDfs.size())) {
-        return;
-    }
-
-    nextDfs[value] =
-        findNextDfs(
-            nextDfs,
-            value + 1
-        );
 }
 
 std::vector<int> WilliamsonSegfoPathBuilder::reconstructPath(
