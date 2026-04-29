@@ -15,6 +15,11 @@
 #include "ht/preprocess/PreparedPalmTreeBuilder.hpp"
 #include "ht/strong/StrongPlanarityTester.hpp"
 
+#include <vector>
+
+#include "ht/PlanarityTester.hpp"
+#include "ht/certificate/KuratowskiCertificate.hpp"
+
 using namespace ht;
 
 namespace {
@@ -172,6 +177,48 @@ void assertNoDuplicateOriginalEdges(const std::vector<int>& edgeIds) {
     }
 }
 
+Graph relabelGraph(
+    const Graph& graph,
+    const std::vector<int>& oldToNew
+) {
+    Graph relabeled(graph.vertexCount());
+
+    for (const Edge& edge : graph.edges()) {
+        relabeled.addEdge(
+            oldToNew[edge.u],
+            oldToNew[edge.v]
+        );
+    }
+
+    return relabeled;
+}
+
+std::vector<int> reverseRelabeling(int vertexCount) {
+    std::vector<int> oldToNew(
+        static_cast<std::size_t>(vertexCount),
+        0
+    );
+
+    for (int v = 0; v < vertexCount; ++v) {
+        oldToNew[v] = vertexCount - 1 - v;
+    }
+
+    return oldToNew;
+}
+
+std::vector<int> rotateRelabeling(int vertexCount) {
+    std::vector<int> oldToNew(
+        static_cast<std::size_t>(vertexCount),
+        0
+    );
+
+    for (int v = 0; v < vertexCount; ++v) {
+        oldToNew[v] = (v + 1) % vertexCount;
+    }
+
+    return oldToNew;
+}
+
 } // namespace
 
 HT_TEST(WilliamsonPipelineVerifiesK33Certificate) {
@@ -216,4 +263,38 @@ HT_TEST(WilliamsonPipelineVerifiesSubdividedK33Certificate) {
     assert(output.verification.type == KuratowskiType::K33Subdivision);
     assert(output.verification.originalEdgeIds.size() == 18);
     assertNoDuplicateOriginalEdges(output.verification.originalEdgeIds);
+}
+
+HT_TEST(WilliamsonPipelineHandlesReverseRelabeledSubdividedK5) {
+    Graph base = ht::test::buildSubdividedK5();
+
+    Graph g =
+        relabelGraph(
+            base,
+            reverseRelabeling(base.vertexCount())
+        );
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+    assert(result.certificate.type == KuratowskiType::K5Subdivision);
+    assert(!result.certificate.originalEdgeIds.empty());
+}
+
+HT_TEST(WilliamsonPipelineHandlesRotateRelabeledSubdividedK5) {
+    Graph base = ht::test::buildSubdividedK5();
+
+    Graph g =
+        relabelGraph(
+            base,
+            rotateRelabeling(base.vertexCount())
+        );
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+    assert(result.certificate.type == KuratowskiType::K5Subdivision);
+    assert(!result.certificate.originalEdgeIds.empty());
 }

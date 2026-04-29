@@ -132,7 +132,36 @@ PipelineOutput runWilliamsonPipeline(const Graph& graph) {
             );
 
         if (!context.valid) {
-            output.message = "Williamson context is invalid.";
+            std::ostringstream out;
+
+            out << "Williamson context is invalid.";
+
+            if (!context.message.empty()) {
+                out << " Context message: " << context.message;
+            }
+
+            out << " Strong failure message: "
+                << failure.message;
+
+            out << " Failure darts:"
+                << " rootTreeDart=" << failure.rootTreeDart
+                << ", cycleRootDart=" << failure.cycleRootDart
+                << ", currentDart=" << failure.currentDart
+                << ", closingBackDart=" << failure.closingBackDart;
+
+            out << " Failure segments:"
+                << " blockLeftSegments=" << failure.blockLeftSegments.size()
+                << ", blockRightSegments=" << failure.blockRightSegments.size()
+                << ", stackTopLeftSegments=" << failure.stackTopLeftSegments.size()
+                << ", stackTopRightSegments=" << failure.stackTopRightSegments.size();
+
+            out << " Failure attachments:"
+                << " blockLeftAttachments=" << failure.blockLeftAttachments.size()
+                << ", blockRightAttachments=" << failure.blockRightAttachments.size()
+                << ", stackTopLeftAttachments=" << failure.stackTopLeftAttachments.size()
+                << ", stackTopRightAttachments=" << failure.stackTopRightAttachments.size();
+
+            output.message = out.str();
             return output;
         }
 
@@ -145,9 +174,33 @@ PipelineOutput runWilliamsonPipeline(const Graph& graph) {
             );
 
         if (!segmentList.valid) {
-            output.message = "Williamson segment list is invalid.";
-            return output;
-        }
+                std::ostringstream out;
+
+                out << "Williamson segment list is invalid.";
+
+                if (!segmentList.message.empty()) {
+                    out << " Segment list message: "
+                        << segmentList.message;
+                }
+
+                out << " Context:"
+                    << " fNode=" << context.fNode
+                    << ", aNode=" << context.aNode
+                    << ", bNode=" << context.bNode
+                    << ", cycleNode=" << context.cycleNode
+                    << ", fDart=" << context.fDart
+                    << ", aDart=" << context.aDart
+                    << ", bDart=" << context.bDart
+                    << ", cycleDart=" << context.cycleDart;
+
+                out << " Segment nodes:";
+                    for (int nodeId : segmentList.segmentNodes) {
+                        out << " " << nodeId;
+                    }
+
+                output.message = out.str();
+                return output;
+            }
 
         WilliamsonSegfoPathBuilder segfoPathBuilder;
         WilliamsonSegfoPath segfoPath =
@@ -615,7 +668,101 @@ bool generateEntryForGraph(
     return true;
 }
 
-std::vector<NamedGraph> seedGraphs() {
+Graph relabelGraph(
+    const Graph& graph,
+    const std::vector<int>& oldToNew
+) {
+    Graph relabeled(graph.vertexCount());
+
+    if (static_cast<int>(oldToNew.size()) != graph.vertexCount()) {
+        return relabeled;
+    }
+
+    for (const Edge& edge : graph.edges()) {
+        const int newU = oldToNew[edge.u];
+        const int newV = oldToNew[edge.v];
+
+        if (newU < 0 || newU >= graph.vertexCount()
+            || newV < 0 || newV >= graph.vertexCount()) {
+            continue;
+        }
+
+        relabeled.addEdge(newU, newV);
+    }
+
+    return relabeled;
+}
+
+std::vector<int> reverseRelabeling(int vertexCount) {
+    std::vector<int> oldToNew(
+        static_cast<std::size_t>(vertexCount),
+        0
+    );
+
+    for (int v = 0; v < vertexCount; ++v) {
+        oldToNew[v] = vertexCount - 1 - v;
+    }
+
+    return oldToNew;
+}
+
+std::vector<int> rotateRelabeling(int vertexCount) {
+    std::vector<int> oldToNew(
+        static_cast<std::size_t>(vertexCount),
+        0
+    );
+
+    for (int v = 0; v < vertexCount; ++v) {
+        oldToNew[v] = (v + 1) % vertexCount;
+    }
+
+    return oldToNew;
+}
+
+Graph subdivideSingleEdgeByIndex(
+    const Graph& graph,
+    int targetEdgeIndex
+) {
+    const int originalVertexCount = graph.vertexCount();
+    const int subdivisionVertex = originalVertexCount;
+
+    Graph subdivided(originalVertexCount + 1);
+
+    const std::vector<Edge>& edges = graph.edges();
+
+    for (int i = 0; i < static_cast<int>(edges.size()); ++i) {
+        const Edge& edge = edges[i];
+
+        if (i == targetEdgeIndex) {
+            subdivided.addEdge(edge.u, subdivisionVertex);
+            subdivided.addEdge(subdivisionVertex, edge.v);
+        } else {
+            subdivided.addEdge(edge.u, edge.v);
+        }
+    }
+
+    return subdivided;
+}
+
+Graph subdivideEveryEdgeOnce(const Graph& graph) {
+    const int originalVertexCount = graph.vertexCount();
+    const int originalEdgeCount = graph.edgeCount();
+
+    Graph subdivided(originalVertexCount + originalEdgeCount);
+
+    int nextSubdivisionVertex = originalVertexCount;
+
+    for (const Edge& edge : graph.edges()) {
+        const int subdivisionVertex = nextSubdivisionVertex++;
+
+        subdivided.addEdge(edge.u, subdivisionVertex);
+        subdivided.addEdge(subdivisionVertex, edge.v);
+    }
+
+    return subdivided;
+}
+
+std::vector<NamedGraph> baseSeedGraphs() {
     return {
         {"K5", ht::test::buildK5()},
         {"K3,3", ht::test::buildK33()},
@@ -628,6 +775,64 @@ std::vector<NamedGraph> seedGraphs() {
         {"DM Rijeseni 15", ht::test::buildDMRijeseni15()},
         {"DM zsr 10", ht::test::buildDMzsr10()}
     };
+}
+
+std::vector<NamedGraph> expandedSeedGraphs() {
+    std::vector<NamedGraph> expanded;
+
+    const std::vector<NamedGraph> baseGraphs =
+        baseSeedGraphs();
+
+    for (const NamedGraph& namedGraph : baseGraphs) {
+        expanded.push_back(namedGraph);
+
+        const int vertexCount =
+            namedGraph.graph.vertexCount();
+
+        const int edgeCount =
+            namedGraph.graph.edgeCount();
+
+        if (vertexCount > 1) {
+            expanded.push_back({
+                namedGraph.name + " | relabel reverse",
+                relabelGraph(
+                    namedGraph.graph,
+                    reverseRelabeling(vertexCount)
+                )
+            });
+        }
+
+        if (vertexCount > 2) {
+            expanded.push_back({
+                namedGraph.name + " | relabel rotate",
+                relabelGraph(
+                    namedGraph.graph,
+                    rotateRelabeling(vertexCount)
+                )
+            });
+        }
+
+        if (edgeCount > 0) {
+            expanded.push_back({
+                namedGraph.name + " | subdivide every edge once",
+                subdivideEveryEdgeOnce(namedGraph.graph)
+            });
+        }
+
+        for (int edgeIndex = 0; edgeIndex < edgeCount; ++edgeIndex) {
+            expanded.push_back({
+                namedGraph.name
+                    + " | subdivide edge "
+                    + std::to_string(edgeIndex),
+                subdivideSingleEdgeByIndex(
+                    namedGraph.graph,
+                    edgeIndex
+                )
+            });
+        }
+    }
+
+    return expanded;
 }
 
 void writeGeneratedTable(
@@ -733,7 +938,15 @@ int main(int argc, char** argv) {
     std::map<std::string, GeneratedEntry> entriesByKey;
     std::vector<std::string> messages;
 
-    for (const NamedGraph& graph : seedGraphs()) {
+    const std::vector<NamedGraph> graphs =
+        expandedSeedGraphs();
+
+    messages.push_back(
+        "Processed graph variants: "
+        + std::to_string(graphs.size())
+    );
+
+    for (const NamedGraph& graph : graphs) {
         GeneratedEntry entry;
         std::string message;
 

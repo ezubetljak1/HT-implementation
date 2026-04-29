@@ -26,11 +26,22 @@ private:
         int dartId
     );
 
+    static void addUnique(
+        std::vector<int>& values,
+        int value
+    );
+
     static std::vector<int> collectFDartCandidates(
         const StrongPlanarityFailure& failure
     );
 
     static std::vector<int> collectCandidateNodes(
+        const PathTree& pathTree,
+        const std::vector<int>& dartIds
+    );
+
+    static void appendCandidateNodes(
+        std::vector<int>& nodes,
         const PathTree& pathTree,
         const std::vector<int>& dartIds
     );
@@ -54,6 +65,26 @@ private:
         int aNode,
         int bNode,
         int cycleNode
+    );
+
+    static bool containsNode(
+        const std::vector<int>& nodes,
+        int nodeId
+    );
+
+    static std::vector<int> collectSegmentNodesAroundCycle(
+        const PreparedPalmTree& prepared,
+        const PathTree& pathTree,
+        int cycleNode
+    );
+
+    static bool contextNodesAppearAroundCycle(
+        const PreparedPalmTree& prepared,
+        const PathTree& pathTree,
+        int cycleNode,
+        int fNode,
+        int aNode,
+        int bNode
     );
 };
 

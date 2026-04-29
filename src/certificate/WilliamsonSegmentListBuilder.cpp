@@ -2,6 +2,8 @@
 
 #include "ht/certificate/PathTreeQueries.hpp"
 
+#include <sstream>
+
 namespace ht {
 
 WilliamsonSegmentList WilliamsonSegmentListBuilder::build(
@@ -12,12 +14,15 @@ WilliamsonSegmentList WilliamsonSegmentListBuilder::build(
     WilliamsonSegmentList result;
 
     if (!context.valid) {
-        result.message = "Cannot build SEGLIST(e) from invalid Williamson context.";
+        result.message =
+            "Cannot build SEGLIST(e) from invalid Williamson context.";
         return result;
     }
 
-    if (context.cycleNode < 0 || context.cycleNode >= static_cast<int>(pathTree.nodes.size())) {
-        result.message = "Invalid context.cycleNode while building SEGLIST(e).";
+    if (context.cycleNode < 0
+        || context.cycleNode >= static_cast<int>(pathTree.nodes.size())) {
+        result.message =
+            "Invalid context.cycleNode while building SEGLIST(e).";
         return result;
     }
 
@@ -49,6 +54,13 @@ WilliamsonSegmentList WilliamsonSegmentListBuilder::build(
 
         dartIsOnBaseCycle[dartId] = 1;
 
+        const int reverseDart = prepared.darts[dartId].rev;
+
+        if (reverseDart >= 0
+            && reverseDart < static_cast<int>(dartIsOnBaseCycle.size())) {
+            dartIsOnBaseCycle[reverseDart] = 1;
+        }
+
         const Dart& dart = prepared.darts[dartId];
 
         addUniqueCycleVertex(
@@ -71,51 +83,54 @@ WilliamsonSegmentList WilliamsonSegmentListBuilder::build(
         0
     );
 
-    // SEGLIST(e): segments attached to vertices of CYCLE(e), in the order
-    // induced by the cycle vertices and prepared ordered outgoing darts.
-    // We skip darts that are part of the base cycle itself.
     for (int vertex : cycleVertices) {
         if (vertex < 0 || vertex >= prepared.n) {
             continue;
         }
 
         for (int dartId : prepared.orderedOut[vertex]) {
-            if (dartId < 0 || dartId >= static_cast<int>(pathTree.nodeByDefiningDart.size())) {
-                continue;
-            }
-
-            if (dartIsOnBaseCycle[dartId]) {
-                continue;
-            }
-
-            const int nodeId = pathTree.nodeByDefiningDart[dartId];
-
-            if (nodeId == -1) {
-                continue;
-            }
-
-            if (nodeId < 0 || nodeId >= static_cast<int>(pathTree.nodes.size())) {
-                result.message = "SEGLIST(e) candidate has invalid PathTree node id.";
-                return result;
-            }
-
-            if (seenNode[nodeId]) {
-                continue;
-            }
-
-            seenNode[nodeId] = 1;
-            result.segmentNodes.push_back(nodeId);
+            addNodeForDartAndReverse(
+                prepared,
+                pathTree,
+                dartId,
+                dartIsOnBaseCycle,
+                seenNode,
+                result.segmentNodes
+            );
         }
     }
 
-    for (int i = 0; i < static_cast<int>(result.segmentNodes.size()); ++i) {
+    for (int i = 0;
+         i < static_cast<int>(result.segmentNodes.size());
+         ++i) {
         const int nodeId = result.segmentNodes[i];
+
+        if (nodeId < 0 || nodeId >= static_cast<int>(result.positionByNode.size())) {
+            result.message =
+                "SEGLIST(e) contains invalid PathTree node id.";
+            return result;
+        }
+
         result.positionByNode[nodeId] = i;
     }
 
-    result.fPosition = positionOf(result.positionByNode, context.fNode);
-    result.aPosition = positionOf(result.positionByNode, context.aNode);
-    result.bPosition = positionOf(result.positionByNode, context.bNode);
+    result.fPosition =
+        positionOf(
+            result.positionByNode,
+            context.fNode
+        );
+
+    result.aPosition =
+        positionOf(
+            result.positionByNode,
+            context.aNode
+        );
+
+    result.bPosition =
+        positionOf(
+            result.positionByNode,
+            context.bNode
+        );
 
     result.valid =
         result.fPosition != -1
@@ -123,10 +138,21 @@ WilliamsonSegmentList WilliamsonSegmentListBuilder::build(
         && result.bPosition != -1;
 
     if (result.valid) {
-        result.message = "Built Williamson SEGLIST(e) containing F, A and B.";
-    } else {
         result.message =
-            "F, A and B are not all present in the computed SEGLIST(e).";
+            "Built Williamson SEGLIST(e) containing F, A and B.";
+    } else {
+        std::ostringstream out;
+
+        out << "F, A and B are not all present in the computed SEGLIST(e). "
+            << "segmentNodes=" << result.segmentNodes.size()
+            << ", fNode=" << context.fNode
+            << ", aNode=" << context.aNode
+            << ", bNode=" << context.bNode
+            << ", fPosition=" << result.fPosition
+            << ", aPosition=" << result.aPosition
+            << ", bPosition=" << result.bPosition;
+
+        result.message = out.str();
     }
 
     return result;
@@ -159,6 +185,91 @@ void WilliamsonSegmentListBuilder::addUniqueCycleVertex(
 
     seenVertex[vertex] = 1;
     cycleVertices.push_back(vertex);
+}
+
+void WilliamsonSegmentListBuilder::addUniqueSegmentNode(
+    const PathTree& pathTree,
+    int nodeId,
+    std::vector<char>& seenNode,
+    std::vector<int>& segmentNodes
+) {
+    if (nodeId < 0 || nodeId >= static_cast<int>(pathTree.nodes.size())) {
+        return;
+    }
+
+    if (seenNode[nodeId]) {
+        return;
+    }
+
+    seenNode[nodeId] = 1;
+    segmentNodes.push_back(nodeId);
+}
+
+void WilliamsonSegmentListBuilder::addNodeForDartAndReverse(
+    const PreparedPalmTree& prepared,
+    const PathTree& pathTree,
+    int dartId,
+    const std::vector<char>& dartIsOnBaseCycle,
+    std::vector<char>& seenNode,
+    std::vector<int>& segmentNodes
+) {
+    if (dartId < 0 || dartId >= static_cast<int>(prepared.darts.size())) {
+        return;
+    }
+
+    if (dartIsOnBaseCycle[dartId]) {
+        return;
+    }
+
+    const int directNode =
+        nodeForDart(
+            pathTree,
+            dartId
+        );
+
+    addUniqueSegmentNode(
+        pathTree,
+        directNode,
+        seenNode,
+        segmentNodes
+    );
+
+    const int reverseDart =
+        prepared.darts[dartId].rev;
+
+    if (reverseDart < 0
+        || reverseDart >= static_cast<int>(prepared.darts.size())) {
+        return;
+    }
+
+    if (dartIsOnBaseCycle[reverseDart]) {
+        return;
+    }
+
+    const int reverseNode =
+        nodeForDart(
+            pathTree,
+            reverseDart
+        );
+
+    addUniqueSegmentNode(
+        pathTree,
+        reverseNode,
+        seenNode,
+        segmentNodes
+    );
+}
+
+int WilliamsonSegmentListBuilder::nodeForDart(
+    const PathTree& pathTree,
+    int dartId
+) {
+    if (dartId < 0
+        || dartId >= static_cast<int>(pathTree.nodeByDefiningDart.size())) {
+        return -1;
+    }
+
+    return pathTree.nodeByDefiningDart[dartId];
 }
 
 } // namespace ht
