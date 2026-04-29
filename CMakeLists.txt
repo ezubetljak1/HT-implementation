@@ -18,6 +18,7 @@ add_library(ht_planarity
     src/certificate/SegmentForest.cpp
     src/certificate/PathTreeBuilder.cpp
     src/certificate/PathTreeQueries.cpp
+    src/certificate/KuratowskiCandidateBuilder.cpp
     src/certificate/KuratowskiExtractor.cpp
     src/debug/DebugPrinter.cpp
 )
@@ -36,6 +37,7 @@ add_executable(ht_planarity_tests
     tests/KuratowskiCertificateTest.cpp
     tests/PathTreeBuilderTest.cpp
     tests/PathTreeQueriesTest.cpp
+    tests/KuratowskiCandidateBuilderTest.cpp
 )
 
 target_link_libraries(ht_planarity_tests PRIVATE ht_planarity)

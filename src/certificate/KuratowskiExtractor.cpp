@@ -1,4 +1,5 @@
 #include "ht/certificate/KuratowskiExtractor.hpp"
+#include "ht/certificate/KuratowskiCandidateBuilder.hpp"
 
 #include <sstream>
 
@@ -72,102 +73,9 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
     KuratowskiCertificate certificate;
     certificate.type = KuratowskiType::Unknown;
 
-    const int maxOriginalId = maxOriginalEdgeId(prepared);
-
-    if (maxOriginalId >= 0) {
-        std::vector<char> seen(static_cast<std::size_t>(maxOriginalId + 1), 0);
-
-        addUniqueOriginalEdgeFromDart(
-            prepared,
-            failure.rootTreeDart,
-            seen,
-            certificate.originalEdgeIds
-        );
-
-        addUniqueOriginalEdgeFromDart(
-            prepared,
-            failure.cycleRootDart,
-            seen,
-            certificate.originalEdgeIds
-        );
-
-        addUniqueOriginalEdgeFromDart(
-            prepared,
-            failure.currentDart,
-            seen,
-            certificate.originalEdgeIds
-        );
-
-        addUniqueOriginalEdgeFromDart(
-            prepared,
-            failure.closingBackDart,
-            seen,
-            certificate.originalEdgeIds
-        );
-
-        addUniqueOriginalEdgesFromDarts(
-            prepared,
-            failure.cycleSpineDarts,
-            seen,
-            certificate.originalEdgeIds
-        );
-
-        addUniqueOriginalEdgesFromDarts(
-            prepared,
-            failure.cycleStemDarts,
-            seen,
-            certificate.originalEdgeIds
-        );
-
-        addUniqueOriginalEdgesFromDarts(
-            prepared,
-            failure.cycleTreeDarts,
-            seen,
-            certificate.originalEdgeIds
-        );
-
-        addUniqueOriginalEdgesFromDarts(
-            prepared,
-            failure.cycleEmanatingDarts,
-            seen,
-            certificate.originalEdgeIds
-        );
-
-        addUniqueOriginalEdgesFromDarts(
-            prepared,
-            failure.cycleRootEmanatingDarts,
-            seen,
-            certificate.originalEdgeIds
-        );
-
-        addUniqueOriginalEdgesFromDarts(
-            prepared,
-            failure.blockLeftSegments,
-            seen,
-            certificate.originalEdgeIds
-        );
-
-        addUniqueOriginalEdgesFromDarts(
-            prepared,
-            failure.blockRightSegments,
-            seen,
-            certificate.originalEdgeIds
-        );
-
-        addUniqueOriginalEdgesFromDarts(
-            prepared,
-            failure.stackTopLeftSegments,
-            seen,
-            certificate.originalEdgeIds
-        );
-
-        addUniqueOriginalEdgesFromDarts(
-            prepared,
-            failure.stackTopRightSegments,
-            seen,
-            certificate.originalEdgeIds
-        );
-    }
+    KuratowskiCandidateBuilder candidateBuilder;
+    certificate.originalEdgeIds =
+        candidateBuilder.buildOriginalEdgeCandidate(prepared, failure);
 
     std::ostringstream oss;
 
