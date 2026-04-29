@@ -1,9 +1,18 @@
 #include "ht/certificate/KuratowskiExtractor.hpp"
+
 #include "ht/certificate/KuratowskiCandidateBuilder.hpp"
+#include "ht/certificate/PathTreeBuilder.hpp"
+#include "ht/certificate/SegmentMetadataBuilder.hpp"
+#include "ht/certificate/WilliamsonBasicCaseDetector.hpp"
+#include "ht/certificate/WilliamsonContextBuilder.hpp"
+#include "ht/certificate/WilliamsonKernelBuilder.hpp"
+#include "ht/certificate/WilliamsonSegmentListBuilder.hpp"
+#include "ht/certificate/WilliamsonSegfoPathBuilder.hpp"
 
 #include <sstream>
 
 namespace ht {
+
 int KuratowskiExtractor::maxOriginalEdgeId(const PreparedPalmTree& prepared) {
     int maxId = -1;
 
@@ -47,7 +56,12 @@ void KuratowskiExtractor::addUniqueOriginalEdgesFromDarts(
     std::vector<int>& originalEdgeIds
 ) {
     for (int dartId : dartIds) {
-        addUniqueOriginalEdgeFromDart(prepared, dartId, seen, originalEdgeIds);
+        addUniqueOriginalEdgeFromDart(
+            prepared,
+            dartId,
+            seen,
+            originalEdgeIds
+        );
     }
 }
 
@@ -57,6 +71,7 @@ KuratowskiCertificate KuratowskiExtractor::notImplementedCertificate() const {
     certificate.message =
         "Kuratowski extraction is not implemented yet. "
         "The next step is to preserve a strong-planarity failure witness and trace original edge IDs.";
+
     return certificate;
 }
 
@@ -73,14 +88,104 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
     KuratowskiCertificate certificate;
     certificate.type = KuratowskiType::Unknown;
 
-    KuratowskiCandidateBuilder candidateBuilder;
-    certificate.originalEdgeIds =
-        candidateBuilder.buildOriginalEdgeCandidate(prepared, failure);
+    bool usedWilliamsonKernel = false;
+
+    if (failure.hasFailure()) {
+        PathTreeBuilder pathTreeBuilder;
+        PathTree pathTree = pathTreeBuilder.build(prepared);
+
+        SegmentMetadataBuilder metadataBuilder;
+        SegmentMetadataTable metadata =
+            metadataBuilder.build(prepared, pathTree);
+
+        WilliamsonContextBuilder contextBuilder;
+        WilliamsonContext context =
+            contextBuilder.build(
+                prepared,
+                pathTree,
+                metadata,
+                failure
+            );
+
+        if (context.valid) {
+            WilliamsonKernelBuilder kernelBuilder;
+
+            WilliamsonBasicCaseDetector basicCaseDetector;
+            WilliamsonBasicCase basicCase =
+                basicCaseDetector.detect(
+                    prepared,
+                    pathTree,
+                    metadata,
+                    context
+                );
+
+            WilliamsonKernel kernel;
+
+            if (basicCase.valid) {
+                kernel =
+                    kernelBuilder.buildDirectKernel(
+                        prepared,
+                        pathTree,
+                        basicCase
+                    );
+            } else {
+                WilliamsonSegmentListBuilder segmentListBuilder;
+                WilliamsonSegmentList segmentList =
+                    segmentListBuilder.build(
+                        prepared,
+                        pathTree,
+                        context
+                    );
+
+                if (segmentList.valid) {
+                    WilliamsonSegfoPathBuilder segfoPathBuilder;
+                    WilliamsonSegfoPath segfoPath =
+                        segfoPathBuilder.buildPath(
+                            prepared,
+                            pathTree,
+                            metadata,
+                            segmentList,
+                            context
+                        );
+
+                    if (segfoPath.valid) {
+                        kernel =
+                            kernelBuilder.buildKernelFromSegfoPath(
+                                prepared,
+                                pathTree,
+                                context,
+                                segfoPath
+                            );
+                    }
+                }
+            }
+
+            if (kernel.valid && !kernel.originalEdgeIds.empty()) {
+                certificate.originalEdgeIds = kernel.originalEdgeIds;
+                usedWilliamsonKernel = true;
+            }
+        }
+    }
+
+    if (!usedWilliamsonKernel) {
+        KuratowskiCandidateBuilder candidateBuilder;
+        certificate.originalEdgeIds =
+            candidateBuilder.buildOriginalEdgeCandidate(
+                prepared,
+                failure
+            );
+    }
 
     std::ostringstream oss;
 
-    oss << "Kuratowski extraction is not implemented yet, "
+    oss << "Kuratowski extraction is not fully implemented yet, "
         << "but strong-planarity produced a failure witness. ";
+
+    if (usedWilliamsonKernel) {
+        oss << "A Williamson kernel candidate was constructed. ";
+    } else {
+        oss << "Falling back to the older failure-witness candidate builder. ";
+    }
 
     if (!failure.hasFailure()) {
         oss << "No structured failure data was recorded.";
@@ -119,9 +224,9 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
         << " vertices and " << prepared.edgeCount
         << " edges.";
 
-     oss << " Candidate original edge count = "
+    oss << " Candidate original edge count = "
         << certificate.originalEdgeIds.size()
-        << ". These edges are only a failure-witness candidate set, not yet a verified Kuratowski subdivision.";
+        << ". These edges are a Kuratowski/kernel candidate; final subdivision verification is not implemented yet.";
 
     certificate.message = oss.str();
     return certificate;

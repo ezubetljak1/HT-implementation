@@ -7,17 +7,47 @@ WilliamsonKernel WilliamsonKernelBuilder::buildDirectKernel(
     const PathTree& pathTree,
     const WilliamsonBasicCase& basicCase
 ) const {
-    WilliamsonKernel kernel;
-    kernel.basicCase = basicCase;
-
     if (!basicCase.valid) {
+        WilliamsonKernel kernel;
+        kernel.basicCase = basicCase;
         kernel.message = "Cannot build Williamson kernel from invalid basic case.";
         return kernel;
     }
 
-    if (basicCase.type != WilliamsonBasicCaseType::DirectTriangleLinks) {
-        kernel.message =
-            "Only Williamson direct triangle-link basic case is supported by this builder.";
+    WilliamsonSegfoPath path;
+    path.valid = true;
+    path.segmentPathNodes = basicCase.segmentPathNodes;
+    path.message = "SEGFO path induced by direct Williamson basic case.";
+
+    WilliamsonKernel kernel =
+        buildKernelFromSegfoPath(
+            prepared,
+            pathTree,
+            basicCase.context,
+            path
+        );
+
+    kernel.basicCase = basicCase;
+    return kernel;
+}
+
+WilliamsonKernel WilliamsonKernelBuilder::buildKernelFromSegfoPath(
+    const PreparedPalmTree& prepared,
+    const PathTree& pathTree,
+    const WilliamsonContext& context,
+    const WilliamsonSegfoPath& segfoPath
+) const {
+    WilliamsonKernel kernel;
+    kernel.context = context;
+    kernel.segfoPath = segfoPath;
+
+    if (!context.valid) {
+        kernel.message = "Cannot build Williamson kernel from invalid context.";
+        return kernel;
+    }
+
+    if (!segfoPath.valid || segfoPath.segmentPathNodes.empty()) {
+        kernel.message = "Cannot build Williamson kernel from invalid SEGFO path.";
         return kernel;
     }
 
@@ -28,39 +58,38 @@ WilliamsonKernel WilliamsonKernelBuilder::buildDirectKernel(
         return kernel;
     }
 
-    std::vector<char> seen(static_cast<std::size_t>(maxOriginalId + 1), 0);
+    std::vector<char> seenEdge(static_cast<std::size_t>(maxOriginalId + 1), 0);
+    std::vector<char> seenPathNode(static_cast<std::size_t>(pathTree.nodes.size()), 0);
+
     PathTreeQueries queries(prepared, pathTree);
 
-    const WilliamsonContext& context = basicCase.context;
-
-    // Basic case 1: F dl B dl A dl F.
-    // Materialize only the selected constant-size set of segments.
-    addKernelNodeContribution(
+    // Williamson kernel uses the base failure cycle CYCLE(e).
+    addCycleForNode(
         prepared,
         queries,
-        context.fNode,
-        seen,
+        context.cycleNode,
+        seenEdge,
         kernel.originalEdgeIds
     );
 
-    for (int nodeId : basicCase.segmentPathNodes) {
-        addKernelNodeContribution(
-            prepared,
-            queries,
-            nodeId,
-            seen,
-            kernel.originalEdgeIds
-        );
-    }
+    // Add SEG(F).
+    addSegmentSubtreeForNode(
+        prepared,
+        pathTree,
+        context.fNode,
+        seenPathNode,
+        seenEdge,
+        kernel.originalEdgeIds
+    );
 
-    // Include the base failure cycle CYCLE(e), where e = failure.cycleRootDart.
-    // This is the Williamson base cycle, not necessarily the parent of F.
-    if (context.cycleNode != -1) {
-        addCycleForNode(
+    // Add all segments on the SEGFO path B -> ... -> A.
+    for (int nodeId : segfoPath.segmentPathNodes) {
+        addSegmentSubtreeForNode(
             prepared,
-            queries,
-            context.cycleNode,
-            seen,
+            pathTree,
+            nodeId,
+            seenPathNode,
+            seenEdge,
             kernel.originalEdgeIds
         );
     }
@@ -68,11 +97,9 @@ WilliamsonKernel WilliamsonKernelBuilder::buildDirectKernel(
     kernel.valid = !kernel.originalEdgeIds.empty();
 
     if (kernel.valid) {
-        kernel.message =
-            "Built Williamson direct basic-case kernel candidate.";
+        kernel.message = "Built Williamson kernel from base cycle, F, and SEGFO path.";
     } else {
-        kernel.message =
-            "Williamson direct basic-case kernel produced no original edges.";
+        kernel.message = "Williamson kernel construction produced no original edges.";
     }
 
     return kernel;
@@ -95,7 +122,7 @@ int WilliamsonKernelBuilder::maxOriginalEdgeId(
 void WilliamsonKernelBuilder::addUniqueOriginalEdgeFromDart(
     const PreparedPalmTree& prepared,
     int dartId,
-    std::vector<char>& seen,
+    std::vector<char>& seenEdge,
     std::vector<int>& originalEdgeIds
 ) {
     if (dartId < 0 || dartId >= static_cast<int>(prepared.darts.size())) {
@@ -104,29 +131,29 @@ void WilliamsonKernelBuilder::addUniqueOriginalEdgeFromDart(
 
     const int originalEdgeId = prepared.darts[dartId].originalEdgeId;
 
-    if (originalEdgeId < 0 || originalEdgeId >= static_cast<int>(seen.size())) {
+    if (originalEdgeId < 0 || originalEdgeId >= static_cast<int>(seenEdge.size())) {
         return;
     }
 
-    if (seen[originalEdgeId]) {
+    if (seenEdge[originalEdgeId]) {
         return;
     }
 
-    seen[originalEdgeId] = 1;
+    seenEdge[originalEdgeId] = 1;
     originalEdgeIds.push_back(originalEdgeId);
 }
 
 void WilliamsonKernelBuilder::addUniqueOriginalEdgesFromDarts(
     const PreparedPalmTree& prepared,
     const std::vector<int>& dartIds,
-    std::vector<char>& seen,
+    std::vector<char>& seenEdge,
     std::vector<int>& originalEdgeIds
 ) {
     for (int dartId : dartIds) {
         addUniqueOriginalEdgeFromDart(
             prepared,
             dartId,
-            seen,
+            seenEdge,
             originalEdgeIds
         );
     }
@@ -136,7 +163,7 @@ void WilliamsonKernelBuilder::addCycleForNode(
     const PreparedPalmTree& prepared,
     const PathTreeQueries& queries,
     int nodeId,
-    std::vector<char>& seen,
+    std::vector<char>& seenEdge,
     std::vector<int>& originalEdgeIds
 ) {
     if (nodeId == -1) {
@@ -149,59 +176,55 @@ void WilliamsonKernelBuilder::addCycleForNode(
     addUniqueOriginalEdgesFromDarts(
         prepared,
         cycleDarts,
-        seen,
+        seenEdge,
         originalEdgeIds
     );
 }
 
-void WilliamsonKernelBuilder::addSegmentForNode(
+void WilliamsonKernelBuilder::addSegmentSubtreeForNode(
     const PreparedPalmTree& prepared,
-    const PathTreeQueries& queries,
+    const PathTree& pathTree,
     int nodeId,
-    std::vector<char>& seen,
+    std::vector<char>& seenPathNode,
+    std::vector<char>& seenEdge,
     std::vector<int>& originalEdgeIds
 ) {
-    if (nodeId == -1) {
+    if (nodeId < 0 || nodeId >= static_cast<int>(pathTree.nodes.size())) {
         return;
     }
 
-    const std::vector<int> segmentDarts =
-        queries.segmentDefiningDartsForNode(nodeId);
+    const PathNode& segmentRoot = pathTree.nodes[nodeId];
 
-    addUniqueOriginalEdgesFromDarts(
-        prepared,
-        segmentDarts,
-        seen,
-        originalEdgeIds
-    );
-}
-
-void WilliamsonKernelBuilder::addKernelNodeContribution(
-    const PreparedPalmTree& prepared,
-    const PathTreeQueries& queries,
-    int nodeId,
-    std::vector<char>& seen,
-    std::vector<int>& originalEdgeIds
-) {
-    if (nodeId == -1) {
+    if (segmentRoot.preorder < 0 || segmentRoot.subtreeEnd < segmentRoot.preorder) {
         return;
     }
 
-    addSegmentForNode(
-        prepared,
-        queries,
-        nodeId,
-        seen,
-        originalEdgeIds
-    );
+    if (segmentRoot.subtreeEnd > static_cast<int>(pathTree.preorderNodes.size())) {
+        return;
+    }
 
-    addCycleForNode(
-        prepared,
-        queries,
-        nodeId,
-        seen,
-        originalEdgeIds
-    );
+    for (int i = segmentRoot.preorder; i < segmentRoot.subtreeEnd; ++i) {
+        const int currentNodeId = pathTree.preorderNodes[i];
+
+        if (currentNodeId < 0 || currentNodeId >= static_cast<int>(pathTree.nodes.size())) {
+            continue;
+        }
+
+        if (seenPathNode[currentNodeId]) {
+            continue;
+        }
+
+        seenPathNode[currentNodeId] = 1;
+
+        const PathNode& currentNode = pathTree.nodes[currentNodeId];
+
+        addUniqueOriginalEdgesFromDarts(
+            prepared,
+            currentNode.pathDarts,
+            seenEdge,
+            originalEdgeIds
+        );
+    }
 }
 
 } // namespace ht

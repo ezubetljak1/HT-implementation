@@ -77,3 +77,27 @@ HT_TEST(KuratowskiCandidateForSubdividedK5HasValidOriginalEdges) {
         assert(originalEdgeId < g.edgeCount());
     }
 }
+
+HT_TEST(KuratowskiExtractorUsesWilliamsonKernelForK33) {
+    Graph g = ht::test::buildK33();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+    assert(!result.certificate.originalEdgeIds.empty());
+
+    // For K3,3, the direct Williamson kernel should recover exactly the 9 edges.
+    assert(result.certificate.originalEdgeIds.size() == 9);
+
+    Graph candidate =
+        buildSubgraphFromOriginalEdgeIds(
+            g,
+            result.certificate.originalEdgeIds
+        );
+
+    PlanarityResult candidateResult =
+        tester.test(candidate, false);
+
+    assert(!candidateResult.planar);
+}

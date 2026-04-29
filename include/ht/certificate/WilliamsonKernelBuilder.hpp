@@ -5,7 +5,9 @@
 #include "ht/certificate/PathTree.hpp"
 #include "ht/certificate/PathTreeQueries.hpp"
 #include "ht/certificate/WilliamsonBasicCase.hpp"
+#include "ht/certificate/WilliamsonContext.hpp"
 #include "ht/certificate/WilliamsonKernel.hpp"
+#include "ht/certificate/WilliamsonSegfoPath.hpp"
 #include "ht/preprocess/PreparedPalmTree.hpp"
 
 namespace ht {
@@ -18,20 +20,27 @@ public:
         const WilliamsonBasicCase& basicCase
     ) const;
 
+    WilliamsonKernel buildKernelFromSegfoPath(
+        const PreparedPalmTree& prepared,
+        const PathTree& pathTree,
+        const WilliamsonContext& context,
+        const WilliamsonSegfoPath& segfoPath
+    ) const;
+
 private:
     static int maxOriginalEdgeId(const PreparedPalmTree& prepared);
 
     static void addUniqueOriginalEdgeFromDart(
         const PreparedPalmTree& prepared,
         int dartId,
-        std::vector<char>& seen,
+        std::vector<char>& seenEdge,
         std::vector<int>& originalEdgeIds
     );
 
     static void addUniqueOriginalEdgesFromDarts(
         const PreparedPalmTree& prepared,
         const std::vector<int>& dartIds,
-        std::vector<char>& seen,
+        std::vector<char>& seenEdge,
         std::vector<int>& originalEdgeIds
     );
 
@@ -39,23 +48,16 @@ private:
         const PreparedPalmTree& prepared,
         const PathTreeQueries& queries,
         int nodeId,
-        std::vector<char>& seen,
+        std::vector<char>& seenEdge,
         std::vector<int>& originalEdgeIds
     );
 
-    static void addSegmentForNode(
+    static void addSegmentSubtreeForNode(
         const PreparedPalmTree& prepared,
-        const PathTreeQueries& queries,
+        const PathTree& pathTree,
         int nodeId,
-        std::vector<char>& seen,
-        std::vector<int>& originalEdgeIds
-    );
-
-    static void addKernelNodeContribution(
-        const PreparedPalmTree& prepared,
-        const PathTreeQueries& queries,
-        int nodeId,
-        std::vector<char>& seen,
+        std::vector<char>& seenPathNode,
+        std::vector<char>& seenEdge,
         std::vector<int>& originalEdgeIds
     );
 };
