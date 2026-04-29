@@ -36,5 +36,11 @@ add_executable(ht_planarity_tests
 
 target_link_libraries(ht_planarity_tests PRIVATE ht_planarity)
 
+add_executable(ht_failure_witness_debug
+    tools/FailureWitnessDebug.cpp
+)
+
+target_link_libraries(ht_failure_witness_debug PRIVATE ht_planarity)
+
 enable_testing()
 add_test(NAME ht_planarity_tests COMMAND ht_planarity_tests)
