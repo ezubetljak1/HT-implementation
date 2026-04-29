@@ -94,5 +94,19 @@ target_include_directories(ht_homkernel_signature_debug
         ${CMAKE_CURRENT_SOURCE_DIR}/tests
 )
 
+add_executable(ht_homkernel_table_generator
+    tools/HomKernelTableGenerator.cpp
+)
+
+target_link_libraries(ht_homkernel_table_generator
+    PRIVATE ht_planarity
+)
+
+target_include_directories(ht_homkernel_table_generator
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests
+)
+
 enable_testing()
 add_test(NAME ht_planarity_tests COMMAND ht_planarity_tests)
