@@ -155,6 +155,8 @@ void DebugPrinter::printStrongPlanarityFailure(
     printDartVector("cycleStemDarts", prepared, failure.cycleStemDarts, out);
     printDartVector("cycleSpineDarts", prepared, failure.cycleSpineDarts, out);
     printDartVector("cycleTreeDarts", prepared, failure.cycleTreeDarts, out);
+    printDartVector("cycleEmanatingDarts", prepared, failure.cycleEmanatingDarts, out);
+    printDartVector("cycleRootEmanatingDarts", prepared, failure.cycleRootEmanatingDarts, out);
 
     out << "\nBlock witness\n";
     printIntVector("blockLeftAttachments", failure.blockLeftAttachments, out);

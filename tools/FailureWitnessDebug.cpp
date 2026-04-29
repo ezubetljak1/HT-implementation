@@ -45,8 +45,9 @@ ht::Graph buildSubdividedK5() {
 
 void inspectCandidateSubgraph(
     const ht::Graph& originalGraph,
+    const ht::PreparedPalmTree& prepared,
     const ht::KuratowskiCertificate& certificate
-) {
+){
     std::cout << "\nCandidate original edge IDs [size="
               << certificate.originalEdgeIds.size()
               << "]: ";
@@ -62,14 +63,47 @@ void inspectCandidateSubgraph(
         selected.insert(edgeId);
     }
 
+    std::vector<int> missingOriginalEdgeIds;
+
     std::cout << "Original edges not in candidate: ";
     for (const ht::Edge& edge : originalGraph.edges()) {
         if (selected.find(edge.originalId) == selected.end()) {
+            missingOriginalEdgeIds.push_back(edge.originalId);
+
             std::cout << edge.originalId
-                      << "(" << edge.u << "-" << edge.v << ") ";
+                    << "(" << edge.u << "-" << edge.v << ") ";
         }
     }
     std::cout << "\n";
+
+    std::cout << "Prepared darts for missing original edges:\n";
+
+    for (int missingOriginalEdgeId : missingOriginalEdgeIds) {
+        std::cout << "  originalEdgeId = " << missingOriginalEdgeId << "\n";
+
+        bool found = false;
+
+        for (const ht::Dart& dart : prepared.darts) {
+            if (dart.originalEdgeId != missingOriginalEdgeId) {
+                continue;
+            }
+
+            found = true;
+
+            std::cout << "    dart " << dart.id
+                    << ": " << dart.from << " -> " << dart.to
+                    << ", rev=" << dart.rev
+                    << ", edgeId=" << dart.edgeId
+                    << ", tree=" << dart.isTree
+                    << ", back=" << dart.isBack
+                    << ", phi=" << dart.phi
+                    << "\n";
+        }
+
+        if (!found) {
+            std::cout << "    not found in prepared.darts\n";
+        }
+    }
 
     ht::Graph candidate(originalGraph.vertexCount());
 
@@ -150,7 +184,7 @@ void inspectGraph(const std::string& name, const ht::Graph& graph) {
             ht::KuratowskiCertificate certificate =
                 extractor.extractFromFailure(prepared, failure);
 
-            inspectCandidateSubgraph(graph, certificate);
+            inspectCandidateSubgraph(graph, prepared, certificate);
 
             return;
         }

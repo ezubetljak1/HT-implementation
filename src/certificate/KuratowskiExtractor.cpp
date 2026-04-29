@@ -128,6 +128,20 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
 
         addUniqueOriginalEdgesFromDarts(
             prepared,
+            failure.cycleEmanatingDarts,
+            seen,
+            certificate.originalEdgeIds
+        );
+
+        addUniqueOriginalEdgesFromDarts(
+            prepared,
+            failure.cycleRootEmanatingDarts,
+            seen,
+            certificate.originalEdgeIds
+        );
+
+        addUniqueOriginalEdgesFromDarts(
+            prepared,
             failure.blockLeftSegments,
             seen,
             certificate.originalEdgeIds
@@ -191,6 +205,8 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
         << ", cycleSpineDartCount=" << failure.cycleSpineDarts.size()
         << ", cycleStemDartCount=" << failure.cycleStemDarts.size()
         << ", cycleTreeDartCount=" << failure.cycleTreeDarts.size()
+        << ", cycleEmanatingDartCount=" << failure.cycleEmanatingDarts.size()
+        << ", cycleRootEmanatingDartCount=" << failure.cycleRootEmanatingDarts.size()
         << ", prepared graph has " << prepared.n
         << " vertices and " << prepared.edgeCount
         << " edges.";

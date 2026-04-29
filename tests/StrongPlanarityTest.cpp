@@ -63,5 +63,7 @@ HT_TEST(StrongPlanarityRecordsFailureForK33) {
     assert(!failure.cycleSpineDarts.empty());
     assert(!failure.cycleTreeDarts.empty());
     assert(failure.cycleTreeDarts.size() >= failure.cycleSpineDarts.size());
+    assert(!failure.cycleEmanatingDarts.empty());
+    assert(!failure.cycleRootEmanatingDarts.empty());
     assert(!failure.message.empty());
 }

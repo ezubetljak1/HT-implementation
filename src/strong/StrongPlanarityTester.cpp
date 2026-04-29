@@ -100,6 +100,7 @@ void StrongPlanarityTester::recordFailure(
     int rootTreeDart,
     int currentDart,
     const CycleInfo& cycle,
+    const std::vector<int>& cycleEmanatingDarts,
     const Block& block,
     const std::vector<Block>& stack,
     const std::string& message
@@ -128,6 +129,17 @@ void StrongPlanarityTester::recordFailure(
         failure_.cycleSpineDarts.begin(),
         failure_.cycleSpineDarts.end()
     );
+    failure_.cycleEmanatingDarts = cycleEmanatingDarts;
+
+    if (cycle.x >= 0 && cycle.x < P_.n) {
+        for (int dartId : P_.orderedOut[cycle.x]) {
+            if (dartId == rootTreeDart) {
+                continue;
+            }
+
+            failure_.cycleRootEmanatingDarts.push_back(dartId);
+        }
+    }
 
     failure_.blockLeftAttachments = dequeToVector(block.Latt);
     failure_.blockRightAttachments = dequeToVector(block.Ratt);
@@ -317,6 +329,8 @@ bool StrongPlanarityTester::stronglyPlanar(
 ) {
     CycleInfo cycle = determineCycle(e0);
 
+    std::vector<int> cycleEmanatingDarts;
+
     std::vector<Block> stack;
 
     int w = cycle.wk;
@@ -326,6 +340,7 @@ bool StrongPlanarityTester::stronglyPlanar(
 
         for (std::size_t i = 1; i < outgoing.size(); ++i) {
             const int e = outgoing[i];
+            cycleEmanatingDarts.push_back(e);
 
             std::vector<int> childAttachments;
 
@@ -352,6 +367,7 @@ bool StrongPlanarityTester::stronglyPlanar(
                         e0,
                         e,
                         cycle,
+                        cycleEmanatingDarts,
                         block,
                         stack,
                         "Strong-planarity failed: unresolved left interlacing after stack flip."
@@ -403,6 +419,7 @@ bool StrongPlanarityTester::stronglyPlanar(
                 e0,
                 -1,
                 cycle,
+                cycleEmanatingDarts,
                 block,
                 stack,
                 "Strong-planarity failed: block has attachments on both sides above w0."
