@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace ht {
 
@@ -138,6 +139,157 @@ EmbeddingValidationResult EmbeddingValidator::validate(
         << result.vertexCount << " - "
         << result.edgeCount << " + "
         << result.faceCount << " = 2.";
+
+    result.message = oss.str();
+
+    return result;
+}
+
+EmbeddingValidationResult EmbeddingValidator::validateGlobalOriginalEmbedding(
+    const Graph& graph,
+    const Embedding& embedding
+) {
+    EmbeddingValidationResult result;
+
+    result.vertexCount = graph.vertexCount();
+    result.edgeCount = graph.edgeCount();
+    result.faceCount = 0;
+    result.expectedFaceCount = 0;
+
+    const int n = graph.vertexCount();
+    const int m = graph.edgeCount();
+
+    if (static_cast<int>(embedding.rotationOriginalEdgeIds.size()) != n) {
+        return fail(
+            "Global embedding has wrong number of vertex rotations for original edge IDs.",
+            result
+        );
+    }
+
+    if (static_cast<int>(embedding.rotationOriginalNeighbors.size()) != n) {
+        return fail(
+            "Global embedding has wrong number of vertex rotations for original neighbors.",
+            result
+        );
+    }
+
+    std::unordered_map<int, const Edge*> edgeByOriginalId;
+    edgeByOriginalId.reserve(static_cast<std::size_t>(m) * 2);
+
+    for (const Edge& edge : graph.edges()) {
+        if (edgeByOriginalId.find(edge.originalId) != edgeByOriginalId.end()) {
+            return fail("Duplicate original edge ID in input graph.", result);
+        }
+
+        edgeByOriginalId[edge.originalId] = &edge;
+    }
+
+    std::unordered_map<int, int> occurrenceCount;
+    occurrenceCount.reserve(static_cast<std::size_t>(m) * 2);
+
+    for (int v = 0; v < n; ++v) {
+        const auto& edgeRotation = embedding.rotationOriginalEdgeIds[v];
+        const auto& neighborRotation = embedding.rotationOriginalNeighbors[v];
+
+        if (edgeRotation.size() != neighborRotation.size()) {
+            std::ostringstream oss;
+            oss << "Vertex " << v
+                << " has mismatching global rotation sizes: "
+                << edgeRotation.size()
+                << " edge IDs but "
+                << neighborRotation.size()
+                << " neighbors.";
+
+            return fail(oss.str(), result);
+        }
+
+        for (std::size_t i = 0; i < edgeRotation.size(); ++i) {
+            const int originalEdgeId = edgeRotation[i];
+            const int neighbor = neighborRotation[i];
+
+            auto edgeIt = edgeByOriginalId.find(originalEdgeId);
+
+            if (edgeIt == edgeByOriginalId.end()) {
+                std::ostringstream oss;
+                oss << "Global embedding references unknown original edge ID "
+                    << originalEdgeId
+                    << ".";
+
+                return fail(oss.str(), result);
+            }
+
+            if (neighbor < 0 || neighbor >= n) {
+                std::ostringstream oss;
+                oss << "Global embedding references invalid neighbor "
+                    << neighbor
+                    << " at vertex "
+                    << v
+                    << ".";
+
+                return fail(oss.str(), result);
+            }
+
+            const Edge& edge = *edgeIt->second;
+
+            int expectedNeighbor = -1;
+
+            if (edge.u == v) {
+                expectedNeighbor = edge.v;
+            } else if (edge.v == v) {
+                expectedNeighbor = edge.u;
+            } else {
+                std::ostringstream oss;
+                oss << "Original edge ID "
+                    << originalEdgeId
+                    << " is listed in rotation of vertex "
+                    << v
+                    << ", but that edge is not incident to this vertex.";
+
+                return fail(oss.str(), result);
+            }
+
+            if (neighbor != expectedNeighbor) {
+                std::ostringstream oss;
+                oss << "Wrong neighbor for original edge ID "
+                    << originalEdgeId
+                    << " at vertex "
+                    << v
+                    << ". Expected "
+                    << expectedNeighbor
+                    << ", got "
+                    << neighbor
+                    << ".";
+
+                return fail(oss.str(), result);
+            }
+
+            occurrenceCount[originalEdgeId]++;
+        }
+    }
+
+    for (const Edge& edge : graph.edges()) {
+        const int count = occurrenceCount[edge.originalId];
+
+        if (count != 2) {
+            std::ostringstream oss;
+            oss << "Original edge ID "
+                << edge.originalId
+                << " appears "
+                << count
+                << " times in global embedding, expected exactly 2.";
+
+            return fail(oss.str(), result);
+        }
+    }
+
+    result.valid = true;
+
+    std::ostringstream oss;
+    oss << "Global original embedding is valid: "
+        << n
+        << " vertices, "
+        << m
+        << " edges, every original edge appears exactly twice.";
 
     result.message = oss.str();
 

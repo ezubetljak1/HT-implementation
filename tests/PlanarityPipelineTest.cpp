@@ -3,6 +3,8 @@
 #include "TestGraphs.hpp"
 #include "ht/PlanarityTester.hpp"
 
+#include <vector>
+
 using namespace ht;
 
 HT_TEST(PlanarityPipelineAcceptsTriangle) {
@@ -74,4 +76,29 @@ HT_TEST(PlanarityPipelineBuildsGlobalEmbeddingForBridgeConnectedTriangles) {
 
     // Vertex 3 belongs to bridge and second triangle.
     assert(!result.embedding.rotationOriginalEdgeIds[3].empty());
+}
+
+HT_TEST(PlanarityPipelineGlobalEmbeddingCoversEveryOriginalEdgeTwice) {
+    Graph g = ht::test::buildTwoTrianglesConnectedByBridge();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, true);
+
+    assert(result.planar);
+    assert(result.embedding.rotationOriginalEdgeIds.size() == 6);
+
+    std::vector<int> occurrenceCount(g.edgeCount(), 0);
+
+    for (const auto& rotation : result.embedding.rotationOriginalEdgeIds) {
+        for (int originalEdgeId : rotation) {
+            assert(originalEdgeId >= 0);
+            assert(originalEdgeId < g.edgeCount());
+
+            occurrenceCount[originalEdgeId]++;
+        }
+    }
+
+    for (int count : occurrenceCount) {
+        assert(count == 2);
+    }
 }

@@ -45,7 +45,21 @@ PlanarityResult PlanarityTester::test(const Graph& graph, bool buildEmbedding) c
     PreparedPalmTreeBuilder preparedBuilder;
 
     for (const Component& component : components) {
-        if (component.size() <= 1) {
+        if (component.empty()) {
+            continue;
+        }
+
+        if (component.size() == 1) {
+            if (buildEmbedding) {
+                const Edge& edge = component.front();
+
+                globalEmbedding.rotationOriginalEdgeIds[edge.u].push_back(edge.originalId);
+                globalEmbedding.rotationOriginalNeighbors[edge.u].push_back(edge.v);
+
+                globalEmbedding.rotationOriginalEdgeIds[edge.v].push_back(edge.originalId);
+                globalEmbedding.rotationOriginalNeighbors[edge.v].push_back(edge.u);
+            }
+
             continue;
         }
 
@@ -104,6 +118,17 @@ PlanarityResult PlanarityTester::test(const Graph& graph, bool buildEmbedding) c
     }
 
     if (buildEmbedding) {
+        EmbeddingValidationResult globalValidation =
+            EmbeddingValidator::validateGlobalOriginalEmbedding(graph, globalEmbedding);
+
+        if (!globalValidation.valid) {
+            result.planar = false;
+            result.message =
+                "Global embedding assembly failed validation: "
+                + globalValidation.message;
+            return result;
+        }
+
         result.embedding = globalEmbedding;
     }
 

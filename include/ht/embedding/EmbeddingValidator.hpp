@@ -4,6 +4,7 @@
 
 #include "ht/embedding/Embedding.hpp"
 #include "ht/preprocess/PreparedPalmTree.hpp"
+#include "ht/Graph.hpp"
 
 namespace ht {
 
@@ -11,6 +12,11 @@ class EmbeddingValidator {
 public:
     static EmbeddingValidationResult validate(
         const PreparedPalmTree& prepared,
+        const Embedding& embedding
+    );
+
+    static EmbeddingValidationResult validateGlobalOriginalEmbedding(
+        const Graph& graph,
         const Embedding& embedding
     );
 
