@@ -1,11 +1,9 @@
 #pragma once
 
-#include <vector>
-
-#include "ht/certificate/DirectLinkTester.hpp"
 #include "ht/certificate/PathTree.hpp"
 #include "ht/certificate/SegmentMetadata.hpp"
 #include "ht/certificate/WilliamsonContext.hpp"
+#include "ht/certificate/WilliamsonFList.hpp"
 #include "ht/certificate/WilliamsonSegmentList.hpp"
 #include "ht/certificate/WilliamsonSegfoPath.hpp"
 #include "ht/preprocess/PreparedPalmTree.hpp"
@@ -22,22 +20,19 @@ public:
         const WilliamsonContext& context
     ) const;
 
-private:
-    struct HeadCache {
-        std::vector<std::vector<int>> headsByNode;
-    };
-
-    static HeadCache buildHeadCache(
+    WilliamsonSegfoPath buildPathFromFList(
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
         const SegmentMetadataTable& metadata,
-        const WilliamsonSegmentList& segmentList
-    );
+        const WilliamsonFList& fList,
+        const WilliamsonContext& context
+    ) const;
 
+private:
     static bool directlyLinkedEitherDirection(
         const PreparedPalmTree& prepared,
         const SegmentMetadataTable& metadata,
-        const HeadCache& headCache,
+        const WilliamsonFList& fList,
         int firstNode,
         int secondNode
     );
@@ -45,14 +40,14 @@ private:
     static bool directlyLinkedEarlierLater(
         const PreparedPalmTree& prepared,
         const SegmentMetadataTable& metadata,
-        const HeadCache& headCache,
+        const WilliamsonFList& fList,
         int earlierNode,
         int laterNode
     );
 
     static bool hasHeadInOpenDfsInterval(
         const PreparedPalmTree& prepared,
-        const HeadCache& headCache,
+        const WilliamsonFList& fList,
         int nodeId,
         int lowExclusiveDfs,
         int highExclusiveDfs

@@ -1,5 +1,7 @@
 #include "ht/certificate/WilliamsonSegfoPathBuilder.hpp"
 
+#include "ht/certificate/WilliamsonFListBuilder.hpp"
+
 #include <stdexcept>
 
 namespace ht {
@@ -23,27 +25,64 @@ WilliamsonSegfoPath WilliamsonSegfoPathBuilder::buildPath(
         return result;
     }
 
-    HeadCache headCache =
-        buildHeadCache(
+    WilliamsonFListBuilder fListBuilder;
+    WilliamsonFList fList =
+        fListBuilder.buildFromSegmentList(
             prepared,
             pathTree,
             metadata,
-            segmentList
+            segmentList,
+            context.fNode
         );
+
+    return buildPathFromFList(
+        prepared,
+        pathTree,
+        metadata,
+        fList,
+        context
+    );
+}
+
+WilliamsonSegfoPath WilliamsonSegfoPathBuilder::buildPathFromFList(
+    const PreparedPalmTree& prepared,
+    const PathTree& pathTree,
+    const SegmentMetadataTable& metadata,
+    const WilliamsonFList& fList,
+    const WilliamsonContext& context
+) const {
+    WilliamsonSegfoPath result;
+
+    if (!context.valid) {
+        result.message = "Cannot build SEGFO path from invalid Williamson context.";
+        return result;
+    }
+
+    if (!fList.valid) {
+        result.message = "Cannot build SEGFO path from invalid FLIST.";
+        return result;
+    }
+
+    if (context.aNode < 0 || context.aNode >= static_cast<int>(pathTree.nodes.size())
+        || context.bNode < 0 || context.bNode >= static_cast<int>(pathTree.nodes.size())
+        || context.fNode < 0 || context.fNode >= static_cast<int>(pathTree.nodes.size())) {
+        result.message = "Williamson context contains invalid node ids.";
+        return result;
+    }
 
     // Direct SEGFO path:
     // B dl A.
     if (directlyLinkedEitherDirection(
             prepared,
             metadata,
-            headCache,
+            fList,
             context.bNode,
             context.aNode
         )) {
         result.valid = true;
         result.segmentPathNodes.push_back(context.bNode);
         result.segmentPathNodes.push_back(context.aNode);
-        result.message = "Built direct SEGFO path: B -> A.";
+        result.message = "Built direct SEGFO path using FLIST: B -> A.";
         return result;
     }
 
@@ -57,14 +96,12 @@ WilliamsonSegfoPath WilliamsonSegfoPathBuilder::buildPath(
     result.segmentPathNodes.push_back(context.bNode);
     usedNode[context.bNode] = 1;
 
-    // General targeted SEGFO path construction:
-    // one linear pass over SEGLIST(e), extending the current path whenever
-    // the next segment is directly linked to the current end.
-    //
-    // This avoids all-pairs SEGGR construction.
-    for (int candidateNode : segmentList.segmentNodes) {
+    // Linear FLIST scan:
+    // extend the current path whenever the next FLIST segment is directly linked
+    // to the current path endpoint. This avoids explicit all-pairs SEGGR construction.
+    for (int candidateNode : fList.segmentNodes) {
         if (candidateNode < 0 || candidateNode >= static_cast<int>(pathTree.nodes.size())) {
-            result.message = "SEGLIST(e) contains invalid PathTree node id.";
+            result.message = "FLIST contains invalid PathTree node id.";
             return result;
         }
 
@@ -80,7 +117,7 @@ WilliamsonSegfoPath WilliamsonSegfoPathBuilder::buildPath(
             directlyLinkedEitherDirection(
                 prepared,
                 metadata,
-                headCache,
+                fList,
                 currentNode,
                 candidateNode
             );
@@ -97,7 +134,7 @@ WilliamsonSegfoPath WilliamsonSegfoPathBuilder::buildPath(
             directlyLinkedEitherDirection(
                 prepared,
                 metadata,
-                headCache,
+                fList,
                 currentNode,
                 context.aNode
             );
@@ -105,64 +142,36 @@ WilliamsonSegfoPath WilliamsonSegfoPathBuilder::buildPath(
         if (currentLinkedToA) {
             result.segmentPathNodes.push_back(context.aNode);
             result.valid = true;
-            result.message = "Built linear SEGFO path: B -> ... -> A.";
+            result.message = "Built linear SEGFO path using FLIST: B -> ... -> A.";
             return result;
         }
     }
 
     result.message =
-        "No SEGFO path found by the current one-pass construction. "
-        "The next Williamson step is FLIST/frontier construction for the fully general case.";
+        "No SEGFO path found by the current FLIST one-pass construction. "
+        "The next Williamson step is frontier construction for the fully general case.";
 
     return result;
-}
-
-WilliamsonSegfoPathBuilder::HeadCache
-WilliamsonSegfoPathBuilder::buildHeadCache(
-    const PreparedPalmTree& prepared,
-    const PathTree& pathTree,
-    const SegmentMetadataTable& metadata,
-    const WilliamsonSegmentList& segmentList
-) {
-    HeadCache cache;
-    cache.headsByNode.resize(pathTree.nodes.size());
-
-    DirectLinkTester directLinkTester(
-        prepared,
-        pathTree,
-        metadata
-    );
-
-    for (int nodeId : segmentList.segmentNodes) {
-        if (nodeId < 0 || nodeId >= static_cast<int>(pathTree.nodes.size())) {
-            throw std::runtime_error("Invalid node id while building SEGFO head cache.");
-        }
-
-        cache.headsByNode[nodeId] =
-            directLinkTester.headVerticesForNode(nodeId);
-    }
-
-    return cache;
 }
 
 bool WilliamsonSegfoPathBuilder::directlyLinkedEitherDirection(
     const PreparedPalmTree& prepared,
     const SegmentMetadataTable& metadata,
-    const HeadCache& headCache,
+    const WilliamsonFList& fList,
     int firstNode,
     int secondNode
 ) {
     return directlyLinkedEarlierLater(
             prepared,
             metadata,
-            headCache,
+            fList,
             firstNode,
             secondNode
         )
         || directlyLinkedEarlierLater(
             prepared,
             metadata,
-            headCache,
+            fList,
             secondNode,
             firstNode
         );
@@ -171,7 +180,7 @@ bool WilliamsonSegfoPathBuilder::directlyLinkedEitherDirection(
 bool WilliamsonSegfoPathBuilder::directlyLinkedEarlierLater(
     const PreparedPalmTree& prepared,
     const SegmentMetadataTable& metadata,
-    const HeadCache& headCache,
+    const WilliamsonFList& fList,
     int earlierNode,
     int laterNode
 ) {
@@ -184,7 +193,7 @@ bool WilliamsonSegfoPathBuilder::directlyLinkedEarlierLater(
 
     return hasHeadInOpenDfsInterval(
         prepared,
-        headCache,
+        fList,
         laterNode,
         earlier.low1Dfs,
         earlier.tailDfsNumber
@@ -193,12 +202,12 @@ bool WilliamsonSegfoPathBuilder::directlyLinkedEarlierLater(
 
 bool WilliamsonSegfoPathBuilder::hasHeadInOpenDfsInterval(
     const PreparedPalmTree& prepared,
-    const HeadCache& headCache,
+    const WilliamsonFList& fList,
     int nodeId,
     int lowExclusiveDfs,
     int highExclusiveDfs
 ) {
-    if (nodeId < 0 || nodeId >= static_cast<int>(headCache.headsByNode.size())) {
+    if (nodeId < 0 || nodeId >= static_cast<int>(fList.headsByNode.size())) {
         return false;
     }
 
@@ -207,7 +216,7 @@ bool WilliamsonSegfoPathBuilder::hasHeadInOpenDfsInterval(
     }
 
     const std::vector<int>& heads =
-        headCache.headsByNode[nodeId];
+        fList.headsByNode[nodeId];
 
     for (int vertex : heads) {
         if (vertex < 0 || vertex >= prepared.n) {

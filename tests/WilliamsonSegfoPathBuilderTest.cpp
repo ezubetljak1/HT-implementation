@@ -10,6 +10,7 @@
 #include "ht/preprocess/ComponentPreprocessor.hpp"
 #include "ht/preprocess/PreparedPalmTreeBuilder.hpp"
 #include "ht/strong/StrongPlanarityTester.hpp"
+#include "ht/certificate/WilliamsonFListBuilder.hpp"
 
 using namespace ht;
 
@@ -92,6 +93,28 @@ void assertValidPathUsesContextEnds(
     assert(path.segmentPathNodes.back() == context.aNode);
 
     assert(!path.message.empty());
+}
+
+WilliamsonFList buildFList(
+    const PreparedPalmTree& prepared,
+    const PathTree& pathTree,
+    const SegmentMetadataTable& metadata,
+    const WilliamsonSegmentList& segmentList,
+    const WilliamsonContext& context
+) {
+    WilliamsonFListBuilder builder;
+    WilliamsonFList fList =
+        builder.buildFromSegmentList(
+            prepared,
+            pathTree,
+            metadata,
+            segmentList,
+            context.fNode
+        );
+
+    assert(fList.valid);
+
+    return fList;
 }
 
 } // namespace
@@ -237,6 +260,42 @@ HT_TEST(WilliamsonSegfoPathBuilderFindsPathForK5) {
             pathTree,
             metadata,
             segmentList,
+            context
+        );
+
+    assertValidPathUsesContextEnds(path, context);
+}
+
+HT_TEST(WilliamsonSegfoPathBuilderUsesExplicitFListForK33) {
+    Graph g = ht::test::buildK33();
+
+    PreparedPalmTree prepared = prepareSingleComponent(g);
+    PathTree pathTree = buildPathTree(prepared);
+    SegmentMetadataTable metadata = buildMetadata(prepared, pathTree);
+    StrongPlanarityFailure failure = computeFailure(prepared);
+
+    WilliamsonContext context =
+        buildContext(prepared, pathTree, metadata, failure);
+
+    WilliamsonSegmentList segmentList =
+        buildSegmentList(prepared, pathTree, context);
+
+    WilliamsonFList fList =
+        buildFList(
+            prepared,
+            pathTree,
+            metadata,
+            segmentList,
+            context
+        );
+
+    WilliamsonSegfoPathBuilder builder;
+    WilliamsonSegfoPath path =
+        builder.buildPathFromFList(
+            prepared,
+            pathTree,
+            metadata,
+            fList,
             context
         );
 
