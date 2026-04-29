@@ -58,3 +58,20 @@ HT_TEST(PlanarityPipelineRejectsSubdividedK5) {
 
     assert(!result.planar);
 }
+
+HT_TEST(PlanarityPipelineBuildsGlobalEmbeddingForBridgeConnectedTriangles) {
+    Graph g = ht::test::buildTwoTrianglesConnectedByBridge();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, true);
+
+    assert(result.planar);
+    assert(result.embedding.rotationOriginalEdgeIds.size() == 6);
+    assert(result.embedding.rotationOriginalNeighbors.size() == 6);
+
+    // Vertex 2 belongs to first triangle and bridge.
+    assert(!result.embedding.rotationOriginalEdgeIds[2].empty());
+
+    // Vertex 3 belongs to bridge and second triangle.
+    assert(!result.embedding.rotationOriginalEdgeIds[3].empty());
+}

@@ -16,6 +16,13 @@ PlanarityResult PlanarityTester::test(const Graph& graph, bool buildEmbedding) c
     const int n = graph.vertexCount();
     const int m = graph.edgeCount();
 
+    Embedding globalEmbedding;
+
+    if (buildEmbedding) {
+        globalEmbedding.rotationOriginalEdgeIds.resize(n);
+        globalEmbedding.rotationOriginalNeighbors.resize(n);
+    }
+
     if (n <= 2) {
         result.planar = true;
         result.message = "Graph with at most two vertices is planar.";
@@ -78,16 +85,33 @@ PlanarityResult PlanarityTester::test(const Graph& graph, bool buildEmbedding) c
                 return result;
             }
 
-            // For now, store the last non-trivial component embedding.
-            // Full graph embedding across articulation points is a later integration step.
-            result.embedding = embedding;
+            for (int localVertex = 0; localVertex < prepared.n; ++localVertex) {
+            const int originalVertex = prepared.localToOriginal[localVertex];
+
+            globalEmbedding.rotationOriginalEdgeIds[originalVertex].insert(
+                globalEmbedding.rotationOriginalEdgeIds[originalVertex].end(),
+                embedding.rotationOriginalEdgeIds[localVertex].begin(),
+                embedding.rotationOriginalEdgeIds[localVertex].end()
+            );
+
+            globalEmbedding.rotationOriginalNeighbors[originalVertex].insert(
+                globalEmbedding.rotationOriginalNeighbors[originalVertex].end(),
+                embedding.rotationOriginalNeighbors[localVertex].begin(),
+                embedding.rotationOriginalNeighbors[localVertex].end()
+            );
         }
+        }
+    }
+
+    if (buildEmbedding) {
+        result.embedding = globalEmbedding;
     }
 
     result.planar = true;
     result.message =
-        "All biconnected components passed the current HT strong-planarity pipeline. "
-        "Full multi-block embedding merge and Kuratowski extraction remain future work.";
+    "All biconnected components passed the current HT strong-planarity pipeline. "
+    "A global original-vertex embedding rotation was assembled by concatenating block rotations. "
+    "Kuratowski extraction remains future work.";
 
     return result;
 }

@@ -29,11 +29,23 @@ Embedding HTEmbeddingBuilder::run() {
     Embedding result;
     result.rotationDarts.resize(P_.n);
     result.rotationNeighbors.resize(P_.n);
+    result.rotationOriginalEdgeIds.resize(P_.n);
+    result.rotationOriginalNeighbors.resize(P_.n);
 
     for (int v = 0; v < P_.n; ++v) {
         for (int d : rotation_[v]) {
+            const Dart& current = dart(d);
+
             result.rotationDarts[v].push_back(d);
-            result.rotationNeighbors[v].push_back(dart(d).to);
+            result.rotationNeighbors[v].push_back(current.to);
+
+            result.rotationOriginalEdgeIds[v].push_back(current.originalEdgeId);
+
+            if (!P_.localToOriginal.empty()) {
+                result.rotationOriginalNeighbors[v].push_back(P_.localToOriginal[current.to]);
+            } else {
+                result.rotationOriginalNeighbors[v].push_back(current.to);
+            }
         }
     }
 

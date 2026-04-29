@@ -6,11 +6,19 @@
 namespace ht {
 
 struct Embedding {
-    // rotationDarts[v] is the cyclic clockwise order of directed darts leaving v.
+    // Local/component-level rotation:
+    // rotationDarts[v] is the cyclic order of local directed darts leaving local vertex v.
     std::vector<std::vector<int>> rotationDarts;
 
-    // Same embedding translated to local neighbor vertex ids.
+    // Same local/component-level embedding translated to local neighbor vertex ids.
     std::vector<std::vector<int>> rotationNeighbors;
+
+    // Global/original-graph rotation:
+    // rotationOriginalEdgeIds[v] is the cyclic order of original edge IDs leaving original vertex v.
+    std::vector<std::vector<int>> rotationOriginalEdgeIds;
+
+    // Same global/original-graph embedding translated to original neighbor vertex IDs.
+    std::vector<std::vector<int>> rotationOriginalNeighbors;
 };
 
 struct EmbeddingValidationResult {
