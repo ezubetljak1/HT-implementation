@@ -91,4 +91,22 @@ inline Graph buildTwoTrianglesConnectedByBridge() {
     return g;
 }
 
+inline Graph buildWheelGraph5() {
+    Graph g(6);
+
+    // outer cycle 0-1-2-3-4-0
+    g.addEdge(0, 1);
+    g.addEdge(1, 2);
+    g.addEdge(2, 3);
+    g.addEdge(3, 4);
+    g.addEdge(4, 0);
+
+    // center 5 connected to all outer vertices
+    for (int v = 0; v < 5; ++v) {
+        g.addEdge(5, v);
+    }
+
+    return g;
+}
+
 } // namespace ht::test

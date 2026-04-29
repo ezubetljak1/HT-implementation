@@ -21,3 +21,9 @@ Current starter state:
 Important:
 
 The certificate module is intentionally a placeholder in this starter. Do not claim final Kuratowski extraction correctness until the Williamson/segment-forest extraction is implemented and tested.
+
+## Build and test
+
+cmake -S . -B build -G Ninja
+cmake --build build
+ctest --test-dir build

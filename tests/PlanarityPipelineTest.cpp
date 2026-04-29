@@ -22,3 +22,30 @@ HT_TEST(PlanarityPipelineRejectsK5ByDensity) {
 
     assert(!result.planar);
 }
+
+HT_TEST(PlanarityPipelineRejectsK33ByStrongPlanarity) {
+    Graph g = ht::test::buildK33();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+}
+
+HT_TEST(PlanarityPipelineAcceptsK4) {
+    Graph g = ht::test::buildK4();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, true);
+
+    assert(result.planar);
+}
+
+HT_TEST(PlanarityPipelineAcceptsWheelGraph5) {
+    Graph g = ht::test::buildWheelGraph5();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, true);
+
+    assert(result.planar);
+}
