@@ -22,6 +22,7 @@ add_library(ht_planarity
     src/certificate/DirectLinkTester.cpp
     src/certificate/WilliamsonContextBuilder.cpp
     src/certificate/WilliamsonSegmentListBuilder.cpp
+    src/certificate/WilliamsonFListBuilder.cpp
     src/certificate/WilliamsonSegfoPathBuilder.cpp
     src/certificate/WilliamsonBasicCaseDetector.cpp
     src/certificate/WilliamsonKernelBuilder.cpp
@@ -54,6 +55,7 @@ add_executable(ht_planarity_tests
     tests/WilliamsonSegmentListBuilderTest.cpp
     tests/WilliamsonSegfoPathBuilderTest.cpp
     tests/KuratowskiSubdivisionVerifierTest.cpp
+    tests/WilliamsonFListBuilderTest.cpp
 )
 
 target_link_libraries(ht_planarity_tests PRIVATE ht_planarity)
