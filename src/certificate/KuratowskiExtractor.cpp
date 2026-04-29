@@ -1,6 +1,5 @@
 #include "ht/certificate/KuratowskiExtractor.hpp"
 
-#include "ht/certificate/KuratowskiCandidateBuilder.hpp"
 #include "ht/certificate/KuratowskiSubdivisionVerifier.hpp"
 #include "ht/certificate/PathTreeBuilder.hpp"
 #include "ht/certificate/SegmentMetadataBuilder.hpp"
@@ -153,27 +152,17 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
         }
     }
 
-    if (!usedWilliamsonKernel) {
-        KuratowskiCandidateBuilder candidateBuilder;
-        certificate.originalEdgeIds =
-            candidateBuilder.buildOriginalEdgeCandidate(
-                prepared,
-                failure
-            );
-    }
 
-    KuratowskiSubdivisionVerifier verifier;
-    KuratowskiSubdivisionVerification verification =
-        verifier.verify(
-            prepared,
-            certificate.originalEdgeIds
-        );
+    if (!certificate.originalEdgeIds.empty()) {
+        KuratowskiSubdivisionVerifier verifier;
+        KuratowskiSubdivisionVerification verification =
+            verifier.verify(prepared, certificate.originalEdgeIds);
 
-    if (verification.valid) {
-        certificate.type = verification.type;
-        certificate.originalEdgeIds =
-            verification.originalEdgeIds;
-        verifiedSubdivision = true;
+        if (verification.valid) {
+            certificate.type = verification.type;
+            certificate.originalEdgeIds = verification.originalEdgeIds;
+            verifiedSubdivision = true;
+        }
     }
 
     std::ostringstream oss;
@@ -181,13 +170,15 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
     if (usedWilliamsonKernel) {
         oss << "A Williamson SEGFO/kernel candidate was constructed. ";
     } else {
-        oss << "Falling back to the older failure-witness candidate builder. ";
+        oss << "Williamson pipeline did not produce a kernel candidate. ";
     }
 
     if (verifiedSubdivision) {
         oss << "The candidate was verified as a Kuratowski subdivision. ";
-    } else {
+    } else if (!certificate.originalEdgeIds.empty()) {
         oss << "The candidate was not verified as a Kuratowski subdivision. ";
+    } else {
+        oss << "No Kuratowski candidate edge set was produced. ";
     }
 
     if (!failure.hasFailure()) {
