@@ -27,7 +27,6 @@ add_library(ht_planarity
     src/certificate/WilliamsonBasicCaseDetector.cpp
     src/certificate/WilliamsonKernelBuilder.cpp
     src/certificate/KuratowskiSubdivisionVerifier.cpp
-    src/certificate/KuratowskiCandidateBuilder.cpp
     src/certificate/KuratowskiExtractor.cpp
     src/debug/DebugPrinter.cpp
 )
@@ -46,7 +45,6 @@ add_executable(ht_planarity_tests
     tests/KuratowskiCertificateTest.cpp
     tests/PathTreeBuilderTest.cpp
     tests/PathTreeQueriesTest.cpp
-    tests/KuratowskiCandidateBuilderTest.cpp
     tests/SegmentMetadataBuilderTest.cpp
     tests/DirectLinkTesterTest.cpp
     tests/WilliamsonKernelBuilderTest.cpp
