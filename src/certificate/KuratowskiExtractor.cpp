@@ -8,6 +8,7 @@
 #include "ht/certificate/WilliamsonKernelBuilder.hpp"
 #include "ht/certificate/WilliamsonSegmentListBuilder.hpp"
 #include "ht/certificate/WilliamsonSegfoPathBuilder.hpp"
+#include "ht/certificate/KuratowskiSubdivisionVerifier.hpp"
 
 #include <sstream>
 
@@ -176,6 +177,21 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
             );
     }
 
+    KuratowskiSubdivisionVerifier verifier;
+        KuratowskiSubdivisionVerification verification =
+            verifier.verify(
+                prepared,
+                certificate.originalEdgeIds
+            );
+
+        bool verifiedSubdivision = false;
+
+        if (verification.valid) {
+            certificate.type = verification.type;
+            certificate.originalEdgeIds = verification.originalEdgeIds;
+            verifiedSubdivision = true;
+        }
+
     std::ostringstream oss;
 
     oss << "Kuratowski extraction is not fully implemented yet, "
@@ -185,6 +201,12 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
         oss << "A Williamson kernel candidate was constructed. ";
     } else {
         oss << "Falling back to the older failure-witness candidate builder. ";
+    }
+
+    if (verifiedSubdivision) {
+        oss << "The candidate was verified as a Kuratowski subdivision. ";
+    } else {
+        oss << "The candidate was not yet verified as a Kuratowski subdivision. ";
     }
 
     if (!failure.hasFailure()) {
