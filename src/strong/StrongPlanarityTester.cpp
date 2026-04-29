@@ -8,10 +8,78 @@ namespace ht {
 StrongPlanarityTester::StrongPlanarityTester(
     const PreparedPalmTree& prepared,
     const std::vector<int>& dfsNumber
-) : P_(prepared), dfs_(dfsNumber) {
+) : P_(prepared),
+    dfs_(dfsNumber),
+    treeDartFromParent_(prepared.n, -1) {
     if (static_cast<int>(dfs_.size()) != P_.n) {
         throw std::runtime_error("DFS number array size does not match prepared graph size.");
     }
+
+    buildTreeDartFromParentIndex();
+}
+
+void StrongPlanarityTester::buildTreeDartFromParentIndex() {
+    for (const Dart& d : P_.darts) {
+        if (!d.isTree) {
+            continue;
+        }
+
+        if (d.to < 0 || d.to >= P_.n) {
+            throw std::runtime_error("Tree dart has invalid target vertex.");
+        }
+
+        if (P_.parent[d.to] != d.from) {
+            throw std::runtime_error("Tree dart does not match DFS parent relation.");
+        }
+
+        if (treeDartFromParent_[d.to] != -1) {
+            throw std::runtime_error("Duplicate tree dart for the same child vertex.");
+        }
+
+        treeDartFromParent_[d.to] = d.id;
+    }
+
+    for (int v = 0; v < P_.n; ++v) {
+        if (P_.parent[v] != -1 && treeDartFromParent_[v] == -1) {
+            throw std::runtime_error("Missing tree dart for non-root vertex.");
+        }
+    }
+}
+
+std::vector<int> StrongPlanarityTester::treePathDartsFromAncestorToDescendant(
+    int ancestor,
+    int descendant
+) const {
+    std::vector<int> reversedPath;
+
+    int current = descendant;
+
+    while (current != ancestor) {
+        if (current < 0 || current >= P_.n) {
+            throw std::runtime_error("Invalid vertex while reconstructing tree path.");
+        }
+
+        const int treeDart = treeDartFromParent_[current];
+
+        if (treeDart == -1) {
+            throw std::runtime_error("Missing tree dart while reconstructing tree path.");
+        }
+
+        reversedPath.push_back(treeDart);
+        current = P_.parent[current];
+
+        if (current == -1) {
+            throw std::runtime_error("Ancestor was not found while reconstructing tree path.");
+        }
+    }
+
+    std::vector<int> path;
+
+    for (auto it = reversedPath.rbegin(); it != reversedPath.rend(); ++it) {
+        path.push_back(*it);
+    }
+
+    return path;
 }
 
 const StrongPlanarityFailure& StrongPlanarityTester::failure() const {
@@ -51,6 +119,15 @@ void StrongPlanarityTester::recordFailure(
     failure_.wk = cycle.wk;
     failure_.closingBackDart = cycle.closingBackDart;
     failure_.cycleSpineDarts = cycle.spineTreeDarts;
+    failure_.cycleStemDarts =
+        treePathDartsFromAncestorToDescendant(cycle.w0, cycle.x);
+
+    failure_.cycleTreeDarts = failure_.cycleStemDarts;
+    failure_.cycleTreeDarts.insert(
+        failure_.cycleTreeDarts.end(),
+        failure_.cycleSpineDarts.begin(),
+        failure_.cycleSpineDarts.end()
+    );
 
     failure_.blockLeftAttachments = dequeToVector(block.Latt);
     failure_.blockRightAttachments = dequeToVector(block.Ratt);

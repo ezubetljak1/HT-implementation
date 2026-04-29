@@ -28,6 +28,8 @@ struct StrongPlanarityFailure {
     int closingBackDart = -1;
 
     std::vector<int> cycleSpineDarts;
+    std::vector<int> cycleStemDarts;
+    std::vector<int> cycleTreeDarts;
 
     std::vector<int> blockLeftAttachments;
     std::vector<int> blockRightAttachments;
@@ -122,6 +124,15 @@ private:
         const std::vector<Block>& stack,
         const std::string& message
     );
+
+    std::vector<int> treeDartFromParent_;
+
+    void buildTreeDartFromParentIndex();
+
+    std::vector<int> treePathDartsFromAncestorToDescendant(
+        int ancestor,
+        int descendant
+    ) const;
 
 };
 
