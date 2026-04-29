@@ -7,8 +7,11 @@
 namespace ht {
 
 HTEmbeddingBuilder::HTEmbeddingBuilder(const PreparedPalmTree& prepared)
-    : P_(prepared), rotation_(prepared.n) {
+    : P_(prepared), 
+    rotation_(prepared.n), 
+    treeDartFromParent_(prepared.n, -1) {
     validateInput();
+    buildTreeDartFromParentIndex();
 }
 
 Embedding HTEmbeddingBuilder::run() {
@@ -57,21 +60,32 @@ int HTEmbeddingBuilder::firstOut(int v) const {
     return P_.orderedOut[v].front();
 }
 
-int HTEmbeddingBuilder::findDart(int from, int to) const {
-    if (from < 0 || from >= P_.n) {
-        throw std::runtime_error("Invalid source vertex in findDart.");
+void HTEmbeddingBuilder::buildTreeDartFromParentIndex() {
+    for (const Dart& d : P_.darts) {
+        if (!d.isTree) {
+            continue;
+        }
+
+        if (d.to < 0 || d.to >= P_.n) {
+            throw std::runtime_error("Tree dart has invalid target vertex.");
+        }
+
+        if (P_.parent[d.to] != d.from) {
+            throw std::runtime_error("Tree dart does not match DFS parent relation.");
+        }
+
+        if (treeDartFromParent_[d.to] != -1) {
+            throw std::runtime_error("Duplicate tree dart for the same child vertex.");
+        }
+
+        treeDartFromParent_[d.to] = d.id;
     }
 
-    // TODO: for strict final linear-time proof, replace this with a precomputed directed lookup.
-    for (int d : P_.outAll[from]) {
-        if (dart(d).to == to) {
-            return d;
+    for (int v = 0; v < P_.n; ++v) {
+        if (P_.parent[v] != -1 && treeDartFromParent_[v] == -1) {
+            throw std::runtime_error("Missing tree dart for non-root vertex.");
         }
     }
-
-    throw std::runtime_error(
-        "No directed dart " + std::to_string(from) + " -> " + std::to_string(to)
-    );
 }
 
 std::vector<int> HTEmbeddingBuilder::treePathFromAncestorToVertex(int ancestor, int x) const {
@@ -130,6 +144,26 @@ HTEmbeddingBuilder::CycleData HTEmbeddingBuilder::buildCycleForTreeEdge(int e0) 
     CycleData c;
     c.cycleVertices = stem;
     c.cycleVertices.insert(c.cycleVertices.end(), spine.begin(), spine.end());
+
+    c.forwardDarts.assign(c.cycleVertices.size(), -1);
+
+    for (int i = 1; i < static_cast<int>(c.cycleVertices.size()); ++i) {
+        const int parent = c.cycleVertices[i - 1];
+        const int child = c.cycleVertices[i];
+
+        if (P_.parent[child] != parent) {
+            throw std::runtime_error("Cycle path contains vertices that are not in parent-child relation.");
+        }
+
+        const int treeDart = treeDartFromParent_[child];
+
+        if (treeDart == -1) {
+            throw std::runtime_error("Missing precomputed tree dart on cycle path.");
+        }
+
+        c.forwardDarts[i] = treeDart;
+    }
+
     c.r = static_cast<int>(stem.size()) - 1;
     c.k = static_cast<int>(c.cycleVertices.size()) - 1;
     c.closingBackDart = closingBack;
@@ -233,8 +267,14 @@ HTEmbeddingBuilder::ReturnedLists HTEmbeddingBuilder::embedding(int e0, Side t) 
 
         const int wPrev = C.cycleVertices[j - 1];
 
+        const int forwardDart = C.forwardDarts[j];
+
+        if (forwardDart == -1) {
+            throw std::runtime_error("Missing forward dart for cycle edge.");
+        }
+
         std::list<int> wjRotation;
-        wjRotation.push_back(findDart(wj, wPrev));
+        wjRotation.push_back(rev(forwardDart));
         wjRotation.insert(wjRotation.end(), T.begin(), T.end());
         setRotation(wj, wjRotation);
 
@@ -245,7 +285,7 @@ HTEmbeddingBuilder::ReturnedLists HTEmbeddingBuilder::embedding(int e0, Side t) 
 
         T.clear();
         T.splice(T.end(), leftIncident);
-        T.push_back(findDart(nextVertex, wj));
+        T.push_back(forwardDart);
         T.splice(T.end(), rightIncident);
     }
 

@@ -23,6 +23,11 @@ private:
     struct CycleData {
         // cycleVertices = w0, w1, ..., wr, wr+1, ..., wk
         std::vector<int> cycleVertices;
+
+        // forwardDarts[i] is the tree dart cycleVertices[i - 1] -> cycleVertices[i].
+        // forwardDarts[0] is unused and stays -1.
+        std::vector<int> forwardDarts;
+
         int r = -1;
         int k = -1;
 
@@ -33,10 +38,14 @@ private:
     const PreparedPalmTree& P_;
     std::vector<std::list<int>> rotation_;
 
+    // treeDartFromParent_[v] is the tree dart parent[v] -> v.
+    // For the DFS root it stays -1.
+    std::vector<int> treeDartFromParent_;
+
     const Dart& dart(int id) const;
     int rev(int d) const;
     int firstOut(int v) const;
-    int findDart(int from, int to) const;
+    void buildTreeDartFromParentIndex();
 
     std::vector<int> treePathFromAncestorToVertex(int ancestor, int x) const;
     CycleData buildCycleForTreeEdge(int e0) const;
