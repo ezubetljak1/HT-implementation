@@ -47,3 +47,16 @@ HT_TEST(KuratowskiExtractorVerifiesK5Subdivision) {
     assert(result.certificate.type == KuratowskiType::K5Subdivision);
     assert(result.certificate.originalEdgeIds.size() == 10);
 }
+
+HT_TEST(KuratowskiExtractorVerifiesSubdividedK33Subdivision) {
+    Graph g = ht::test::buildSubdividedK33();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+    assert(!result.certificate.originalEdgeIds.empty());
+
+    assert(result.certificate.type == KuratowskiType::K33Subdivision);
+    assert(result.certificate.originalEdgeIds.size() == 18);
+}

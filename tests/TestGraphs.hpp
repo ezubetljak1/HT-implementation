@@ -129,4 +129,21 @@ inline Graph buildSubdividedK5() {
     return g;
 }
 
+inline Graph buildSubdividedK33() {
+    Graph g(15);
+
+    int subdivisionVertex = 6;
+
+    for (int u = 0; u < 3; ++u) {
+        for (int v = 3; v < 6; ++v) {
+            int s = subdivisionVertex++;
+
+            g.addEdge(u, s);
+            g.addEdge(s, v);
+        }
+    }
+
+    return g;
+}
+
 } // namespace ht::test

@@ -206,3 +206,14 @@ HT_TEST(WilliamsonPipelineVerifiesSubdividedK5Certificate) {
     assert(output.verification.originalEdgeIds.size() == 20);
     assertNoDuplicateOriginalEdges(output.verification.originalEdgeIds);
 }
+
+HT_TEST(WilliamsonPipelineVerifiesSubdividedK33Certificate) {
+    Graph g = ht::test::buildSubdividedK33();
+
+    WilliamsonPipelineOutput output =
+        runWilliamsonPipeline(g);
+
+    assert(output.verification.type == KuratowskiType::K33Subdivision);
+    assert(output.verification.originalEdgeIds.size() == 18);
+    assertNoDuplicateOriginalEdges(output.verification.originalEdgeIds);
+}

@@ -136,3 +136,15 @@ HT_TEST(PlanarityPipelineNonPlanarResultCarriesFailureWitnessEdgesForSubdividedK
         assert(originalEdgeId < g.edgeCount());
     }
 }
+
+HT_TEST(PlanarityPipelineRejectsSubdividedK33WithCertificate) {
+    Graph g = ht::test::buildSubdividedK33();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+    assert(result.certificate.type == KuratowskiType::K33Subdivision);
+    assert(!result.certificate.originalEdgeIds.empty());
+    assert(result.certificate.originalEdgeIds.size() == 18);
+}
