@@ -1,0 +1,95 @@
+#include "ht/PlanarityTester.hpp"
+
+#include "ht/bcc/BiconnectedComponents.hpp"
+#include "ht/certificate/KuratowskiExtractor.hpp"
+#include "ht/embedding/EmbeddingValidator.hpp"
+#include "ht/embedding/HTEmbeddingBuilder.hpp"
+#include "ht/preprocess/ComponentPreprocessor.hpp"
+#include "ht/preprocess/PreparedPalmTreeBuilder.hpp"
+#include "ht/strong/StrongPlanarityTester.hpp"
+
+namespace ht {
+
+PlanarityResult PlanarityTester::test(const Graph& graph, bool buildEmbedding) const {
+    PlanarityResult result;
+
+    const int n = graph.vertexCount();
+    const int m = graph.edgeCount();
+
+    if (n <= 2) {
+        result.planar = true;
+        result.message = "Graph with at most two vertices is planar.";
+        return result;
+    }
+
+    if (m > 3 * n - 6) {
+        result.planar = false;
+        result.certificate = KuratowskiExtractor().notImplementedCertificate();
+        result.message =
+            "Graph violates the planar edge bound m <= 3n - 6. "
+            "Kuratowski extraction is not implemented yet.";
+        return result;
+    }
+
+    BiconnectedComponentsFinder bccFinder;
+    Components components = bccFinder.find(graph);
+
+    ComponentPreprocessor preprocessor;
+    PreparedPalmTreeBuilder preparedBuilder;
+
+    for (const Component& component : components) {
+        if (component.size() <= 1) {
+            continue;
+        }
+
+        PreprocessedComponent preprocessed = preprocessor.preprocess(component);
+        PreparedPalmTree prepared = preparedBuilder.build(preprocessed);
+
+        if (prepared.rootTreeDart == -1) {
+            continue;
+        }
+
+        StrongPlanarityTester strongTester(prepared, prepared.number);
+        std::vector<Side> alpha;
+
+        if (!strongTester.run(prepared.rootTreeDart, alpha)) {
+            result.planar = false;
+            result.certificate = KuratowskiExtractor().extractFromFailure(prepared);
+            result.message =
+                "Strong-planarity phase reported non-planarity. "
+                "Certificate extraction is still a placeholder.";
+            return result;
+        }
+
+        prepared.alpha = alpha;
+
+        if (buildEmbedding) {
+            HTEmbeddingBuilder embeddingBuilder(prepared);
+            Embedding embedding = embeddingBuilder.run();
+
+            EmbeddingValidationResult validation =
+                EmbeddingValidator::validate(prepared, embedding);
+
+            if (!validation.valid) {
+                result.planar = false;
+                result.message =
+                    "Embedding builder produced an invalid embedding: "
+                    + validation.message;
+                return result;
+            }
+
+            // For now, store the last non-trivial component embedding.
+            // Full graph embedding across articulation points is a later integration step.
+            result.embedding = embedding;
+        }
+    }
+
+    result.planar = true;
+    result.message =
+        "All biconnected components passed the current HT strong-planarity pipeline. "
+        "Full multi-block embedding merge and Kuratowski extraction remain future work.";
+
+    return result;
+}
+
+} // namespace ht
