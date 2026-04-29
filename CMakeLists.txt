@@ -62,5 +62,19 @@ add_executable(ht_failure_witness_debug
 
 target_link_libraries(ht_failure_witness_debug PRIVATE ht_planarity)
 
+add_executable(ht_inspect_planarity_result
+    tools/InspectPlanarityResult.cpp
+)
+
+target_link_libraries(ht_inspect_planarity_result
+    PRIVATE ht_planarity
+)
+
+target_include_directories(ht_inspect_planarity_result
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests
+)
+
 enable_testing()
 add_test(NAME ht_planarity_tests COMMAND ht_planarity_tests)

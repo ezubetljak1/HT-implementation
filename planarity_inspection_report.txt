@@ -1,0 +1,1142 @@
+HT Planarity Inspection Report
+========================================
+
+========================================
+Graph: Empty graph
+V = 0, E = 0
+
+Original graph edges:
+
+Running planarity tester...
+Planar = true
+Message:
+  Graph with at most two vertices is planar.
+
+Embedding rotation by original vertices:
+
+========================================
+Graph: Single vertex
+V = 1, E = 0
+
+Original graph edges:
+
+Running planarity tester...
+Planar = true
+Message:
+  Graph with at most two vertices is planar.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    [empty rotation]
+
+========================================
+Graph: Single edge
+V = 2, E = 1
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+
+Running planarity tester...
+Planar = true
+Message:
+  Graph with at most two vertices is planar.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    [empty rotation]
+  vertex 1:
+    [empty rotation]
+
+========================================
+Graph: Path graph
+V = 4, E = 3
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 1 -- 2
+  edge id=2, originalId=2: 2 -- 3
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=1, originalEdgeId=0
+  vertex 1:
+    neighbor=2, originalEdgeId=1
+    neighbor=0, originalEdgeId=0
+  vertex 2:
+    neighbor=3, originalEdgeId=2
+    neighbor=1, originalEdgeId=1
+  vertex 3:
+    neighbor=2, originalEdgeId=2
+
+========================================
+Graph: Cycle graph
+V = 4, E = 4
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 1 -- 2
+  edge id=2, originalId=2: 2 -- 3
+  edge id=3, originalId=3: 3 -- 0
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=3, originalEdgeId=3
+    neighbor=1, originalEdgeId=0
+  vertex 1:
+    neighbor=0, originalEdgeId=0
+    neighbor=2, originalEdgeId=1
+  vertex 2:
+    neighbor=1, originalEdgeId=1
+    neighbor=3, originalEdgeId=2
+  vertex 3:
+    neighbor=0, originalEdgeId=3
+    neighbor=2, originalEdgeId=2
+
+========================================
+Graph: Triangle
+V = 3, E = 3
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 1 -- 2
+  edge id=2, originalId=2: 2 -- 0
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=2, originalEdgeId=2
+    neighbor=1, originalEdgeId=0
+  vertex 1:
+    neighbor=0, originalEdgeId=0
+    neighbor=2, originalEdgeId=1
+  vertex 2:
+    neighbor=0, originalEdgeId=2
+    neighbor=1, originalEdgeId=1
+
+========================================
+Graph: K4
+V = 4, E = 6
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 0 -- 2
+  edge id=2, originalId=2: 0 -- 3
+  edge id=3, originalId=3: 1 -- 2
+  edge id=4, originalId=4: 1 -- 3
+  edge id=5, originalId=5: 2 -- 3
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=3, originalEdgeId=2
+    neighbor=2, originalEdgeId=1
+    neighbor=1, originalEdgeId=0
+  vertex 1:
+    neighbor=2, originalEdgeId=3
+    neighbor=3, originalEdgeId=4
+    neighbor=0, originalEdgeId=0
+  vertex 2:
+    neighbor=0, originalEdgeId=1
+    neighbor=3, originalEdgeId=5
+    neighbor=1, originalEdgeId=3
+  vertex 3:
+    neighbor=1, originalEdgeId=4
+    neighbor=2, originalEdgeId=5
+    neighbor=0, originalEdgeId=2
+
+========================================
+Graph: Wheel graph 5
+V = 6, E = 10
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 1 -- 2
+  edge id=2, originalId=2: 2 -- 3
+  edge id=3, originalId=3: 3 -- 4
+  edge id=4, originalId=4: 4 -- 0
+  edge id=5, originalId=5: 5 -- 0
+  edge id=6, originalId=6: 5 -- 1
+  edge id=7, originalId=7: 5 -- 2
+  edge id=8, originalId=8: 5 -- 3
+  edge id=9, originalId=9: 5 -- 4
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=4, originalEdgeId=4
+    neighbor=1, originalEdgeId=0
+    neighbor=5, originalEdgeId=5
+  vertex 1:
+    neighbor=0, originalEdgeId=0
+    neighbor=2, originalEdgeId=1
+    neighbor=5, originalEdgeId=6
+  vertex 2:
+    neighbor=1, originalEdgeId=1
+    neighbor=3, originalEdgeId=2
+    neighbor=5, originalEdgeId=7
+  vertex 3:
+    neighbor=5, originalEdgeId=8
+    neighbor=2, originalEdgeId=2
+    neighbor=4, originalEdgeId=3
+  vertex 4:
+    neighbor=3, originalEdgeId=3
+    neighbor=0, originalEdgeId=4
+    neighbor=5, originalEdgeId=9
+  vertex 5:
+    neighbor=0, originalEdgeId=5
+    neighbor=1, originalEdgeId=6
+    neighbor=2, originalEdgeId=7
+    neighbor=3, originalEdgeId=8
+    neighbor=4, originalEdgeId=9
+
+========================================
+Graph: Two triangles connected by bridge
+V = 6, E = 7
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 1 -- 2
+  edge id=2, originalId=2: 2 -- 0
+  edge id=3, originalId=3: 2 -- 3
+  edge id=4, originalId=4: 3 -- 4
+  edge id=5, originalId=5: 4 -- 5
+  edge id=6, originalId=6: 5 -- 3
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=2, originalEdgeId=2
+    neighbor=1, originalEdgeId=0
+  vertex 1:
+    neighbor=0, originalEdgeId=0
+    neighbor=2, originalEdgeId=1
+  vertex 2:
+    neighbor=3, originalEdgeId=3
+    neighbor=0, originalEdgeId=2
+    neighbor=1, originalEdgeId=1
+  vertex 3:
+    neighbor=5, originalEdgeId=6
+    neighbor=4, originalEdgeId=4
+    neighbor=2, originalEdgeId=3
+  vertex 4:
+    neighbor=3, originalEdgeId=4
+    neighbor=5, originalEdgeId=5
+  vertex 5:
+    neighbor=3, originalEdgeId=6
+    neighbor=4, originalEdgeId=5
+
+========================================
+Graph: Star graph 5
+V = 6, E = 5
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 0 -- 2
+  edge id=2, originalId=2: 0 -- 3
+  edge id=3, originalId=3: 0 -- 4
+  edge id=4, originalId=4: 0 -- 5
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=1, originalEdgeId=0
+    neighbor=2, originalEdgeId=1
+    neighbor=3, originalEdgeId=2
+    neighbor=4, originalEdgeId=3
+    neighbor=5, originalEdgeId=4
+  vertex 1:
+    neighbor=0, originalEdgeId=0
+  vertex 2:
+    neighbor=0, originalEdgeId=1
+  vertex 3:
+    neighbor=0, originalEdgeId=2
+  vertex 4:
+    neighbor=0, originalEdgeId=3
+  vertex 5:
+    neighbor=0, originalEdgeId=4
+
+========================================
+Graph: Butterfly graph
+V = 5, E = 6
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 1 -- 2
+  edge id=2, originalId=2: 2 -- 0
+  edge id=3, originalId=3: 0 -- 3
+  edge id=4, originalId=4: 3 -- 4
+  edge id=5, originalId=5: 4 -- 0
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=2, originalEdgeId=2
+    neighbor=1, originalEdgeId=0
+    neighbor=4, originalEdgeId=5
+    neighbor=3, originalEdgeId=3
+  vertex 1:
+    neighbor=0, originalEdgeId=0
+    neighbor=2, originalEdgeId=1
+  vertex 2:
+    neighbor=0, originalEdgeId=2
+    neighbor=1, originalEdgeId=1
+  vertex 3:
+    neighbor=0, originalEdgeId=3
+    neighbor=4, originalEdgeId=4
+  vertex 4:
+    neighbor=0, originalEdgeId=5
+    neighbor=3, originalEdgeId=4
+
+========================================
+Graph: Figure eight graph
+V = 5, E = 6
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 1 -- 2
+  edge id=2, originalId=2: 2 -- 0
+  edge id=3, originalId=3: 0 -- 3
+  edge id=4, originalId=4: 3 -- 4
+  edge id=5, originalId=5: 4 -- 0
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=2, originalEdgeId=2
+    neighbor=1, originalEdgeId=0
+    neighbor=4, originalEdgeId=5
+    neighbor=3, originalEdgeId=3
+  vertex 1:
+    neighbor=0, originalEdgeId=0
+    neighbor=2, originalEdgeId=1
+  vertex 2:
+    neighbor=0, originalEdgeId=2
+    neighbor=1, originalEdgeId=1
+  vertex 3:
+    neighbor=0, originalEdgeId=3
+    neighbor=4, originalEdgeId=4
+  vertex 4:
+    neighbor=0, originalEdgeId=5
+    neighbor=3, originalEdgeId=4
+
+========================================
+Graph: Ladder graph 3
+V = 6, E = 7
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 1 -- 2
+  edge id=2, originalId=2: 3 -- 4
+  edge id=3, originalId=3: 4 -- 5
+  edge id=4, originalId=4: 0 -- 3
+  edge id=5, originalId=5: 1 -- 4
+  edge id=6, originalId=6: 2 -- 5
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=3, originalEdgeId=4
+    neighbor=1, originalEdgeId=0
+  vertex 1:
+    neighbor=2, originalEdgeId=1
+    neighbor=4, originalEdgeId=5
+    neighbor=0, originalEdgeId=0
+  vertex 2:
+    neighbor=5, originalEdgeId=6
+    neighbor=1, originalEdgeId=1
+  vertex 3:
+    neighbor=4, originalEdgeId=2
+    neighbor=0, originalEdgeId=4
+  vertex 4:
+    neighbor=1, originalEdgeId=5
+    neighbor=5, originalEdgeId=3
+    neighbor=3, originalEdgeId=2
+  vertex 5:
+    neighbor=4, originalEdgeId=3
+    neighbor=2, originalEdgeId=6
+
+========================================
+Graph: Triangular prism
+V = 6, E = 9
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 1 -- 2
+  edge id=2, originalId=2: 2 -- 0
+  edge id=3, originalId=3: 3 -- 4
+  edge id=4, originalId=4: 4 -- 5
+  edge id=5, originalId=5: 5 -- 3
+  edge id=6, originalId=6: 0 -- 3
+  edge id=7, originalId=7: 1 -- 4
+  edge id=8, originalId=8: 2 -- 5
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=3, originalEdgeId=6
+    neighbor=2, originalEdgeId=2
+    neighbor=1, originalEdgeId=0
+  vertex 1:
+    neighbor=2, originalEdgeId=1
+    neighbor=4, originalEdgeId=7
+    neighbor=0, originalEdgeId=0
+  vertex 2:
+    neighbor=0, originalEdgeId=2
+    neighbor=5, originalEdgeId=8
+    neighbor=1, originalEdgeId=1
+  vertex 3:
+    neighbor=4, originalEdgeId=3
+    neighbor=5, originalEdgeId=5
+    neighbor=0, originalEdgeId=6
+  vertex 4:
+    neighbor=1, originalEdgeId=7
+    neighbor=5, originalEdgeId=4
+    neighbor=3, originalEdgeId=3
+  vertex 5:
+    neighbor=2, originalEdgeId=8
+    neighbor=3, originalEdgeId=5
+    neighbor=4, originalEdgeId=4
+
+========================================
+Graph: Cube graph
+V = 8, E = 12
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 1 -- 2
+  edge id=2, originalId=2: 2 -- 3
+  edge id=3, originalId=3: 3 -- 0
+  edge id=4, originalId=4: 4 -- 5
+  edge id=5, originalId=5: 5 -- 6
+  edge id=6, originalId=6: 6 -- 7
+  edge id=7, originalId=7: 7 -- 4
+  edge id=8, originalId=8: 0 -- 4
+  edge id=9, originalId=9: 1 -- 5
+  edge id=10, originalId=10: 2 -- 6
+  edge id=11, originalId=11: 3 -- 7
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=1, originalEdgeId=0
+    neighbor=4, originalEdgeId=8
+    neighbor=3, originalEdgeId=3
+  vertex 1:
+    neighbor=5, originalEdgeId=9
+    neighbor=0, originalEdgeId=0
+    neighbor=2, originalEdgeId=1
+  vertex 2:
+    neighbor=3, originalEdgeId=2
+    neighbor=6, originalEdgeId=10
+    neighbor=1, originalEdgeId=1
+  vertex 3:
+    neighbor=7, originalEdgeId=11
+    neighbor=2, originalEdgeId=2
+    neighbor=0, originalEdgeId=3
+  vertex 4:
+    neighbor=0, originalEdgeId=8
+    neighbor=5, originalEdgeId=4
+    neighbor=7, originalEdgeId=7
+  vertex 5:
+    neighbor=6, originalEdgeId=5
+    neighbor=4, originalEdgeId=4
+    neighbor=1, originalEdgeId=9
+  vertex 6:
+    neighbor=2, originalEdgeId=10
+    neighbor=7, originalEdgeId=6
+    neighbor=5, originalEdgeId=5
+  vertex 7:
+    neighbor=4, originalEdgeId=7
+    neighbor=6, originalEdgeId=6
+    neighbor=3, originalEdgeId=11
+
+========================================
+Graph: Disconnected planar graph
+V = 6, E = 5
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 1 -- 2
+  edge id=2, originalId=2: 2 -- 0
+  edge id=3, originalId=3: 3 -- 4
+  edge id=4, originalId=4: 4 -- 5
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=2, originalEdgeId=2
+    neighbor=1, originalEdgeId=0
+  vertex 1:
+    neighbor=0, originalEdgeId=0
+    neighbor=2, originalEdgeId=1
+  vertex 2:
+    neighbor=0, originalEdgeId=2
+    neighbor=1, originalEdgeId=1
+  vertex 3:
+    neighbor=4, originalEdgeId=3
+  vertex 4:
+    neighbor=5, originalEdgeId=4
+    neighbor=3, originalEdgeId=3
+  vertex 5:
+    neighbor=4, originalEdgeId=4
+
+========================================
+Graph: K5 minus one edge
+V = 5, E = 9
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 2
+  edge id=1, originalId=1: 0 -- 3
+  edge id=2, originalId=2: 0 -- 4
+  edge id=3, originalId=3: 1 -- 2
+  edge id=4, originalId=4: 1 -- 3
+  edge id=5, originalId=5: 1 -- 4
+  edge id=6, originalId=6: 2 -- 3
+  edge id=7, originalId=7: 2 -- 4
+  edge id=8, originalId=8: 3 -- 4
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=3, originalEdgeId=1
+    neighbor=4, originalEdgeId=2
+    neighbor=2, originalEdgeId=0
+  vertex 1:
+    neighbor=4, originalEdgeId=5
+    neighbor=3, originalEdgeId=4
+    neighbor=2, originalEdgeId=3
+  vertex 2:
+    neighbor=3, originalEdgeId=6
+    neighbor=0, originalEdgeId=0
+    neighbor=4, originalEdgeId=7
+    neighbor=1, originalEdgeId=3
+  vertex 3:
+    neighbor=1, originalEdgeId=4
+    neighbor=4, originalEdgeId=8
+    neighbor=0, originalEdgeId=1
+    neighbor=2, originalEdgeId=6
+  vertex 4:
+    neighbor=2, originalEdgeId=7
+    neighbor=0, originalEdgeId=2
+    neighbor=3, originalEdgeId=8
+    neighbor=1, originalEdgeId=5
+
+========================================
+Graph: K3,3 minus one edge
+V = 6, E = 8
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 4
+  edge id=1, originalId=1: 0 -- 5
+  edge id=2, originalId=2: 1 -- 3
+  edge id=3, originalId=3: 1 -- 4
+  edge id=4, originalId=4: 1 -- 5
+  edge id=5, originalId=5: 2 -- 3
+  edge id=6, originalId=6: 2 -- 4
+  edge id=7, originalId=7: 2 -- 5
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=5, originalEdgeId=1
+    neighbor=4, originalEdgeId=0
+  vertex 1:
+    neighbor=3, originalEdgeId=2
+    neighbor=5, originalEdgeId=4
+    neighbor=4, originalEdgeId=3
+  vertex 2:
+    neighbor=4, originalEdgeId=6
+    neighbor=5, originalEdgeId=7
+    neighbor=3, originalEdgeId=5
+  vertex 3:
+    neighbor=2, originalEdgeId=5
+    neighbor=1, originalEdgeId=2
+  vertex 4:
+    neighbor=0, originalEdgeId=0
+    neighbor=2, originalEdgeId=6
+    neighbor=1, originalEdgeId=3
+  vertex 5:
+    neighbor=1, originalEdgeId=4
+    neighbor=2, originalEdgeId=7
+    neighbor=0, originalEdgeId=1
+
+========================================
+Graph: K5
+V = 5, E = 10
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 0 -- 2
+  edge id=2, originalId=2: 0 -- 3
+  edge id=3, originalId=3: 0 -- 4
+  edge id=4, originalId=4: 1 -- 2
+  edge id=5, originalId=5: 1 -- 3
+  edge id=6, originalId=6: 1 -- 4
+  edge id=7, originalId=7: 2 -- 3
+  edge id=8, originalId=8: 2 -- 4
+  edge id=9, originalId=9: 3 -- 4
+
+Running planarity tester...
+Planar = false
+Message:
+  Graph violates the planar edge bound m <= 3n - 6. Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
+
+Kuratowski certificate:
+  type = K5Subdivision
+  originalEdgeIds [size=10]: 8 6 3 9 5 2 7 1 4 0 
+  message:
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 8, currentDart = -1, cycle vertices: x=2, y=4, w0=0, wk=4, closingBackDart=13, cycleSpineDartCount=1, cycleStemDartCount=2, cycleTreeDartCount=3, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 5 vertices and 10 edges. Certificate original edge count = 10.
+
+========================================
+Graph: K3,3
+V = 6, E = 9
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 3
+  edge id=1, originalId=1: 0 -- 4
+  edge id=2, originalId=2: 0 -- 5
+  edge id=3, originalId=3: 1 -- 3
+  edge id=4, originalId=4: 1 -- 4
+  edge id=5, originalId=5: 1 -- 5
+  edge id=6, originalId=6: 2 -- 3
+  edge id=7, originalId=7: 2 -- 4
+  edge id=8, originalId=8: 2 -- 5
+
+Running planarity tester...
+Planar = false
+Message:
+  Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
+
+Kuratowski certificate:
+  type = K33Subdivision
+  originalEdgeIds [size=9]: 5 2 8 6 7 1 4 3 0 
+  message:
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 9, currentDart = -1, cycle vertices: x=5, y=3, w0=0, wk=4, closingBackDart=15, cycleSpineDartCount=2, cycleStemDartCount=3, cycleTreeDartCount=5, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 6 vertices and 9 edges. Certificate original edge count = 9.
+
+========================================
+Graph: Subdivided K5
+V = 15, E = 20
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 5
+  edge id=1, originalId=1: 5 -- 1
+  edge id=2, originalId=2: 0 -- 6
+  edge id=3, originalId=3: 6 -- 2
+  edge id=4, originalId=4: 0 -- 7
+  edge id=5, originalId=5: 7 -- 3
+  edge id=6, originalId=6: 0 -- 8
+  edge id=7, originalId=7: 8 -- 4
+  edge id=8, originalId=8: 1 -- 9
+  edge id=9, originalId=9: 9 -- 2
+  edge id=10, originalId=10: 1 -- 10
+  edge id=11, originalId=11: 10 -- 3
+  edge id=12, originalId=12: 1 -- 11
+  edge id=13, originalId=13: 11 -- 4
+  edge id=14, originalId=14: 2 -- 12
+  edge id=15, originalId=15: 12 -- 3
+  edge id=16, originalId=16: 2 -- 13
+  edge id=17, originalId=17: 13 -- 4
+  edge id=18, originalId=18: 3 -- 14
+  edge id=19, originalId=19: 14 -- 4
+
+Running planarity tester...
+Planar = false
+Message:
+  Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
+
+Kuratowski certificate:
+  type = K5Subdivision
+  originalEdgeIds [size=20]: 16 17 12 13 6 7 19 18 10 11 4 5 15 14 2 3 9 8 1 0 
+  message:
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 16, currentDart = -1, cycle vertices: x=3, y=9, w0=0, wk=11, closingBackDart=27, cycleSpineDartCount=3, cycleStemDartCount=4, cycleTreeDartCount=7, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 15 vertices and 20 edges. Certificate original edge count = 20.
+
+========================================
+Graph: Subdivided K3,3
+V = 15, E = 18
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 6
+  edge id=1, originalId=1: 6 -- 3
+  edge id=2, originalId=2: 0 -- 7
+  edge id=3, originalId=3: 7 -- 4
+  edge id=4, originalId=4: 0 -- 8
+  edge id=5, originalId=5: 8 -- 5
+  edge id=6, originalId=6: 1 -- 9
+  edge id=7, originalId=7: 9 -- 3
+  edge id=8, originalId=8: 1 -- 10
+  edge id=9, originalId=9: 10 -- 4
+  edge id=10, originalId=10: 1 -- 11
+  edge id=11, originalId=11: 11 -- 5
+  edge id=12, originalId=12: 2 -- 12
+  edge id=13, originalId=13: 12 -- 3
+  edge id=14, originalId=14: 2 -- 13
+  edge id=15, originalId=15: 13 -- 4
+  edge id=16, originalId=16: 2 -- 14
+  edge id=17, originalId=17: 14 -- 5
+
+Running planarity tester...
+Planar = false
+Message:
+  Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
+
+Kuratowski certificate:
+  type = K33Subdivision
+  originalEdgeIds [size=18]: 10 11 4 5 17 16 13 12 14 15 2 3 9 8 6 7 1 0 
+  message:
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 19, currentDart = -1, cycle vertices: x=10, y=9, w0=0, wk=13, closingBackDart=29, cycleSpineDartCount=5, cycleStemDartCount=6, cycleTreeDartCount=11, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 15 vertices and 18 edges. Certificate original edge count = 18.
+
+========================================
+Graph: Partially subdivided K5
+V = 6, E = 11
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 5
+  edge id=1, originalId=1: 5 -- 1
+  edge id=2, originalId=2: 0 -- 2
+  edge id=3, originalId=3: 0 -- 3
+  edge id=4, originalId=4: 0 -- 4
+  edge id=5, originalId=5: 1 -- 2
+  edge id=6, originalId=6: 1 -- 3
+  edge id=7, originalId=7: 1 -- 4
+  edge id=8, originalId=8: 2 -- 3
+  edge id=9, originalId=9: 2 -- 4
+  edge id=10, originalId=10: 3 -- 4
+
+Running planarity tester...
+Planar = false
+Message:
+  Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
+
+Kuratowski certificate:
+  type = K5Subdivision
+  originalEdgeIds [size=11]: 9 7 4 10 6 3 8 2 5 1 0 
+  message:
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 8, currentDart = -1, cycle vertices: x=2, y=4, w0=0, wk=4, closingBackDart=13, cycleSpineDartCount=1, cycleStemDartCount=2, cycleTreeDartCount=3, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 6 vertices and 11 edges. Certificate original edge count = 11.
+
+========================================
+Graph: Partially subdivided K3,3
+V = 7, E = 10
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 6
+  edge id=1, originalId=1: 6 -- 3
+  edge id=2, originalId=2: 0 -- 4
+  edge id=3, originalId=3: 0 -- 5
+  edge id=4, originalId=4: 1 -- 3
+  edge id=5, originalId=5: 1 -- 4
+  edge id=6, originalId=6: 1 -- 5
+  edge id=7, originalId=7: 2 -- 3
+  edge id=8, originalId=8: 2 -- 4
+  edge id=9, originalId=9: 2 -- 5
+
+Running planarity tester...
+Planar = false
+Message:
+  Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
+
+Kuratowski certificate:
+  type = K33Subdivision
+  originalEdgeIds [size=10]: 6 3 9 7 8 2 5 4 1 0 
+  message:
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 9, currentDart = -1, cycle vertices: x=5, y=3, w0=0, wk=4, closingBackDart=15, cycleSpineDartCount=2, cycleStemDartCount=3, cycleTreeDartCount=5, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 7 vertices and 10 edges. Certificate original edge count = 10.
+
+========================================
+Graph: Disconnected non-planar graph
+V = 9, E = 12
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 1 -- 2
+  edge id=2, originalId=2: 2 -- 0
+  edge id=3, originalId=3: 3 -- 6
+  edge id=4, originalId=4: 3 -- 7
+  edge id=5, originalId=5: 3 -- 8
+  edge id=6, originalId=6: 4 -- 6
+  edge id=7, originalId=7: 4 -- 7
+  edge id=8, originalId=8: 4 -- 8
+  edge id=9, originalId=9: 5 -- 6
+  edge id=10, originalId=10: 5 -- 7
+  edge id=11, originalId=11: 5 -- 8
+
+Running planarity tester...
+Planar = false
+Message:
+  Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
+
+Kuratowski certificate:
+  type = K33Subdivision
+  originalEdgeIds [size=9]: 8 5 11 9 10 4 7 6 3 
+  message:
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 9, currentDart = -1, cycle vertices: x=5, y=3, w0=0, wk=4, closingBackDart=15, cycleSpineDartCount=2, cycleStemDartCount=3, cycleTreeDartCount=5, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 6 vertices and 9 edges. Certificate original edge count = 9.
+
+========================================
+Graph: Petersen graph
+V = 10, E = 15
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 1 -- 2
+  edge id=2, originalId=2: 2 -- 3
+  edge id=3, originalId=3: 3 -- 4
+  edge id=4, originalId=4: 4 -- 0
+  edge id=5, originalId=5: 5 -- 7
+  edge id=6, originalId=6: 7 -- 9
+  edge id=7, originalId=7: 9 -- 6
+  edge id=8, originalId=8: 6 -- 8
+  edge id=9, originalId=9: 8 -- 5
+  edge id=10, originalId=10: 0 -- 5
+  edge id=11, originalId=11: 1 -- 6
+  edge id=12, originalId=12: 2 -- 7
+  edge id=13, originalId=13: 3 -- 8
+  edge id=14, originalId=14: 4 -- 9
+
+Running planarity tester...
+Planar = false
+Message:
+  Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
+
+Kuratowski certificate:
+  type = Unknown
+  originalEdgeIds [size=14]: 12 5 10 4 14 7 8 13 2 11 1 0 3 9 
+  message:
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was not verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 10, currentDart = -1, cycle vertices: x=7, y=5, w0=0, wk=4, closingBackDart=25, cycleSpineDartCount=2, cycleStemDartCount=6, cycleTreeDartCount=8, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 10 vertices and 15 edges. Certificate original edge count = 14.
+
+========================================
+Graph: Octahedral graph
+V = 6, E = 12
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 2
+  edge id=1, originalId=1: 0 -- 3
+  edge id=2, originalId=2: 0 -- 4
+  edge id=3, originalId=3: 0 -- 5
+  edge id=4, originalId=4: 1 -- 2
+  edge id=5, originalId=5: 1 -- 3
+  edge id=6, originalId=6: 1 -- 4
+  edge id=7, originalId=7: 1 -- 5
+  edge id=8, originalId=8: 2 -- 4
+  edge id=9, originalId=9: 2 -- 5
+  edge id=10, originalId=10: 3 -- 4
+  edge id=11, originalId=11: 3 -- 5
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=4, originalEdgeId=2
+    neighbor=3, originalEdgeId=1
+    neighbor=5, originalEdgeId=3
+    neighbor=2, originalEdgeId=0
+  vertex 1:
+    neighbor=5, originalEdgeId=7
+    neighbor=3, originalEdgeId=5
+    neighbor=4, originalEdgeId=6
+    neighbor=2, originalEdgeId=4
+  vertex 2:
+    neighbor=4, originalEdgeId=8
+    neighbor=0, originalEdgeId=0
+    neighbor=5, originalEdgeId=9
+    neighbor=1, originalEdgeId=4
+  vertex 3:
+    neighbor=0, originalEdgeId=1
+    neighbor=4, originalEdgeId=10
+    neighbor=1, originalEdgeId=5
+    neighbor=5, originalEdgeId=11
+  vertex 4:
+    neighbor=1, originalEdgeId=6
+    neighbor=3, originalEdgeId=10
+    neighbor=0, originalEdgeId=2
+    neighbor=2, originalEdgeId=8
+  vertex 5:
+    neighbor=2, originalEdgeId=9
+    neighbor=0, originalEdgeId=3
+    neighbor=3, originalEdgeId=11
+    neighbor=1, originalEdgeId=7
+
+========================================
+Graph: DM Rijeseni 14a
+V = 6, E = 8
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 0 -- 2
+  edge id=2, originalId=2: 0 -- 4
+  edge id=3, originalId=3: 0 -- 5
+  edge id=4, originalId=4: 1 -- 2
+  edge id=5, originalId=5: 1 -- 3
+  edge id=6, originalId=6: 2 -- 4
+  edge id=7, originalId=7: 4 -- 5
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=2, originalEdgeId=1
+    neighbor=1, originalEdgeId=0
+    neighbor=5, originalEdgeId=3
+    neighbor=4, originalEdgeId=2
+  vertex 1:
+    neighbor=3, originalEdgeId=5
+    neighbor=2, originalEdgeId=4
+    neighbor=0, originalEdgeId=0
+  vertex 2:
+    neighbor=4, originalEdgeId=6
+    neighbor=1, originalEdgeId=4
+    neighbor=0, originalEdgeId=1
+  vertex 3:
+    neighbor=1, originalEdgeId=5
+  vertex 4:
+    neighbor=5, originalEdgeId=7
+    neighbor=2, originalEdgeId=6
+    neighbor=0, originalEdgeId=2
+  vertex 5:
+    neighbor=0, originalEdgeId=3
+    neighbor=4, originalEdgeId=7
+
+========================================
+Graph: DM Rijeseni 14b
+V = 7, E = 12
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 0 -- 2
+  edge id=2, originalId=2: 0 -- 5
+  edge id=3, originalId=3: 0 -- 6
+  edge id=4, originalId=4: 1 -- 2
+  edge id=5, originalId=5: 1 -- 3
+  edge id=6, originalId=6: 2 -- 5
+  edge id=7, originalId=7: 2 -- 6
+  edge id=8, originalId=8: 3 -- 4
+  edge id=9, originalId=9: 3 -- 6
+  edge id=10, originalId=10: 4 -- 5
+  edge id=11, originalId=11: 4 -- 6
+
+Running planarity tester...
+Planar = false
+Message:
+  Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
+
+Kuratowski certificate:
+  type = K33Subdivision
+  originalEdgeIds [size=10]: 11 7 3 5 8 10 2 6 4 0 
+  message:
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 15, currentDart = -1, cycle vertices: x=6, y=3, w0=0, wk=4, closingBackDart=10, cycleSpineDartCount=3, cycleStemDartCount=3, cycleTreeDartCount=6, cycleEmanatingDartCount=4, cycleRootEmanatingDartCount=1, prepared graph has 7 vertices and 12 edges. Certificate original edge count = 10.
+
+========================================
+Graph: DM Rijeseni 15
+V = 7, E = 12
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 0 -- 2
+  edge id=2, originalId=2: 0 -- 3
+  edge id=3, originalId=3: 0 -- 5
+  edge id=4, originalId=4: 1 -- 2
+  edge id=5, originalId=5: 1 -- 6
+  edge id=6, originalId=6: 2 -- 3
+  edge id=7, originalId=7: 2 -- 5
+  edge id=8, originalId=8: 3 -- 4
+  edge id=9, originalId=9: 3 -- 6
+  edge id=10, originalId=10: 4 -- 5
+  edge id=11, originalId=11: 4 -- 6
+
+Running planarity tester...
+Planar = false
+Message:
+  Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
+
+Kuratowski certificate:
+  type = Unknown
+  originalEdgeIds [size=11]: 9 5 4 7 3 2 6 0 10 8 11 
+  message:
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was not verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 6, currentDart = -1, cycle vertices: x=4, y=5, w0=0, wk=6, closingBackDart=14, cycleSpineDartCount=2, cycleStemDartCount=3, cycleTreeDartCount=5, cycleEmanatingDartCount=3, cycleRootEmanatingDartCount=1, prepared graph has 7 vertices and 12 edges. Certificate original edge count = 11.
+
+========================================
+Graph: DM zsr 10
+V = 10, E = 18
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 0 -- 3
+  edge id=2, originalId=2: 0 -- 4
+  edge id=3, originalId=3: 0 -- 7
+  edge id=4, originalId=4: 0 -- 9
+  edge id=5, originalId=5: 1 -- 2
+  edge id=6, originalId=6: 1 -- 8
+  edge id=7, originalId=7: 2 -- 5
+  edge id=8, originalId=8: 2 -- 6
+  edge id=9, originalId=9: 2 -- 7
+  edge id=10, originalId=10: 2 -- 9
+  edge id=11, originalId=11: 3 -- 7
+  edge id=12, originalId=12: 4 -- 5
+  edge id=13, originalId=13: 4 -- 7
+  edge id=14, originalId=14: 5 -- 9
+  edge id=15, originalId=15: 6 -- 9
+  edge id=16, originalId=16: 7 -- 8
+  edge id=17, originalId=17: 8 -- 9
+
+Running planarity tester...
+Planar = false
+Message:
+  Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
+
+Kuratowski certificate:
+  type = Unknown
+  originalEdgeIds [size=16]: 8 15 14 12 13 16 6 5 9 0 4 2 1 11 3 17 
+  message:
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was not verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 14, currentDart = -1, cycle vertices: x=7, y=5, w0=0, wk=6, closingBackDart=32, cycleSpineDartCount=2, cycleStemDartCount=5, cycleTreeDartCount=7, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 10 vertices and 18 edges. Certificate original edge count = 16.
+
+========================================
+Graph: DM zsr 14
+V = 10, E = 21
+
+Original graph edges:
+  edge id=0, originalId=0: 0 -- 1
+  edge id=1, originalId=1: 0 -- 5
+  edge id=2, originalId=2: 0 -- 6
+  edge id=3, originalId=3: 1 -- 2
+  edge id=4, originalId=4: 1 -- 5
+  edge id=5, originalId=5: 1 -- 6
+  edge id=6, originalId=6: 1 -- 7
+  edge id=7, originalId=7: 2 -- 3
+  edge id=8, originalId=8: 2 -- 6
+  edge id=9, originalId=9: 2 -- 7
+  edge id=10, originalId=10: 2 -- 8
+  edge id=11, originalId=11: 3 -- 4
+  edge id=12, originalId=12: 3 -- 7
+  edge id=13, originalId=13: 3 -- 8
+  edge id=14, originalId=14: 3 -- 9
+  edge id=15, originalId=15: 4 -- 8
+  edge id=16, originalId=16: 4 -- 9
+  edge id=17, originalId=17: 5 -- 6
+  edge id=18, originalId=18: 6 -- 7
+  edge id=19, originalId=19: 7 -- 8
+  edge id=20, originalId=20: 8 -- 9
+
+Running planarity tester...
+Planar = true
+Message:
+  All biconnected components passed the HT strong-planarity pipeline. A global original-vertex embedding rotation was assembled.
+
+Embedding rotation by original vertices:
+  vertex 0:
+    neighbor=1, originalEdgeId=0
+    neighbor=5, originalEdgeId=1
+    neighbor=6, originalEdgeId=2
+  vertex 1:
+    neighbor=5, originalEdgeId=4
+    neighbor=0, originalEdgeId=0
+    neighbor=6, originalEdgeId=5
+    neighbor=7, originalEdgeId=6
+    neighbor=2, originalEdgeId=3
+  vertex 2:
+    neighbor=1, originalEdgeId=3
+    neighbor=7, originalEdgeId=9
+    neighbor=3, originalEdgeId=7
+    neighbor=8, originalEdgeId=10
+    neighbor=6, originalEdgeId=8
+  vertex 3:
+    neighbor=9, originalEdgeId=14
+    neighbor=8, originalEdgeId=13
+    neighbor=2, originalEdgeId=7
+    neighbor=7, originalEdgeId=12
+    neighbor=4, originalEdgeId=11
+  vertex 4:
+    neighbor=8, originalEdgeId=15
+    neighbor=9, originalEdgeId=16
+    neighbor=3, originalEdgeId=11
+  vertex 5:
+    neighbor=6, originalEdgeId=17
+    neighbor=0, originalEdgeId=1
+    neighbor=1, originalEdgeId=4
+  vertex 6:
+    neighbor=7, originalEdgeId=18
+    neighbor=1, originalEdgeId=5
+    neighbor=0, originalEdgeId=2
+    neighbor=5, originalEdgeId=17
+    neighbor=2, originalEdgeId=8
+  vertex 7:
+    neighbor=3, originalEdgeId=12
+    neighbor=2, originalEdgeId=9
+    neighbor=1, originalEdgeId=6
+    neighbor=6, originalEdgeId=18
+    neighbor=8, originalEdgeId=19
+  vertex 8:
+    neighbor=2, originalEdgeId=10
+    neighbor=3, originalEdgeId=13
+    neighbor=9, originalEdgeId=20
+    neighbor=4, originalEdgeId=15
+    neighbor=7, originalEdgeId=19
+  vertex 9:
+    neighbor=4, originalEdgeId=16
+    neighbor=8, originalEdgeId=20
+    neighbor=3, originalEdgeId=14
+

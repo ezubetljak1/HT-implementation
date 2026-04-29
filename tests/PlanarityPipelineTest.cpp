@@ -148,3 +148,78 @@ HT_TEST(PlanarityPipelineRejectsSubdividedK33WithCertificate) {
     assert(!result.certificate.originalEdgeIds.empty());
     assert(result.certificate.originalEdgeIds.size() == 18);
 }
+
+HT_TEST(PlanarityPipelineAcceptsK5MinusOneEdge) {
+    Graph g = ht::test::buildK5MinusOneEdge();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, true);
+
+    assert(result.planar);
+}
+
+HT_TEST(PlanarityPipelineAcceptsK33MinusOneEdge) {
+    Graph g = ht::test::buildK33MinusOneEdge();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, true);
+
+    assert(result.planar);
+}
+
+HT_TEST(PlanarityPipelineAcceptsCubeGraph) {
+    Graph g = ht::test::buildCubeGraph();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, true);
+
+    assert(result.planar);
+}
+
+HT_TEST(PlanarityPipelineAcceptsTriangularPrism) {
+    Graph g = ht::test::buildTriangularPrism();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, true);
+
+    assert(result.planar);
+}
+
+HT_TEST(PlanarityPipelineAcceptsDisconnectedPlanarGraph) {
+    Graph g = ht::test::buildDisconnectedPlanarGraph();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, true);
+
+    assert(result.planar);
+}
+
+HT_TEST(PlanarityPipelineRejectsDisconnectedNonPlanarGraph) {
+    Graph g = ht::test::buildDisconnectedNonPlanarGraph();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+    assert(result.certificate.type == KuratowskiType::K33Subdivision);
+}
+
+HT_TEST(PlanarityPipelineRejectsPartiallySubdividedK5) {
+    Graph g = ht::test::buildPartiallySubdividedK5();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+    assert(result.certificate.type == KuratowskiType::K5Subdivision);
+}
+
+HT_TEST(PlanarityPipelineRejectsPartiallySubdividedK33) {
+    Graph g = ht::test::buildPartiallySubdividedK33();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+    assert(result.certificate.type == KuratowskiType::K33Subdivision);
+}
