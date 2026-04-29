@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "ht/certificate/PathTree.hpp"
 #include "ht/certificate/SegmentMetadata.hpp"
 #include "ht/certificate/WilliamsonContext.hpp"
@@ -53,12 +55,44 @@ private:
         int highExclusiveDfs
     );
 
+    static bool tryDiscoverSegment(
+        const PathTree& pathTree,
+        const WilliamsonFList& fList,
+        const WilliamsonContext& context,
+        int currentNode,
+        int candidateNode,
+        std::vector<char>& visitedNode,
+        std::vector<int>& parentNode,
+        std::vector<int>& queue,
+        int& queueTail
+    );
+
+    static std::vector<int> buildVertexByDfs(
+        const PreparedPalmTree& prepared
+    );
+
+    static int findNextDfs(
+        std::vector<int>& nextDfs,
+        int value
+    );
+
+    static void markDfsProcessed(
+        std::vector<int>& nextDfs,
+        int value
+    );
+
+    static std::vector<int> reconstructPath(
+        int startNode,
+        int targetNode,
+        const std::vector<int>& parentNode
+    );
+
     static const SegmentMetadata& metadataForNode(
         const SegmentMetadataTable& metadata,
         int nodeId
     );
 
-    static bool isContextNode(
+    static bool isExcludedFromSegfoPath(
         const WilliamsonContext& context,
         int nodeId
     );
