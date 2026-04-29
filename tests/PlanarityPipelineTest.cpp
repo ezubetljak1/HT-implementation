@@ -49,3 +49,12 @@ HT_TEST(PlanarityPipelineAcceptsWheelGraph5) {
 
     assert(result.planar);
 }
+
+HT_TEST(PlanarityPipelineRejectsSubdividedK5) {
+    Graph g = ht::test::buildSubdividedK5();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+}

@@ -109,4 +109,24 @@ inline Graph buildWheelGraph5() {
     return g;
 }
 
+inline Graph buildSubdividedK5() {
+    // K5 has 5 original branch vertices: 0..4.
+    // Each K5 edge is subdivided once using vertices 5..14.
+    // This graph is still non-planar, but it avoids the trivial density shortcut.
+    Graph g(15);
+
+    int subdivisionVertex = 5;
+
+    for (int u = 0; u < 5; ++u) {
+        for (int v = u + 1; v < 5; ++v) {
+            int s = subdivisionVertex++;
+
+            g.addEdge(u, s);
+            g.addEdge(s, v);
+        }
+    }
+
+    return g;
+}
+
 } // namespace ht::test
