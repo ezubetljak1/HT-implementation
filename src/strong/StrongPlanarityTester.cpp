@@ -50,6 +50,7 @@ void StrongPlanarityTester::recordFailure(
     failure_.w0 = cycle.w0;
     failure_.wk = cycle.wk;
     failure_.closingBackDart = cycle.closingBackDart;
+    failure_.cycleSpineDarts = cycle.spineTreeDarts;
 
     failure_.blockLeftAttachments = dequeToVector(block.Latt);
     failure_.blockRightAttachments = dequeToVector(block.Ratt);
@@ -204,10 +205,19 @@ StrongPlanarityTester::CycleInfo StrongPlanarityTester::determineCycle(int e0) c
     info.x = start.from;
     info.y = start.to;
 
+    // The cycle spine starts with e0: x -> y.
+    info.spineTreeDarts.push_back(e0);
+
     int e = firstOut(info.y);
     int wk = info.y;
 
     while (dfs_[dart(e).to] > dfs_[wk]) {
+        if (!dart(e).isTree) {
+            throw std::runtime_error("Expected tree dart while following cycle spine.");
+        }
+
+        info.spineTreeDarts.push_back(e);
+
         wk = dart(e).to;
         e = firstOut(wk);
     }

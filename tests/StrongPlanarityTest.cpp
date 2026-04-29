@@ -60,5 +60,6 @@ HT_TEST(StrongPlanarityRecordsFailureForK33) {
     assert(failure.type != StrongPlanarityFailureType::None);
     assert(failure.rootTreeDart == prepared.rootTreeDart);
     assert(failure.cycleRootDart != -1);
+    assert(!failure.cycleSpineDarts.empty());
     assert(!failure.message.empty());
 }

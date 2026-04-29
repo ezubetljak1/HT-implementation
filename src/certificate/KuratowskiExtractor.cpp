@@ -107,6 +107,13 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
 
         addUniqueOriginalEdgesFromDarts(
             prepared,
+            failure.cycleSpineDarts,
+            seen,
+            certificate.originalEdgeIds
+        );
+
+        addUniqueOriginalEdgesFromDarts(
+            prepared,
             failure.blockLeftSegments,
             seen,
             certificate.originalEdgeIds
@@ -167,6 +174,7 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
         << ", w0=" << failure.w0
         << ", wk=" << failure.wk
         << ", closingBackDart=" << failure.closingBackDart
+        << ", cycleSpineDartCount=" << failure.cycleSpineDarts.size()
         << ", prepared graph has " << prepared.n
         << " vertices and " << prepared.edgeCount
         << " edges.";

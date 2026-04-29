@@ -27,6 +27,8 @@ struct StrongPlanarityFailure {
     int wk = -1;
     int closingBackDart = -1;
 
+    std::vector<int> cycleSpineDarts;
+
     std::vector<int> blockLeftAttachments;
     std::vector<int> blockRightAttachments;
     std::vector<int> blockLeftSegments;
@@ -86,6 +88,8 @@ private:
         int wk = -1;
         int w0 = -1;
         int closingBackDart = -1;
+        // Tree darts on the cycle spine: x -> y -> ... -> wk.
+        std::vector<int> spineTreeDarts;
     };
 
     const PreparedPalmTree& P_;
