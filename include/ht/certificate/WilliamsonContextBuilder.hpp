@@ -52,7 +52,8 @@ private:
         const DirectLinkTester& tester,
         int fNode,
         int aNode,
-        int bNode
+        int bNode,
+        int cycleNode
     );
 };
 

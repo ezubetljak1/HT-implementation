@@ -50,6 +50,30 @@ StrongPlanarityFailure computeFailure(const PreparedPalmTree& prepared) {
     return tester.failure();
 }
 
+void assertValidWilliamsonContext(
+    const WilliamsonContext& context,
+    const StrongPlanarityFailure& failure
+) {
+    assert(context.valid);
+
+    assert(context.fNode != -1);
+    assert(context.aNode != -1);
+    assert(context.bNode != -1);
+    assert(context.cycleNode != -1);
+
+    assert(context.fDart != -1);
+    assert(context.aDart != -1);
+    assert(context.bDart != -1);
+    assert(context.cycleDart != -1);
+
+    assert(context.cycleDart == failure.cycleRootDart);
+
+    assert(context.aLinkedToF);
+    assert(context.bLinkedToF);
+
+    assert(!context.message.empty());
+}
+
 } // namespace
 
 HT_TEST(WilliamsonContextBuilderMapsK33FailureToFAB) {
@@ -64,23 +88,13 @@ HT_TEST(WilliamsonContextBuilderMapsK33FailureToFAB) {
     WilliamsonContext context =
         builder.build(prepared, pathTree, metadata, failure);
 
-    assert(context.valid);
-    assert(context.fNode != -1);
-    assert(context.aNode != -1);
-    assert(context.bNode != -1);
+    assertValidWilliamsonContext(context, failure);
 
-    assert(context.fDart != -1);
-
+    // For the current K3,3 failure, the Williamson F segment should be the
+    // root emanating dart, not the cycleRootDart itself.
     if (!failure.cycleRootEmanatingDarts.empty()) {
         assert(context.fDart == failure.cycleRootEmanatingDarts.front());
     }
-    assert(context.aDart != -1);
-    assert(context.bDart != -1);
-
-    assert(context.aLinkedToF);
-    assert(context.bLinkedToF);
-
-    assert(!context.message.empty());
 }
 
 HT_TEST(WilliamsonContextBuilderMapsSubdividedK5FailureToFAB) {
@@ -95,14 +109,7 @@ HT_TEST(WilliamsonContextBuilderMapsSubdividedK5FailureToFAB) {
     WilliamsonContext context =
         builder.build(prepared, pathTree, metadata, failure);
 
-    assert(context.valid);
-    assert(context.fNode != -1);
-    assert(context.aNode != -1);
-    assert(context.bNode != -1);
-
-    assert(context.fDart != -1);
-    assert(context.aLinkedToF);
-    assert(context.bLinkedToF);
+    assertValidWilliamsonContext(context, failure);
 }
 
 HT_TEST(WilliamsonContextBuilderRejectsEmptyFailure) {
@@ -119,8 +126,19 @@ HT_TEST(WilliamsonContextBuilderRejectsEmptyFailure) {
         builder.build(prepared, pathTree, metadata, emptyFailure);
 
     assert(!context.valid);
+
     assert(context.fNode == -1);
     assert(context.aNode == -1);
     assert(context.bNode == -1);
+    assert(context.cycleNode == -1);
+
+    assert(context.fDart == -1);
+    assert(context.aDart == -1);
+    assert(context.bDart == -1);
+    assert(context.cycleDart == -1);
+
+    assert(!context.aLinkedToF);
+    assert(!context.bLinkedToF);
+
     assert(!context.message.empty());
 }

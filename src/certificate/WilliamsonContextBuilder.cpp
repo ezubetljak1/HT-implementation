@@ -17,6 +17,14 @@ WilliamsonContext WilliamsonContextBuilder::build(
 
     DirectLinkTester directLinkTester(prepared, pathTree, metadata);
 
+    const int cycleNode = nodeForDart(pathTree, failure.cycleRootDart);
+
+    if (cycleNode == -1) {
+        context.message =
+            "Could not map failure.cycleRootDart to a base cycle PathTree node.";
+        return context;
+    }
+
     std::vector<int> leftCandidates =
         collectCandidateNodes(pathTree, failure.blockLeftSegments);
 
@@ -63,7 +71,8 @@ WilliamsonContext WilliamsonContextBuilder::build(
                 directLinkTester,
                 fNode,
                 aNode,
-                bNode
+                bNode,
+                cycleNode
             );
 
         if (mapped.valid) {
@@ -160,13 +169,15 @@ WilliamsonContext WilliamsonContextBuilder::makeContext(
     const DirectLinkTester& tester,
     int fNode,
     int aNode,
-    int bNode
+    int bNode,
+    int cycleNode
 ) {
     WilliamsonContext context;
 
     if (fNode < 0 || fNode >= static_cast<int>(pathTree.nodes.size())
         || aNode < 0 || aNode >= static_cast<int>(pathTree.nodes.size())
-        || bNode < 0 || bNode >= static_cast<int>(pathTree.nodes.size())) {
+        || bNode < 0 || bNode >= static_cast<int>(pathTree.nodes.size())
+        || cycleNode < 0 || cycleNode >= static_cast<int>(pathTree.nodes.size())) {
         context.message = "Invalid node id while creating Williamson context.";
         return context;
     }
@@ -174,10 +185,12 @@ WilliamsonContext WilliamsonContextBuilder::makeContext(
     context.fNode = fNode;
     context.aNode = aNode;
     context.bNode = bNode;
+    context.cycleNode = cycleNode;
 
     context.fDart = pathTree.nodes[fNode].definingDart;
     context.aDart = pathTree.nodes[aNode].definingDart;
     context.bDart = pathTree.nodes[bNode].definingDart;
+    context.cycleDart = pathTree.nodes[cycleNode].definingDart;
 
     context.parentNode = pathTree.nodes[fNode].parent;
 
@@ -192,7 +205,8 @@ WilliamsonContext WilliamsonContextBuilder::makeContext(
         && context.bLinkedToF
         && context.fNode != -1
         && context.aNode != -1
-        && context.bNode != -1;
+        && context.bNode != -1
+        && context.cycleNode != -1;
 
     if (context.valid) {
         context.message =
