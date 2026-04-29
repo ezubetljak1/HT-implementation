@@ -2,35 +2,6 @@
 
 namespace ht {
 
-WilliamsonKernel WilliamsonKernelBuilder::buildDirectKernel(
-    const PreparedPalmTree& prepared,
-    const PathTree& pathTree,
-    const WilliamsonBasicCase& basicCase
-) const {
-    if (!basicCase.valid) {
-        WilliamsonKernel kernel;
-        kernel.basicCase = basicCase;
-        kernel.message = "Cannot build Williamson kernel from invalid basic case.";
-        return kernel;
-    }
-
-    WilliamsonSegfoPath path;
-    path.valid = true;
-    path.segmentPathNodes = basicCase.segmentPathNodes;
-    path.message = "SEGFO path induced by direct Williamson basic case.";
-
-    WilliamsonKernel kernel =
-        buildKernelFromSegfoPath(
-            prepared,
-            pathTree,
-            basicCase.context,
-            path
-        );
-
-    kernel.basicCase = basicCase;
-    return kernel;
-}
-
 WilliamsonKernel WilliamsonKernelBuilder::buildKernelFromSegfoPath(
     const PreparedPalmTree& prepared,
     const PathTree& pathTree,

@@ -24,7 +24,6 @@ add_library(ht_planarity
     src/certificate/WilliamsonSegmentListBuilder.cpp
     src/certificate/WilliamsonFListBuilder.cpp
     src/certificate/WilliamsonSegfoPathBuilder.cpp
-    src/certificate/WilliamsonBasicCaseDetector.cpp
     src/certificate/WilliamsonKernelBuilder.cpp
     src/certificate/KuratowskiSubdivisionVerifier.cpp
     src/certificate/KuratowskiExtractor.cpp
@@ -47,9 +46,7 @@ add_executable(ht_planarity_tests
     tests/PathTreeQueriesTest.cpp
     tests/SegmentMetadataBuilderTest.cpp
     tests/DirectLinkTesterTest.cpp
-    tests/WilliamsonKernelBuilderTest.cpp
     tests/WilliamsonContextBuilderTest.cpp
-    tests/WilliamsonBasicCaseDetectorTest.cpp
     tests/WilliamsonSegmentListBuilderTest.cpp
     tests/WilliamsonSegfoPathBuilderTest.cpp
     tests/KuratowskiSubdivisionVerifierTest.cpp

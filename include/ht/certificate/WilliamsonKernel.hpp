@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 
-#include "ht/certificate/WilliamsonBasicCase.hpp"
 #include "ht/certificate/WilliamsonContext.hpp"
 #include "ht/certificate/WilliamsonSegfoPath.hpp"
 
@@ -13,7 +12,6 @@ struct WilliamsonKernel {
     bool valid = false;
 
     WilliamsonContext context;
-    WilliamsonBasicCase basicCase;
     WilliamsonSegfoPath segfoPath;
 
     // Original graph edge IDs belonging to the materialized kernel candidate.

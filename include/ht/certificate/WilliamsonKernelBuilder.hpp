@@ -4,7 +4,6 @@
 
 #include "ht/certificate/PathTree.hpp"
 #include "ht/certificate/PathTreeQueries.hpp"
-#include "ht/certificate/WilliamsonBasicCase.hpp"
 #include "ht/certificate/WilliamsonContext.hpp"
 #include "ht/certificate/WilliamsonKernel.hpp"
 #include "ht/certificate/WilliamsonSegfoPath.hpp"
@@ -14,12 +13,6 @@ namespace ht {
 
 class WilliamsonKernelBuilder {
 public:
-    WilliamsonKernel buildDirectKernel(
-        const PreparedPalmTree& prepared,
-        const PathTree& pathTree,
-        const WilliamsonBasicCase& basicCase
-    ) const;
-
     WilliamsonKernel buildKernelFromSegfoPath(
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
