@@ -102,3 +102,33 @@ HT_TEST(PlanarityPipelineGlobalEmbeddingCoversEveryOriginalEdgeTwice) {
         assert(count == 2);
     }
 }
+
+HT_TEST(PlanarityPipelineNonPlanarResultCarriesFailureWitnessEdgesForK33) {
+    Graph g = ht::test::buildK33();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+    assert(!result.certificate.originalEdgeIds.empty());
+
+    for (int originalEdgeId : result.certificate.originalEdgeIds) {
+        assert(originalEdgeId >= 0);
+        assert(originalEdgeId < g.edgeCount());
+    }
+}
+
+HT_TEST(PlanarityPipelineNonPlanarResultCarriesFailureWitnessEdgesForSubdividedK5) {
+    Graph g = ht::test::buildSubdividedK5();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+    assert(!result.certificate.originalEdgeIds.empty());
+
+    for (int originalEdgeId : result.certificate.originalEdgeIds) {
+        assert(originalEdgeId >= 0);
+        assert(originalEdgeId < g.edgeCount());
+    }
+}
