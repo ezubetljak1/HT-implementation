@@ -1,14 +1,13 @@
 #include "ht/certificate/KuratowskiExtractor.hpp"
 
 #include "ht/certificate/KuratowskiCandidateBuilder.hpp"
+#include "ht/certificate/KuratowskiSubdivisionVerifier.hpp"
 #include "ht/certificate/PathTreeBuilder.hpp"
 #include "ht/certificate/SegmentMetadataBuilder.hpp"
-#include "ht/certificate/WilliamsonBasicCaseDetector.hpp"
 #include "ht/certificate/WilliamsonContextBuilder.hpp"
 #include "ht/certificate/WilliamsonKernelBuilder.hpp"
 #include "ht/certificate/WilliamsonSegmentListBuilder.hpp"
 #include "ht/certificate/WilliamsonSegfoPathBuilder.hpp"
-#include "ht/certificate/KuratowskiSubdivisionVerifier.hpp"
 
 #include <sstream>
 
@@ -70,8 +69,7 @@ KuratowskiCertificate KuratowskiExtractor::notImplementedCertificate() const {
     KuratowskiCertificate certificate;
     certificate.type = KuratowskiType::Unknown;
     certificate.message =
-        "Kuratowski extraction is not implemented yet. "
-        "The next step is to preserve a strong-planarity failure witness and trace original edge IDs.";
+        "Kuratowski extraction is not implemented for this case yet.";
 
     return certificate;
 }
@@ -90,14 +88,19 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
     certificate.type = KuratowskiType::Unknown;
 
     bool usedWilliamsonKernel = false;
+    bool verifiedSubdivision = false;
 
     if (failure.hasFailure()) {
         PathTreeBuilder pathTreeBuilder;
-        PathTree pathTree = pathTreeBuilder.build(prepared);
+        PathTree pathTree =
+            pathTreeBuilder.build(prepared);
 
         SegmentMetadataBuilder metadataBuilder;
         SegmentMetadataTable metadata =
-            metadataBuilder.build(prepared, pathTree);
+            metadataBuilder.build(
+                prepared,
+                pathTree
+            );
 
         WilliamsonContextBuilder contextBuilder;
         WilliamsonContext context =
@@ -112,8 +115,6 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
             WilliamsonKernelBuilder kernelBuilder;
             WilliamsonKernel kernel;
 
-            // Preferred Williamson route:
-            // SEGLIST(e) -> SEGFO path B -> ... -> A -> kernel.
             WilliamsonSegmentListBuilder segmentListBuilder;
             WilliamsonSegmentList segmentList =
                 segmentListBuilder.build(
@@ -144,30 +145,9 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
                 }
             }
 
-            // Fallback only if the general SEGFO path was not found.
-            // This covers direct Williamson basic case 1: F dl B dl A dl F.
-            if (!kernel.valid) {
-                WilliamsonBasicCaseDetector basicCaseDetector;
-                WilliamsonBasicCase basicCase =
-                    basicCaseDetector.detect(
-                        prepared,
-                        pathTree,
-                        metadata,
-                        context
-                    );
-
-                if (basicCase.valid) {
-                    kernel =
-                        kernelBuilder.buildDirectKernel(
-                            prepared,
-                            pathTree,
-                            basicCase
-                        );
-                }
-            }
-
             if (kernel.valid && !kernel.originalEdgeIds.empty()) {
-                certificate.originalEdgeIds = kernel.originalEdgeIds;
+                certificate.originalEdgeIds =
+                    kernel.originalEdgeIds;
                 usedWilliamsonKernel = true;
             }
         }
@@ -183,27 +163,23 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
     }
 
     KuratowskiSubdivisionVerifier verifier;
-        KuratowskiSubdivisionVerification verification =
-            verifier.verify(
-                prepared,
-                certificate.originalEdgeIds
-            );
+    KuratowskiSubdivisionVerification verification =
+        verifier.verify(
+            prepared,
+            certificate.originalEdgeIds
+        );
 
-        bool verifiedSubdivision = false;
-
-        if (verification.valid) {
-            certificate.type = verification.type;
-            certificate.originalEdgeIds = verification.originalEdgeIds;
-            verifiedSubdivision = true;
-        }
+    if (verification.valid) {
+        certificate.type = verification.type;
+        certificate.originalEdgeIds =
+            verification.originalEdgeIds;
+        verifiedSubdivision = true;
+    }
 
     std::ostringstream oss;
 
-    oss << "Kuratowski extraction is not fully implemented yet, "
-        << "but strong-planarity produced a failure witness. ";
-
     if (usedWilliamsonKernel) {
-        oss << "A Williamson kernel candidate was constructed. ";
+        oss << "A Williamson SEGFO/kernel candidate was constructed. ";
     } else {
         oss << "Falling back to the older failure-witness candidate builder. ";
     }
@@ -211,11 +187,11 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
     if (verifiedSubdivision) {
         oss << "The candidate was verified as a Kuratowski subdivision. ";
     } else {
-        oss << "The candidate was not yet verified as a Kuratowski subdivision. ";
+        oss << "The candidate was not verified as a Kuratowski subdivision. ";
     }
 
     if (!failure.hasFailure()) {
-        oss << "No structured failure data was recorded.";
+        oss << "No structured strong-planarity failure data was recorded.";
         certificate.message = oss.str();
         return certificate;
     }
@@ -246,14 +222,15 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
         << ", cycleStemDartCount=" << failure.cycleStemDarts.size()
         << ", cycleTreeDartCount=" << failure.cycleTreeDarts.size()
         << ", cycleEmanatingDartCount=" << failure.cycleEmanatingDarts.size()
-        << ", cycleRootEmanatingDartCount=" << failure.cycleRootEmanatingDarts.size()
+        << ", cycleRootEmanatingDartCount="
+        << failure.cycleRootEmanatingDarts.size()
         << ", prepared graph has " << prepared.n
         << " vertices and " << prepared.edgeCount
         << " edges.";
 
-    oss << " Candidate original edge count = "
+    oss << " Certificate original edge count = "
         << certificate.originalEdgeIds.size()
-        << ". These edges are a Kuratowski/kernel candidate; final subdivision verification is not implemented yet.";
+        << ".";
 
     certificate.message = oss.str();
     return certificate;
