@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <vector>
+#include <unordered_set>
 
 #include "ht/Graph.hpp"
 #include "ht/bcc/BiconnectedComponents.hpp"
@@ -7,6 +9,8 @@
 #include "ht/preprocess/ComponentPreprocessor.hpp"
 #include "ht/preprocess/PreparedPalmTreeBuilder.hpp"
 #include "ht/strong/StrongPlanarityTester.hpp"
+#include "ht/PlanarityTester.hpp"
+#include "ht/certificate/KuratowskiExtractor.hpp"
 
 namespace {
 
@@ -38,6 +42,51 @@ ht::Graph buildSubdividedK5() {
 
     return g;
 }
+
+void inspectCandidateSubgraph(
+    const ht::Graph& originalGraph,
+    const ht::KuratowskiCertificate& certificate
+) {
+    std::cout << "\nCandidate original edge IDs [size="
+              << certificate.originalEdgeIds.size()
+              << "]: ";
+
+    for (int edgeId : certificate.originalEdgeIds) {
+        std::cout << edgeId << " ";
+    }
+
+    std::cout << "\n";
+
+    std::unordered_set<int> selected;
+    for (int edgeId : certificate.originalEdgeIds) {
+        selected.insert(edgeId);
+    }
+
+    std::cout << "Original edges not in candidate: ";
+    for (const ht::Edge& edge : originalGraph.edges()) {
+        if (selected.find(edge.originalId) == selected.end()) {
+            std::cout << edge.originalId
+                      << "(" << edge.u << "-" << edge.v << ") ";
+        }
+    }
+    std::cout << "\n";
+
+    ht::Graph candidate(originalGraph.vertexCount());
+
+    for (const ht::Edge& edge : originalGraph.edges()) {
+        if (selected.find(edge.originalId) != selected.end()) {
+            candidate.addEdgeWithOriginalId(edge.u, edge.v, edge.originalId);
+        }
+    }
+
+    ht::PlanarityTester tester;
+    ht::PlanarityResult result = tester.test(candidate, false);
+
+    std::cout << "Candidate subgraph planarity = "
+              << (result.planar ? "planar" : "non-planar")
+              << "\n";
+}
+
 
 void inspectGraph(const std::string& name, const ht::Graph& graph) {
     std::cout << "========================================\n";
@@ -96,6 +145,12 @@ void inspectGraph(const std::string& name, const ht::Graph& graph) {
                 failure,
                 std::cout
             );
+
+            ht::KuratowskiExtractor extractor;
+            ht::KuratowskiCertificate certificate =
+                extractor.extractFromFailure(prepared, failure);
+
+            inspectCandidateSubgraph(graph, certificate);
 
             return;
         }
