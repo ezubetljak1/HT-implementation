@@ -1,0 +1,639 @@
+HOMKERNEL Signature Report
+========================================
+
+========================================
+Graph: K5
+V = 5, E = 10
+Shape key:
+V=5;E=10;deg=4,4,4,4,4,;edges=0-1[1],0-4[1],0-3[1],0-2[1],1-2[1],1-3[1],1-4[1],2-4[1],2-3[1],3-4[1],
+
+Canonical key:
+V=5;E=10;edges=0-1,0-2,0-3,0-4,1-2,1-3,1-4,2-3,2-4,3-4,
+
+Canonical edge -> skeleton edge mapping:
+  canonical edge 0 -> skeleton edge 0
+  canonical edge 1 -> skeleton edge 3
+  canonical edge 2 -> skeleton edge 2
+  canonical edge 3 -> skeleton edge 1
+  canonical edge 4 -> skeleton edge 4
+  canonical edge 5 -> skeleton edge 5
+  canonical edge 6 -> skeleton edge 6
+  canonical edge 7 -> skeleton edge 8
+  canonical edge 8 -> skeleton edge 7
+  canonical edge 9 -> skeleton edge 9
+
+Canonical vertex -> skeleton vertex mapping:
+  canonical vertex 0 -> skeleton vertex 0
+  canonical vertex 1 -> skeleton vertex 1
+  canonical vertex 2 -> skeleton vertex 2
+  canonical vertex 3 -> skeleton vertex 3
+  canonical vertex 4 -> skeleton vertex 4
+
+Context nodes:
+  fNode = 2
+  aNode = 9
+  bNode = 8
+  cycleNode = 3
+
+SEGFO path nodes: 8 9 
+
+Kernel originalEdgeIds [size=10]: 8 6 5 7 4 2 1 3 0 9 
+
+Selected certificate:
+  type = K5Subdivision
+  originalEdgeIds [size=10]: 8 6 3 9 5 2 7 1 4 0 
+
+HOMKERNEL skeleton vertices:
+  skeleton vertex 0 -> prepared vertex 0
+  skeleton vertex 1 -> prepared vertex 1
+  skeleton vertex 2 -> prepared vertex 2
+  skeleton vertex 3 -> prepared vertex 3
+  skeleton vertex 4 -> prepared vertex 4
+
+HOMKERNEL skeleton edges:
+  [0] 0 -- 1 pathOriginalEdgeIds=8  SELECTED
+  [1] 0 -- 4 pathOriginalEdgeIds=7  SELECTED
+  [2] 0 -- 3 pathOriginalEdgeIds=1  SELECTED
+  [3] 0 -- 2 pathOriginalEdgeIds=4  SELECTED
+  [4] 1 -- 2 pathOriginalEdgeIds=6  SELECTED
+  [5] 1 -- 3 pathOriginalEdgeIds=3  SELECTED
+  [6] 1 -- 4 pathOriginalEdgeIds=9  SELECTED
+  [7] 2 -- 4 pathOriginalEdgeIds=5  SELECTED
+  [8] 2 -- 3 pathOriginalEdgeIds=0  SELECTED
+  [9] 3 -- 4 pathOriginalEdgeIds=2  SELECTED
+
+========================================
+Graph: K3,3
+V = 6, E = 9
+Shape key:
+V=6;E=9;deg=3,3,3,3,3,3,;edges=0-1[1],0-5[1],0-4[1],1-2[1],1-3[1],2-5[1],2-4[1],3-4[1],3-5[1],
+
+Canonical key:
+V=6;E=9;edges=0-1,0-2,0-3,1-4,1-5,2-4,2-5,3-4,3-5,
+
+Canonical edge -> skeleton edge mapping:
+  canonical edge 0 -> skeleton edge 0
+  canonical edge 1 -> skeleton edge 2
+  canonical edge 2 -> skeleton edge 1
+  canonical edge 3 -> skeleton edge 3
+  canonical edge 4 -> skeleton edge 4
+  canonical edge 5 -> skeleton edge 6
+  canonical edge 6 -> skeleton edge 7
+  canonical edge 7 -> skeleton edge 5
+  canonical edge 8 -> skeleton edge 8
+
+Canonical vertex -> skeleton vertex mapping:
+  canonical vertex 0 -> skeleton vertex 0
+  canonical vertex 1 -> skeleton vertex 1
+  canonical vertex 2 -> skeleton vertex 4
+  canonical vertex 3 -> skeleton vertex 5
+  canonical vertex 4 -> skeleton vertex 2
+  canonical vertex 5 -> skeleton vertex 3
+
+Context nodes:
+  fNode = 7
+  aNode = 4
+  bNode = 6
+  cycleNode = 8
+
+SEGFO path nodes: 6 4 
+
+Kernel originalEdgeIds [size=9]: 5 2 1 7 6 3 4 0 8 
+
+Selected certificate:
+  type = K33Subdivision
+  originalEdgeIds [size=9]: 5 2 8 6 7 1 4 3 0 
+
+HOMKERNEL skeleton vertices:
+  skeleton vertex 0 -> prepared vertex 0
+  skeleton vertex 1 -> prepared vertex 1
+  skeleton vertex 2 -> prepared vertex 2
+  skeleton vertex 3 -> prepared vertex 3
+  skeleton vertex 4 -> prepared vertex 4
+  skeleton vertex 5 -> prepared vertex 5
+
+HOMKERNEL skeleton edges:
+  [0] 0 -- 1 pathOriginalEdgeIds=5  SELECTED
+  [1] 0 -- 5 pathOriginalEdgeIds=4  SELECTED
+  [2] 0 -- 4 pathOriginalEdgeIds=3  SELECTED
+  [3] 1 -- 2 pathOriginalEdgeIds=2  SELECTED
+  [4] 1 -- 3 pathOriginalEdgeIds=8  SELECTED
+  [5] 2 -- 5 pathOriginalEdgeIds=1  SELECTED
+  [6] 2 -- 4 pathOriginalEdgeIds=0  SELECTED
+  [7] 3 -- 4 pathOriginalEdgeIds=6  SELECTED
+  [8] 3 -- 5 pathOriginalEdgeIds=7  SELECTED
+
+========================================
+Graph: Subdivided K5
+V = 15, E = 20
+Shape key:
+V=5;E=10;deg=4,4,4,4,4,;edges=0-1[2],0-4[2],0-3[2],0-2[2],1-2[2],1-3[2],1-4[2],2-4[2],2-3[2],3-4[2],
+
+Canonical key:
+V=5;E=10;edges=0-1,0-2,0-3,0-4,1-2,1-3,1-4,2-3,2-4,3-4,
+
+Canonical edge -> skeleton edge mapping:
+  canonical edge 0 -> skeleton edge 0
+  canonical edge 1 -> skeleton edge 3
+  canonical edge 2 -> skeleton edge 2
+  canonical edge 3 -> skeleton edge 1
+  canonical edge 4 -> skeleton edge 4
+  canonical edge 5 -> skeleton edge 5
+  canonical edge 6 -> skeleton edge 6
+  canonical edge 7 -> skeleton edge 8
+  canonical edge 8 -> skeleton edge 7
+  canonical edge 9 -> skeleton edge 9
+
+Canonical vertex -> skeleton vertex mapping:
+  canonical vertex 0 -> skeleton vertex 0
+  canonical vertex 1 -> skeleton vertex 1
+  canonical vertex 2 -> skeleton vertex 2
+  canonical vertex 3 -> skeleton vertex 3
+  canonical vertex 4 -> skeleton vertex 4
+
+Context nodes:
+  fNode = 3
+  aNode = 13
+  bNode = 12
+  cycleNode = 4
+
+SEGFO path nodes: 12 13 
+
+Kernel originalEdgeIds [size=20]: 16 17 13 12 10 11 15 14 8 9 5 4 2 3 6 7 0 1 18 19 
+
+Selected certificate:
+  type = K5Subdivision
+  originalEdgeIds [size=20]: 16 17 12 13 6 7 19 18 10 11 4 5 15 14 2 3 9 8 1 0 
+
+HOMKERNEL skeleton vertices:
+  skeleton vertex 0 -> prepared vertex 0
+  skeleton vertex 1 -> prepared vertex 2
+  skeleton vertex 2 -> prepared vertex 3
+  skeleton vertex 3 -> prepared vertex 5
+  skeleton vertex 4 -> prepared vertex 8
+
+HOMKERNEL skeleton edges:
+  [0] 0 -- 1 pathOriginalEdgeIds=16 17  SELECTED
+  [1] 0 -- 4 pathOriginalEdgeIds=14 15  SELECTED
+  [2] 0 -- 3 pathOriginalEdgeIds=3 2  SELECTED
+  [3] 0 -- 2 pathOriginalEdgeIds=9 8  SELECTED
+  [4] 1 -- 2 pathOriginalEdgeIds=13 12  SELECTED
+  [5] 1 -- 3 pathOriginalEdgeIds=7 6  SELECTED
+  [6] 1 -- 4 pathOriginalEdgeIds=19 18  SELECTED
+  [7] 2 -- 4 pathOriginalEdgeIds=10 11  SELECTED
+  [8] 2 -- 3 pathOriginalEdgeIds=1 0  SELECTED
+  [9] 3 -- 4 pathOriginalEdgeIds=4 5  SELECTED
+
+========================================
+Graph: Subdivided K3,3
+V = 15, E = 18
+Shape key:
+V=6;E=9;deg=3,3,3,3,3,3,;edges=0-1[2],0-5[2],0-4[2],1-2[2],1-3[2],2-5[2],2-4[2],3-4[2],3-5[2],
+
+Canonical key:
+V=6;E=9;edges=0-1,0-2,0-3,1-4,1-5,2-4,2-5,3-4,3-5,
+
+Canonical edge -> skeleton edge mapping:
+  canonical edge 0 -> skeleton edge 0
+  canonical edge 1 -> skeleton edge 2
+  canonical edge 2 -> skeleton edge 1
+  canonical edge 3 -> skeleton edge 3
+  canonical edge 4 -> skeleton edge 4
+  canonical edge 5 -> skeleton edge 6
+  canonical edge 6 -> skeleton edge 7
+  canonical edge 7 -> skeleton edge 5
+  canonical edge 8 -> skeleton edge 8
+
+Canonical vertex -> skeleton vertex mapping:
+  canonical vertex 0 -> skeleton vertex 0
+  canonical vertex 1 -> skeleton vertex 1
+  canonical vertex 2 -> skeleton vertex 4
+  canonical vertex 3 -> skeleton vertex 5
+  canonical vertex 4 -> skeleton vertex 2
+  canonical vertex 5 -> skeleton vertex 3
+
+Context nodes:
+  fNode = 12
+  aNode = 7
+  bNode = 10
+  cycleNode = 13
+
+SEGFO path nodes: 10 7 
+
+Kernel originalEdgeIds [size=18]: 10 11 5 4 2 3 15 14 12 13 7 6 9 8 1 0 16 17 
+
+Selected certificate:
+  type = K33Subdivision
+  originalEdgeIds [size=18]: 10 11 4 5 17 16 13 12 14 15 2 3 9 8 6 7 1 0 
+
+HOMKERNEL skeleton vertices:
+  skeleton vertex 0 -> prepared vertex 0
+  skeleton vertex 1 -> prepared vertex 2
+  skeleton vertex 2 -> prepared vertex 3
+  skeleton vertex 3 -> prepared vertex 6
+  skeleton vertex 4 -> prepared vertex 8
+  skeleton vertex 5 -> prepared vertex 10
+
+HOMKERNEL skeleton edges:
+  [0] 0 -- 1 pathOriginalEdgeIds=10 11  SELECTED
+  [1] 0 -- 5 pathOriginalEdgeIds=8 9  SELECTED
+  [2] 0 -- 4 pathOriginalEdgeIds=6 7  SELECTED
+  [3] 1 -- 2 pathOriginalEdgeIds=5 4  SELECTED
+  [4] 1 -- 3 pathOriginalEdgeIds=17 16  SELECTED
+  [5] 2 -- 5 pathOriginalEdgeIds=2 3  SELECTED
+  [6] 2 -- 4 pathOriginalEdgeIds=0 1  SELECTED
+  [7] 3 -- 4 pathOriginalEdgeIds=12 13  SELECTED
+  [8] 3 -- 5 pathOriginalEdgeIds=14 15  SELECTED
+
+========================================
+Graph: Partially subdivided K5
+V = 6, E = 11
+Shape key:
+V=5;E=10;deg=4,4,4,4,4,;edges=0-1[1],0-4[1],0-3[1],0-2[1],1-2[1],1-3[1],1-4[1],2-4[1],2-3[2],3-4[1],
+
+Canonical key:
+V=5;E=10;edges=0-1,0-2,0-3,0-4,1-2,1-3,1-4,2-3,2-4,3-4,
+
+Canonical edge -> skeleton edge mapping:
+  canonical edge 0 -> skeleton edge 0
+  canonical edge 1 -> skeleton edge 3
+  canonical edge 2 -> skeleton edge 2
+  canonical edge 3 -> skeleton edge 1
+  canonical edge 4 -> skeleton edge 4
+  canonical edge 5 -> skeleton edge 5
+  canonical edge 6 -> skeleton edge 6
+  canonical edge 7 -> skeleton edge 8
+  canonical edge 8 -> skeleton edge 7
+  canonical edge 9 -> skeleton edge 9
+
+Canonical vertex -> skeleton vertex mapping:
+  canonical vertex 0 -> skeleton vertex 0
+  canonical vertex 1 -> skeleton vertex 1
+  canonical vertex 2 -> skeleton vertex 2
+  canonical vertex 3 -> skeleton vertex 3
+  canonical vertex 4 -> skeleton vertex 4
+
+Context nodes:
+  fNode = 2
+  aNode = 9
+  bNode = 8
+  cycleNode = 3
+
+SEGFO path nodes: 8 9 
+
+Kernel originalEdgeIds [size=11]: 9 7 6 8 5 3 2 4 0 1 10 
+
+Selected certificate:
+  type = K5Subdivision
+  originalEdgeIds [size=11]: 9 7 4 10 6 3 8 2 5 1 0 
+
+HOMKERNEL skeleton vertices:
+  skeleton vertex 0 -> prepared vertex 0
+  skeleton vertex 1 -> prepared vertex 1
+  skeleton vertex 2 -> prepared vertex 2
+  skeleton vertex 3 -> prepared vertex 3
+  skeleton vertex 4 -> prepared vertex 4
+
+HOMKERNEL skeleton edges:
+  [0] 0 -- 1 pathOriginalEdgeIds=9  SELECTED
+  [1] 0 -- 4 pathOriginalEdgeIds=8  SELECTED
+  [2] 0 -- 3 pathOriginalEdgeIds=2  SELECTED
+  [3] 0 -- 2 pathOriginalEdgeIds=5  SELECTED
+  [4] 1 -- 2 pathOriginalEdgeIds=7  SELECTED
+  [5] 1 -- 3 pathOriginalEdgeIds=4  SELECTED
+  [6] 1 -- 4 pathOriginalEdgeIds=10  SELECTED
+  [7] 2 -- 4 pathOriginalEdgeIds=6  SELECTED
+  [8] 2 -- 3 pathOriginalEdgeIds=1 0  SELECTED
+  [9] 3 -- 4 pathOriginalEdgeIds=3  SELECTED
+
+========================================
+Graph: Partially subdivided K3,3
+V = 7, E = 10
+Shape key:
+V=6;E=9;deg=3,3,3,3,3,3,;edges=0-1[1],0-5[1],0-4[1],1-2[1],1-3[1],2-5[1],2-4[2],3-4[1],3-5[1],
+
+Canonical key:
+V=6;E=9;edges=0-1,0-2,0-3,1-4,1-5,2-4,2-5,3-4,3-5,
+
+Canonical edge -> skeleton edge mapping:
+  canonical edge 0 -> skeleton edge 0
+  canonical edge 1 -> skeleton edge 2
+  canonical edge 2 -> skeleton edge 1
+  canonical edge 3 -> skeleton edge 3
+  canonical edge 4 -> skeleton edge 4
+  canonical edge 5 -> skeleton edge 6
+  canonical edge 6 -> skeleton edge 7
+  canonical edge 7 -> skeleton edge 5
+  canonical edge 8 -> skeleton edge 8
+
+Canonical vertex -> skeleton vertex mapping:
+  canonical vertex 0 -> skeleton vertex 0
+  canonical vertex 1 -> skeleton vertex 1
+  canonical vertex 2 -> skeleton vertex 4
+  canonical vertex 3 -> skeleton vertex 5
+  canonical vertex 4 -> skeleton vertex 2
+  canonical vertex 5 -> skeleton vertex 3
+
+Context nodes:
+  fNode = 7
+  aNode = 4
+  bNode = 6
+  cycleNode = 8
+
+SEGFO path nodes: 6 4 
+
+Kernel originalEdgeIds [size=10]: 6 3 2 8 7 4 5 1 0 9 
+
+Selected certificate:
+  type = K33Subdivision
+  originalEdgeIds [size=10]: 6 3 9 7 8 2 5 4 1 0 
+
+HOMKERNEL skeleton vertices:
+  skeleton vertex 0 -> prepared vertex 0
+  skeleton vertex 1 -> prepared vertex 1
+  skeleton vertex 2 -> prepared vertex 2
+  skeleton vertex 3 -> prepared vertex 3
+  skeleton vertex 4 -> prepared vertex 4
+  skeleton vertex 5 -> prepared vertex 5
+
+HOMKERNEL skeleton edges:
+  [0] 0 -- 1 pathOriginalEdgeIds=6  SELECTED
+  [1] 0 -- 5 pathOriginalEdgeIds=5  SELECTED
+  [2] 0 -- 4 pathOriginalEdgeIds=4  SELECTED
+  [3] 1 -- 2 pathOriginalEdgeIds=3  SELECTED
+  [4] 1 -- 3 pathOriginalEdgeIds=9  SELECTED
+  [5] 2 -- 5 pathOriginalEdgeIds=2  SELECTED
+  [6] 2 -- 4 pathOriginalEdgeIds=0 1  SELECTED
+  [7] 3 -- 4 pathOriginalEdgeIds=7  SELECTED
+  [8] 3 -- 5 pathOriginalEdgeIds=8  SELECTED
+
+========================================
+Graph: Petersen graph
+V = 10, E = 15
+Shape key:
+V=8;E=12;deg=3,3,3,3,3,3,3,3,;edges=0-2[2],0-3[1],0-5[1],1-2[1],1-7[1],1-5[1],2-4[1],3-4[1],3-7[1],4-6[1],5-6[1],6-7[2],
+
+Canonical key:
+V=8;E=12;edges=0-1,0-2,0-3,1-4,1-5,2-4,2-6,3-5,3-7,4-7,5-6,6-7,
+
+Canonical edge -> skeleton edge mapping:
+  canonical edge 0 -> skeleton edge 0
+  canonical edge 1 -> skeleton edge 1
+  canonical edge 2 -> skeleton edge 2
+  canonical edge 3 -> skeleton edge 6
+  canonical edge 4 -> skeleton edge 3
+  canonical edge 5 -> skeleton edge 7
+  canonical edge 6 -> skeleton edge 8
+  canonical edge 7 -> skeleton edge 5
+  canonical edge 8 -> skeleton edge 10
+  canonical edge 9 -> skeleton edge 9
+  canonical edge 10 -> skeleton edge 4
+  canonical edge 11 -> skeleton edge 11
+
+Canonical vertex -> skeleton vertex mapping:
+  canonical vertex 0 -> skeleton vertex 0
+  canonical vertex 1 -> skeleton vertex 2
+  canonical vertex 2 -> skeleton vertex 3
+  canonical vertex 3 -> skeleton vertex 5
+  canonical vertex 4 -> skeleton vertex 4
+  canonical vertex 5 -> skeleton vertex 1
+  canonical vertex 6 -> skeleton vertex 7
+  canonical vertex 7 -> skeleton vertex 6
+
+Context nodes:
+  fNode = 10
+  aNode = 7
+  bNode = 5
+  cycleNode = 11
+
+SEGFO path nodes: 5 7 
+
+Kernel originalEdgeIds [size=14]: 12 5 10 4 14 7 8 13 2 11 1 0 3 9 
+
+Selected certificate:
+  type = K33Subdivision
+  originalEdgeIds [size=12]: 12 10 13 11 8 9 5 4 3 2 1 0 
+
+HOMKERNEL skeleton vertices:
+  skeleton vertex 0 -> prepared vertex 0
+  skeleton vertex 1 -> prepared vertex 2
+  skeleton vertex 2 -> prepared vertex 3
+  skeleton vertex 3 -> prepared vertex 4
+  skeleton vertex 4 -> prepared vertex 5
+  skeleton vertex 5 -> prepared vertex 6
+  skeleton vertex 6 -> prepared vertex 7
+  skeleton vertex 7 -> prepared vertex 9
+
+HOMKERNEL skeleton edges:
+  [0] 0 -- 2 pathOriginalEdgeIds=12 5  SELECTED
+  [1] 0 -- 3 pathOriginalEdgeIds=2  SELECTED
+  [2] 0 -- 5 pathOriginalEdgeIds=1  SELECTED
+  [3] 1 -- 2 pathOriginalEdgeIds=10  SELECTED
+  [4] 1 -- 7 pathOriginalEdgeIds=4  SELECTED
+  [5] 1 -- 5 pathOriginalEdgeIds=0  SELECTED
+  [6] 2 -- 4 pathOriginalEdgeIds=9  SELECTED
+  [7] 3 -- 4 pathOriginalEdgeIds=13  SELECTED
+  [8] 3 -- 7 pathOriginalEdgeIds=3  SELECTED
+  [9] 4 -- 6 pathOriginalEdgeIds=8  SELECTED
+  [10] 5 -- 6 pathOriginalEdgeIds=11  SELECTED
+  [11] 6 -- 7 pathOriginalEdgeIds=7 14 
+
+========================================
+Graph: DM Rijeseni 14b
+V = 7, E = 12
+Shape key:
+V=6;E=9;deg=3,3,3,3,3,3,;edges=0-1[1],0-4[2],0-5[1],1-2[1],1-3[1],2-5[1],2-4[1],3-5[1],3-4[1],
+
+Canonical key:
+V=6;E=9;edges=0-1,0-2,0-3,1-4,1-5,2-4,2-5,3-4,3-5,
+
+Canonical edge -> skeleton edge mapping:
+  canonical edge 0 -> skeleton edge 0
+  canonical edge 1 -> skeleton edge 1
+  canonical edge 2 -> skeleton edge 2
+  canonical edge 3 -> skeleton edge 3
+  canonical edge 4 -> skeleton edge 4
+  canonical edge 5 -> skeleton edge 6
+  canonical edge 6 -> skeleton edge 8
+  canonical edge 7 -> skeleton edge 5
+  canonical edge 8 -> skeleton edge 7
+
+Canonical vertex -> skeleton vertex mapping:
+  canonical vertex 0 -> skeleton vertex 0
+  canonical vertex 1 -> skeleton vertex 1
+  canonical vertex 2 -> skeleton vertex 4
+  canonical vertex 3 -> skeleton vertex 5
+  canonical vertex 4 -> skeleton vertex 2
+  canonical vertex 5 -> skeleton vertex 3
+
+Context nodes:
+  fNode = 10
+  aNode = 4
+  bNode = 9
+  cycleNode = 11
+
+SEGFO path nodes: 9 4 
+
+Kernel originalEdgeIds [size=10]: 11 7 6 2 0 5 8 10 4 3 
+
+Selected certificate:
+  type = K33Subdivision
+  originalEdgeIds [size=10]: 11 7 3 5 8 10 2 6 4 0 
+
+HOMKERNEL skeleton vertices:
+  skeleton vertex 0 -> prepared vertex 0
+  skeleton vertex 1 -> prepared vertex 1
+  skeleton vertex 2 -> prepared vertex 2
+  skeleton vertex 3 -> prepared vertex 3
+  skeleton vertex 4 -> prepared vertex 5
+  skeleton vertex 5 -> prepared vertex 6
+
+HOMKERNEL skeleton edges:
+  [0] 0 -- 1 pathOriginalEdgeIds=11  SELECTED
+  [1] 0 -- 4 pathOriginalEdgeIds=8 5  SELECTED
+  [2] 0 -- 5 pathOriginalEdgeIds=10  SELECTED
+  [3] 1 -- 2 pathOriginalEdgeIds=7  SELECTED
+  [4] 1 -- 3 pathOriginalEdgeIds=3  SELECTED
+  [5] 2 -- 5 pathOriginalEdgeIds=6  SELECTED
+  [6] 2 -- 4 pathOriginalEdgeIds=4  SELECTED
+  [7] 3 -- 5 pathOriginalEdgeIds=2  SELECTED
+  [8] 3 -- 4 pathOriginalEdgeIds=0  SELECTED
+
+========================================
+Graph: DM Rijeseni 15
+V = 7, E = 12
+Shape key:
+V=7;E=11;deg=4,3,3,3,3,3,3,;edges=0-1[1],0-3[1],0-6[1],0-4[1],1-2[1],1-3[1],2-4[1],2-6[1],3-5[1],4-5[1],5-6[1],
+
+Canonical key:
+V=7;E=11;edges=0-1,0-2,0-3,0-4,1-2,1-5,2-6,3-5,3-6,4-5,4-6,
+
+Canonical edge -> skeleton edge mapping:
+  canonical edge 0 -> skeleton edge 0
+  canonical edge 1 -> skeleton edge 1
+  canonical edge 2 -> skeleton edge 3
+  canonical edge 3 -> skeleton edge 2
+  canonical edge 4 -> skeleton edge 5
+  canonical edge 5 -> skeleton edge 4
+  canonical edge 6 -> skeleton edge 8
+  canonical edge 7 -> skeleton edge 6
+  canonical edge 8 -> skeleton edge 9
+  canonical edge 9 -> skeleton edge 7
+  canonical edge 10 -> skeleton edge 10
+
+Canonical vertex -> skeleton vertex mapping:
+  canonical vertex 0 -> skeleton vertex 0
+  canonical vertex 1 -> skeleton vertex 1
+  canonical vertex 2 -> skeleton vertex 3
+  canonical vertex 3 -> skeleton vertex 4
+  canonical vertex 4 -> skeleton vertex 6
+  canonical vertex 5 -> skeleton vertex 2
+  canonical vertex 6 -> skeleton vertex 5
+
+Context nodes:
+  fNode = 5
+  aNode = 8
+  bNode = 10
+  cycleNode = 6
+
+SEGFO path nodes: 10 8 
+
+Kernel originalEdgeIds [size=11]: 9 5 4 7 3 2 6 0 10 8 11 
+
+Selected certificate:
+  type = K33Subdivision
+  originalEdgeIds [size=10]: 9 5 11 7 3 10 2 6 4 0 
+
+HOMKERNEL skeleton vertices:
+  skeleton vertex 0 -> prepared vertex 0
+  skeleton vertex 1 -> prepared vertex 1
+  skeleton vertex 2 -> prepared vertex 2
+  skeleton vertex 3 -> prepared vertex 3
+  skeleton vertex 4 -> prepared vertex 4
+  skeleton vertex 5 -> prepared vertex 5
+  skeleton vertex 6 -> prepared vertex 6
+
+HOMKERNEL skeleton edges:
+  [0] 0 -- 1 pathOriginalEdgeIds=9  SELECTED
+  [1] 0 -- 3 pathOriginalEdgeIds=8 
+  [2] 0 -- 6 pathOriginalEdgeIds=2  SELECTED
+  [3] 0 -- 4 pathOriginalEdgeIds=6  SELECTED
+  [4] 1 -- 2 pathOriginalEdgeIds=5  SELECTED
+  [5] 1 -- 3 pathOriginalEdgeIds=11  SELECTED
+  [6] 2 -- 4 pathOriginalEdgeIds=4  SELECTED
+  [7] 2 -- 6 pathOriginalEdgeIds=0  SELECTED
+  [8] 3 -- 5 pathOriginalEdgeIds=10  SELECTED
+  [9] 4 -- 5 pathOriginalEdgeIds=7  SELECTED
+  [10] 5 -- 6 pathOriginalEdgeIds=3  SELECTED
+
+========================================
+Graph: DM zsr 10
+V = 10, E = 18
+Shape key:
+V=7;E=13;deg=3,4,5,3,3,5,3,;edges=0-1[2],0-5[1],0-4[1],1-6[2],1-2[1],1-3[1],2-5[2],2-5[1],2-6[1],2-4[1],3-4[1],3-5[1],5-6[1],
+
+Canonical key:
+V=7;E=13;edges=0-1,0-1,0-2,0-3,0-4,1-3,1-5,1-6,2-3,2-5,2-6,4-5,4-6,
+
+Canonical edge -> skeleton edge mapping:
+  canonical edge 0 -> skeleton edge 6
+  canonical edge 1 -> skeleton edge 7
+  canonical edge 2 -> skeleton edge 4
+  canonical edge 3 -> skeleton edge 8
+  canonical edge 4 -> skeleton edge 9
+  canonical edge 5 -> skeleton edge 12
+  canonical edge 6 -> skeleton edge 1
+  canonical edge 7 -> skeleton edge 11
+  canonical edge 8 -> skeleton edge 3
+  canonical edge 9 -> skeleton edge 0
+  canonical edge 10 -> skeleton edge 5
+  canonical edge 11 -> skeleton edge 2
+  canonical edge 12 -> skeleton edge 10
+
+Canonical vertex -> skeleton vertex mapping:
+  canonical vertex 0 -> skeleton vertex 2
+  canonical vertex 1 -> skeleton vertex 5
+  canonical vertex 2 -> skeleton vertex 1
+  canonical vertex 3 -> skeleton vertex 6
+  canonical vertex 4 -> skeleton vertex 4
+  canonical vertex 5 -> skeleton vertex 0
+  canonical vertex 6 -> skeleton vertex 3
+
+Context nodes:
+  fNode = 14
+  aNode = 11
+  bNode = 13
+  cycleNode = 15
+
+SEGFO path nodes: 13 11 
+
+Kernel originalEdgeIds [size=16]: 8 15 14 12 13 16 6 5 9 0 4 2 1 11 3 17 
+
+Selected certificate:
+  type = K33Subdivision
+  originalEdgeIds [size=11]: 8 15 4 17 6 16 1 11 9 5 0 
+
+HOMKERNEL skeleton vertices:
+  skeleton vertex 0 -> prepared vertex 0
+  skeleton vertex 1 -> prepared vertex 2
+  skeleton vertex 2 -> prepared vertex 4
+  skeleton vertex 3 -> prepared vertex 5
+  skeleton vertex 4 -> prepared vertex 6
+  skeleton vertex 5 -> prepared vertex 7
+  skeleton vertex 6 -> prepared vertex 9
+
+HOMKERNEL skeleton edges:
+  [0] 0 -- 1 pathOriginalEdgeIds=8 15  SELECTED
+  [1] 0 -- 5 pathOriginalEdgeIds=9  SELECTED
+  [2] 0 -- 4 pathOriginalEdgeIds=5  SELECTED
+  [3] 1 -- 6 pathOriginalEdgeIds=14 12 
+  [4] 1 -- 2 pathOriginalEdgeIds=4  SELECTED
+  [5] 1 -- 3 pathOriginalEdgeIds=17  SELECTED
+  [6] 2 -- 5 pathOriginalEdgeIds=1 11  SELECTED
+  [7] 2 -- 5 pathOriginalEdgeIds=3 
+  [8] 2 -- 6 pathOriginalEdgeIds=2 
+  [9] 2 -- 4 pathOriginalEdgeIds=0  SELECTED
+  [10] 3 -- 4 pathOriginalEdgeIds=6  SELECTED
+  [11] 3 -- 5 pathOriginalEdgeIds=16  SELECTED
+  [12] 5 -- 6 pathOriginalEdgeIds=13 
+

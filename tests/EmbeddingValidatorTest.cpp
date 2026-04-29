@@ -25,7 +25,14 @@ HT_TEST(EmbeddingBuilderAndValidatorRunOnTriangle) {
     StrongPlanarityTester strong(prepared, prepared.number);
     std::vector<Side> alpha;
 
-    assert(strong.run(prepared.rootTreeDart, alpha));
+    const bool planar =
+        strong.run(
+            prepared.rootTreeDart,
+            alpha
+        );
+
+    assert(planar);
+    assert(alpha.size() == prepared.darts.size());
 
     prepared.alpha = alpha;
 

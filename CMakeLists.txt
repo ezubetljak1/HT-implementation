@@ -25,6 +25,9 @@ add_library(ht_planarity
     src/certificate/WilliamsonFListBuilder.cpp
     src/certificate/WilliamsonSegfoPathBuilder.cpp
     src/certificate/WilliamsonKernelBuilder.cpp
+    src/certificate/HomKernelSignatureBuilder.cpp
+    src/certificate/HomKernelCanonicalizer.cpp
+    src/certificate/HomKernelLookupTable.cpp
     src/certificate/KuratowskiKernelSelector.cpp
     src/certificate/KuratowskiSubdivisionVerifier.cpp
     src/certificate/KuratowskiExtractor.cpp
@@ -72,6 +75,20 @@ target_link_libraries(ht_inspect_planarity_result
 )
 
 target_include_directories(ht_inspect_planarity_result
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests
+)
+
+add_executable(ht_homkernel_signature_debug
+    tools/HomKernelSignatureDebug.cpp
+)
+
+target_link_libraries(ht_homkernel_signature_debug
+    PRIVATE ht_planarity
+)
+
+target_include_directories(ht_homkernel_signature_debug
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/tests
