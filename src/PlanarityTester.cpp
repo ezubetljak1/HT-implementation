@@ -8,9 +8,14 @@
 #include "ht/preprocess/PreparedPalmTreeBuilder.hpp"
 #include "ht/strong/StrongPlanarityTester.hpp"
 
+#include <string>
+
 namespace ht {
 
-PlanarityResult PlanarityTester::test(const Graph& graph, bool buildEmbedding) const {
+PlanarityResult PlanarityTester::test(
+    const Graph& graph,
+    bool buildEmbedding
+) const {
     PlanarityResult result;
 
     const int n = graph.vertexCount();
@@ -29,14 +34,8 @@ PlanarityResult PlanarityTester::test(const Graph& graph, bool buildEmbedding) c
         return result;
     }
 
-    if (m > 3 * n - 6) {
-        result.planar = false;
-        result.certificate = KuratowskiExtractor().notImplementedCertificate();
-        result.message =
-            "Graph violates the planar edge bound m <= 3n - 6. "
-            "Kuratowski extraction is not implemented yet.";
-        return result;
-    }
+    const bool violatesPlanarDensityBound =
+        n >= 3 && m > 3 * n - 6;
 
     BiconnectedComponentsFinder bccFinder;
     Components components = bccFinder.find(graph);
@@ -53,18 +52,29 @@ PlanarityResult PlanarityTester::test(const Graph& graph, bool buildEmbedding) c
             if (buildEmbedding) {
                 const Edge& edge = component.front();
 
-                globalEmbedding.rotationOriginalEdgeIds[edge.u].push_back(edge.originalId);
-                globalEmbedding.rotationOriginalNeighbors[edge.u].push_back(edge.v);
+                globalEmbedding.rotationOriginalEdgeIds[edge.u].push_back(
+                    edge.originalId
+                );
+                globalEmbedding.rotationOriginalNeighbors[edge.u].push_back(
+                    edge.v
+                );
 
-                globalEmbedding.rotationOriginalEdgeIds[edge.v].push_back(edge.originalId);
-                globalEmbedding.rotationOriginalNeighbors[edge.v].push_back(edge.u);
+                globalEmbedding.rotationOriginalEdgeIds[edge.v].push_back(
+                    edge.originalId
+                );
+                globalEmbedding.rotationOriginalNeighbors[edge.v].push_back(
+                    edge.u
+                );
             }
 
             continue;
         }
 
-        PreprocessedComponent preprocessed = preprocessor.preprocess(component);
-        PreparedPalmTree prepared = preparedBuilder.build(preprocessed);
+        PreprocessedComponent preprocessed =
+            preprocessor.preprocess(component);
+
+        PreparedPalmTree prepared =
+            preparedBuilder.build(preprocessed);
 
         if (prepared.rootTreeDart == -1) {
             continue;
@@ -74,14 +84,27 @@ PlanarityResult PlanarityTester::test(const Graph& graph, bool buildEmbedding) c
         std::vector<Side> alpha;
 
         if (!strongTester.run(prepared.rootTreeDart, alpha)) {
-            const StrongPlanarityFailure& failure = strongTester.failure();
+            const StrongPlanarityFailure& failure =
+                strongTester.failure();
 
             result.planar = false;
-            result.certificate = KuratowskiExtractor().extractFromFailure(prepared, failure);
+            result.certificate =
+                KuratowskiExtractor().extractFromFailure(
+                    prepared,
+                    failure
+                );
+
+            std::string prefix;
+
+            if (violatesPlanarDensityBound) {
+                prefix =
+                    "Graph violates the planar edge bound m <= 3n - 6. ";
+            }
 
             result.message =
-                "Strong-planarity phase reported non-planarity. "
-                "Failure witness was recorded. "
+                prefix
+                + "Strong-planarity phase reported non-planarity. "
+                  "Failure witness was recorded. "
                 + failure.message;
 
             return result;
@@ -104,27 +127,60 @@ PlanarityResult PlanarityTester::test(const Graph& graph, bool buildEmbedding) c
                 return result;
             }
 
-            for (int localVertex = 0; localVertex < prepared.n; ++localVertex) {
-            const int originalVertex = prepared.localToOriginal[localVertex];
+            for (int localVertex = 0;
+                 localVertex < prepared.n;
+                 ++localVertex) {
+                const int originalVertex =
+                    prepared.localToOriginal[localVertex];
 
-            globalEmbedding.rotationOriginalEdgeIds[originalVertex].insert(
-                globalEmbedding.rotationOriginalEdgeIds[originalVertex].end(),
-                embedding.rotationOriginalEdgeIds[localVertex].begin(),
-                embedding.rotationOriginalEdgeIds[localVertex].end()
-            );
+                globalEmbedding
+                    .rotationOriginalEdgeIds[originalVertex]
+                    .insert(
+                        globalEmbedding
+                            .rotationOriginalEdgeIds[originalVertex]
+                            .end(),
+                        embedding
+                            .rotationOriginalEdgeIds[localVertex]
+                            .begin(),
+                        embedding
+                            .rotationOriginalEdgeIds[localVertex]
+                            .end()
+                    );
 
-            globalEmbedding.rotationOriginalNeighbors[originalVertex].insert(
-                globalEmbedding.rotationOriginalNeighbors[originalVertex].end(),
-                embedding.rotationOriginalNeighbors[localVertex].begin(),
-                embedding.rotationOriginalNeighbors[localVertex].end()
-            );
+                globalEmbedding
+                    .rotationOriginalNeighbors[originalVertex]
+                    .insert(
+                        globalEmbedding
+                            .rotationOriginalNeighbors[originalVertex]
+                            .end(),
+                        embedding
+                            .rotationOriginalNeighbors[localVertex]
+                            .begin(),
+                        embedding
+                            .rotationOriginalNeighbors[localVertex]
+                            .end()
+                    );
+            }
         }
-        }
+    }
+
+    if (violatesPlanarDensityBound) {
+        result.planar = false;
+        result.certificate =
+            KuratowskiExtractor().notImplementedCertificate();
+        result.message =
+            "Graph violates the planar edge bound m <= 3n - 6, "
+            "but the strong-planarity pipeline did not produce a failure witness. "
+            "This indicates an internal inconsistency in the certificate pipeline.";
+        return result;
     }
 
     if (buildEmbedding) {
         EmbeddingValidationResult globalValidation =
-            EmbeddingValidator::validateGlobalOriginalEmbedding(graph, globalEmbedding);
+            EmbeddingValidator::validateGlobalOriginalEmbedding(
+                graph,
+                globalEmbedding
+            );
 
         if (!globalValidation.valid) {
             result.planar = false;
@@ -139,9 +195,8 @@ PlanarityResult PlanarityTester::test(const Graph& graph, bool buildEmbedding) c
 
     result.planar = true;
     result.message =
-    "All biconnected components passed the current HT strong-planarity pipeline. "
-    "A global original-vertex embedding rotation was assembled by concatenating block rotations. "
-    "Kuratowski extraction remains future work.";
+        "All biconnected components passed the HT strong-planarity pipeline. "
+        "A global original-vertex embedding rotation was assembled.";
 
     return result;
 }

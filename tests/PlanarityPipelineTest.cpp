@@ -2,6 +2,7 @@
 
 #include "TestGraphs.hpp"
 #include "ht/PlanarityTester.hpp"
+#include "ht/certificate/KuratowskiCertificate.hpp"
 
 #include <vector>
 
@@ -16,13 +17,16 @@ HT_TEST(PlanarityPipelineAcceptsTriangle) {
     assert(result.planar);
 }
 
-HT_TEST(PlanarityPipelineRejectsK5ByDensity) {
+HT_TEST(PlanarityPipelineRejectsK5WithCertificate) {
     Graph g = ht::test::buildK5();
 
     PlanarityTester tester;
     PlanarityResult result = tester.test(g, false);
 
     assert(!result.planar);
+    assert(result.certificate.type == KuratowskiType::K5Subdivision);
+    assert(!result.certificate.originalEdgeIds.empty());
+    assert(result.certificate.originalEdgeIds.size() == 10);
 }
 
 HT_TEST(PlanarityPipelineRejectsK33ByStrongPlanarity) {
