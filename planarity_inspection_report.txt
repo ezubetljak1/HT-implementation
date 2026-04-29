@@ -647,7 +647,7 @@ Kuratowski certificate:
   type = K5Subdivision
   originalEdgeIds [size=10]: 8 6 3 9 5 2 7 1 4 0 
   message:
-    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 8, currentDart = -1, cycle vertices: x=2, y=4, w0=0, wk=4, closingBackDart=13, cycleSpineDartCount=1, cycleStemDartCount=2, cycleTreeDartCount=3, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 5 vertices and 10 edges. Certificate original edge count = 10.
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified/selected as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 8, currentDart = -1, cycle vertices: x=2, y=4, w0=0, wk=4, closingBackDart=13, cycleSpineDartCount=1, cycleStemDartCount=2, cycleTreeDartCount=3, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 5 vertices and 10 edges. Certificate original edge count = 10.
 
 ========================================
 Graph: K3,3
@@ -673,7 +673,7 @@ Kuratowski certificate:
   type = K33Subdivision
   originalEdgeIds [size=9]: 5 2 8 6 7 1 4 3 0 
   message:
-    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 9, currentDart = -1, cycle vertices: x=5, y=3, w0=0, wk=4, closingBackDart=15, cycleSpineDartCount=2, cycleStemDartCount=3, cycleTreeDartCount=5, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 6 vertices and 9 edges. Certificate original edge count = 9.
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified/selected as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 9, currentDart = -1, cycle vertices: x=5, y=3, w0=0, wk=4, closingBackDart=15, cycleSpineDartCount=2, cycleStemDartCount=3, cycleTreeDartCount=5, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 6 vertices and 9 edges. Certificate original edge count = 9.
 
 ========================================
 Graph: Subdivided K5
@@ -710,7 +710,7 @@ Kuratowski certificate:
   type = K5Subdivision
   originalEdgeIds [size=20]: 16 17 12 13 6 7 19 18 10 11 4 5 15 14 2 3 9 8 1 0 
   message:
-    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 16, currentDart = -1, cycle vertices: x=3, y=9, w0=0, wk=11, closingBackDart=27, cycleSpineDartCount=3, cycleStemDartCount=4, cycleTreeDartCount=7, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 15 vertices and 20 edges. Certificate original edge count = 20.
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified/selected as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 16, currentDart = -1, cycle vertices: x=3, y=9, w0=0, wk=11, closingBackDart=27, cycleSpineDartCount=3, cycleStemDartCount=4, cycleTreeDartCount=7, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 15 vertices and 20 edges. Certificate original edge count = 20.
 
 ========================================
 Graph: Subdivided K3,3
@@ -745,7 +745,7 @@ Kuratowski certificate:
   type = K33Subdivision
   originalEdgeIds [size=18]: 10 11 4 5 17 16 13 12 14 15 2 3 9 8 6 7 1 0 
   message:
-    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 19, currentDart = -1, cycle vertices: x=10, y=9, w0=0, wk=13, closingBackDart=29, cycleSpineDartCount=5, cycleStemDartCount=6, cycleTreeDartCount=11, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 15 vertices and 18 edges. Certificate original edge count = 18.
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified/selected as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 19, currentDart = -1, cycle vertices: x=10, y=9, w0=0, wk=13, closingBackDart=29, cycleSpineDartCount=5, cycleStemDartCount=6, cycleTreeDartCount=11, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 15 vertices and 18 edges. Certificate original edge count = 18.
 
 ========================================
 Graph: Partially subdivided K5
@@ -773,7 +773,7 @@ Kuratowski certificate:
   type = K5Subdivision
   originalEdgeIds [size=11]: 9 7 4 10 6 3 8 2 5 1 0 
   message:
-    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 8, currentDart = -1, cycle vertices: x=2, y=4, w0=0, wk=4, closingBackDart=13, cycleSpineDartCount=1, cycleStemDartCount=2, cycleTreeDartCount=3, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 6 vertices and 11 edges. Certificate original edge count = 11.
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified/selected as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 8, currentDart = -1, cycle vertices: x=2, y=4, w0=0, wk=4, closingBackDart=13, cycleSpineDartCount=1, cycleStemDartCount=2, cycleTreeDartCount=3, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 6 vertices and 11 edges. Certificate original edge count = 11.
 
 ========================================
 Graph: Partially subdivided K3,3
@@ -800,7 +800,7 @@ Kuratowski certificate:
   type = K33Subdivision
   originalEdgeIds [size=10]: 6 3 9 7 8 2 5 4 1 0 
   message:
-    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 9, currentDart = -1, cycle vertices: x=5, y=3, w0=0, wk=4, closingBackDart=15, cycleSpineDartCount=2, cycleStemDartCount=3, cycleTreeDartCount=5, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 7 vertices and 10 edges. Certificate original edge count = 10.
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified/selected as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 9, currentDart = -1, cycle vertices: x=5, y=3, w0=0, wk=4, closingBackDart=15, cycleSpineDartCount=2, cycleStemDartCount=3, cycleTreeDartCount=5, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 7 vertices and 10 edges. Certificate original edge count = 10.
 
 ========================================
 Graph: Disconnected non-planar graph
@@ -829,7 +829,7 @@ Kuratowski certificate:
   type = K33Subdivision
   originalEdgeIds [size=9]: 8 5 11 9 10 4 7 6 3 
   message:
-    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 9, currentDart = -1, cycle vertices: x=5, y=3, w0=0, wk=4, closingBackDart=15, cycleSpineDartCount=2, cycleStemDartCount=3, cycleTreeDartCount=5, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 6 vertices and 9 edges. Certificate original edge count = 9.
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified/selected as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 9, currentDart = -1, cycle vertices: x=5, y=3, w0=0, wk=4, closingBackDart=15, cycleSpineDartCount=2, cycleStemDartCount=3, cycleTreeDartCount=5, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 6 vertices and 9 edges. Certificate original edge count = 9.
 
 ========================================
 Graph: Petersen graph
@@ -858,10 +858,10 @@ Message:
   Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
 
 Kuratowski certificate:
-  type = Unknown
-  originalEdgeIds [size=14]: 12 5 10 4 14 7 8 13 2 11 1 0 3 9 
+  type = K33Subdivision
+  originalEdgeIds [size=12]: 12 10 13 11 8 9 5 4 3 2 1 0 
   message:
-    A Williamson SEGFO/kernel candidate was constructed. The candidate was not verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 10, currentDart = -1, cycle vertices: x=7, y=5, w0=0, wk=4, closingBackDart=25, cycleSpineDartCount=2, cycleStemDartCount=6, cycleTreeDartCount=8, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 10 vertices and 15 edges. Certificate original edge count = 14.
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified/selected as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 10, currentDart = -1, cycle vertices: x=7, y=5, w0=0, wk=4, closingBackDart=25, cycleSpineDartCount=2, cycleStemDartCount=6, cycleTreeDartCount=8, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 10 vertices and 15 edges. Certificate original edge count = 12.
 
 ========================================
 Graph: Octahedral graph
@@ -988,7 +988,7 @@ Kuratowski certificate:
   type = K33Subdivision
   originalEdgeIds [size=10]: 11 7 3 5 8 10 2 6 4 0 
   message:
-    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 15, currentDart = -1, cycle vertices: x=6, y=3, w0=0, wk=4, closingBackDart=10, cycleSpineDartCount=3, cycleStemDartCount=3, cycleTreeDartCount=6, cycleEmanatingDartCount=4, cycleRootEmanatingDartCount=1, prepared graph has 7 vertices and 12 edges. Certificate original edge count = 10.
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified/selected as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 15, currentDart = -1, cycle vertices: x=6, y=3, w0=0, wk=4, closingBackDart=10, cycleSpineDartCount=3, cycleStemDartCount=3, cycleTreeDartCount=6, cycleEmanatingDartCount=4, cycleRootEmanatingDartCount=1, prepared graph has 7 vertices and 12 edges. Certificate original edge count = 10.
 
 ========================================
 Graph: DM Rijeseni 15
@@ -1014,10 +1014,10 @@ Message:
   Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
 
 Kuratowski certificate:
-  type = Unknown
-  originalEdgeIds [size=11]: 9 5 4 7 3 2 6 0 10 8 11 
+  type = K33Subdivision
+  originalEdgeIds [size=10]: 9 5 11 7 3 10 2 6 4 0 
   message:
-    A Williamson SEGFO/kernel candidate was constructed. The candidate was not verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 6, currentDart = -1, cycle vertices: x=4, y=5, w0=0, wk=6, closingBackDart=14, cycleSpineDartCount=2, cycleStemDartCount=3, cycleTreeDartCount=5, cycleEmanatingDartCount=3, cycleRootEmanatingDartCount=1, prepared graph has 7 vertices and 12 edges. Certificate original edge count = 11.
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified/selected as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 6, currentDart = -1, cycle vertices: x=4, y=5, w0=0, wk=6, closingBackDart=14, cycleSpineDartCount=2, cycleStemDartCount=3, cycleTreeDartCount=5, cycleEmanatingDartCount=3, cycleRootEmanatingDartCount=1, prepared graph has 7 vertices and 12 edges. Certificate original edge count = 10.
 
 ========================================
 Graph: DM zsr 10
@@ -1049,10 +1049,10 @@ Message:
   Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
 
 Kuratowski certificate:
-  type = Unknown
-  originalEdgeIds [size=16]: 8 15 14 12 13 16 6 5 9 0 4 2 1 11 3 17 
+  type = K33Subdivision
+  originalEdgeIds [size=11]: 8 15 4 17 6 16 1 11 9 5 0 
   message:
-    A Williamson SEGFO/kernel candidate was constructed. The candidate was not verified as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 14, currentDart = -1, cycle vertices: x=7, y=5, w0=0, wk=6, closingBackDart=32, cycleSpineDartCount=2, cycleStemDartCount=5, cycleTreeDartCount=7, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 10 vertices and 18 edges. Certificate original edge count = 16.
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified/selected as a Kuratowski subdivision. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 14, currentDart = -1, cycle vertices: x=7, y=5, w0=0, wk=6, closingBackDart=32, cycleSpineDartCount=2, cycleStemDartCount=5, cycleTreeDartCount=7, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 10 vertices and 18 edges. Certificate original edge count = 11.
 
 ========================================
 Graph: DM zsr 14

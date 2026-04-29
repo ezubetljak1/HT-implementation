@@ -7,6 +7,7 @@
 #include "ht/certificate/WilliamsonKernelBuilder.hpp"
 #include "ht/certificate/WilliamsonSegmentListBuilder.hpp"
 #include "ht/certificate/WilliamsonSegfoPathBuilder.hpp"
+#include "ht/certificate/KuratowskiKernelSelector.hpp"
 
 #include <sstream>
 
@@ -104,11 +105,24 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
     if (!certificate.originalEdgeIds.empty()) {
         KuratowskiSubdivisionVerifier verifier;
         KuratowskiSubdivisionVerification verification =
-            verifier.verify(prepared, certificate.originalEdgeIds);
+            verifier.verify(
+                prepared,
+                certificate.originalEdgeIds
+            );
+
+        if (!verification.valid && usedWilliamsonKernel) {
+            KuratowskiKernelSelector selector;
+            verification =
+                selector.select(
+                    prepared,
+                    certificate.originalEdgeIds
+                );
+        }
 
         if (verification.valid) {
             certificate.type = verification.type;
-            certificate.originalEdgeIds = verification.originalEdgeIds;
+            certificate.originalEdgeIds =
+                verification.originalEdgeIds;
             verifiedSubdivision = true;
         }
     }
@@ -122,7 +136,7 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
     }
 
     if (verifiedSubdivision) {
-        oss << "The candidate was verified as a Kuratowski subdivision. ";
+        oss << "The candidate was verified/selected as a Kuratowski subdivision. ";
     } else if (!certificate.originalEdgeIds.empty()) {
         oss << "The candidate was not verified as a Kuratowski subdivision. ";
     } else {

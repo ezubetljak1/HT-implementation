@@ -25,6 +25,7 @@ add_library(ht_planarity
     src/certificate/WilliamsonFListBuilder.cpp
     src/certificate/WilliamsonSegfoPathBuilder.cpp
     src/certificate/WilliamsonKernelBuilder.cpp
+    src/certificate/KuratowskiKernelSelector.cpp
     src/certificate/KuratowskiSubdivisionVerifier.cpp
     src/certificate/KuratowskiExtractor.cpp
     src/debug/DebugPrinter.cpp

@@ -223,3 +223,36 @@ HT_TEST(PlanarityPipelineRejectsPartiallySubdividedK33) {
     assert(!result.planar);
     assert(result.certificate.type == KuratowskiType::K33Subdivision);
 }
+
+HT_TEST(PlanarityPipelineExtractsCertificateForPetersenGraph) {
+    Graph g = ht::test::buildPetersenGraph();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+    assert(result.certificate.type != KuratowskiType::Unknown);
+    assert(!result.certificate.originalEdgeIds.empty());
+}
+
+HT_TEST(PlanarityPipelineExtractsCertificateForDMRijeseni15) {
+    Graph g = ht::test::buildDMRijeseni15();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+    assert(result.certificate.type != KuratowskiType::Unknown);
+    assert(!result.certificate.originalEdgeIds.empty());
+}
+
+HT_TEST(PlanarityPipelineExtractsCertificateForDMzsr10) {
+    Graph g = ht::test::buildDMzsr10();
+
+    PlanarityTester tester;
+    PlanarityResult result = tester.test(g, false);
+
+    assert(!result.planar);
+    assert(result.certificate.type != KuratowskiType::Unknown);
+    assert(!result.certificate.originalEdgeIds.empty());
+}
