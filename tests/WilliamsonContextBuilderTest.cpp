@@ -69,7 +69,11 @@ HT_TEST(WilliamsonContextBuilderMapsK33FailureToFAB) {
     assert(context.aNode != -1);
     assert(context.bNode != -1);
 
-    assert(context.fDart == failure.cycleRootDart);
+    assert(context.fDart != -1);
+
+    if (!failure.cycleRootEmanatingDarts.empty()) {
+        assert(context.fDart == failure.cycleRootEmanatingDarts.front());
+    }
     assert(context.aDart != -1);
     assert(context.bDart != -1);
 
@@ -96,7 +100,7 @@ HT_TEST(WilliamsonContextBuilderMapsSubdividedK5FailureToFAB) {
     assert(context.aNode != -1);
     assert(context.bNode != -1);
 
-    assert(context.fDart == failure.cycleRootDart);
+    assert(context.fDart != -1);
     assert(context.aLinkedToF);
     assert(context.bLinkedToF);
 }

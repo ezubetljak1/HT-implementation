@@ -26,6 +26,10 @@ private:
         int dartId
     );
 
+    static std::vector<int> collectFDartCandidates(
+        const StrongPlanarityFailure& failure
+    );
+
     static std::vector<int> collectCandidateNodes(
         const PathTree& pathTree,
         const std::vector<int>& dartIds
@@ -41,6 +45,14 @@ private:
         const DirectLinkTester& tester,
         int fNode,
         const std::vector<int>& candidateNodes
+    );
+
+    static WilliamsonContext makeContext(
+        const PathTree& pathTree,
+        const DirectLinkTester& tester,
+        int fNode,
+        int aNode,
+        int bNode
     );
 };
 
