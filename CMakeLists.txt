@@ -20,6 +20,7 @@ add_library(ht_planarity
     src/certificate/PathTreeQueries.cpp
     src/certificate/SegmentMetadataBuilder.cpp
     src/certificate/DirectLinkTester.cpp
+    src/certificate/WilliamsonContextBuilder.cpp
     src/certificate/KuratowskiCandidateBuilder.cpp
     src/certificate/KuratowskiExtractor.cpp
     src/debug/DebugPrinter.cpp
@@ -42,6 +43,7 @@ add_executable(ht_planarity_tests
     tests/KuratowskiCandidateBuilderTest.cpp
     tests/SegmentMetadataBuilderTest.cpp
     tests/DirectLinkTesterTest.cpp
+    tests/WilliamsonContextBuilderTest.cpp
 )
 
 target_link_libraries(ht_planarity_tests PRIVATE ht_planarity)
