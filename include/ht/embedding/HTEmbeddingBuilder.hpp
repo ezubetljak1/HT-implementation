@@ -21,15 +21,18 @@ private:
     };
 
     struct CycleData {
-        // cycleVertices = w0, w1, ..., wr, wr+1, ..., wk
-        std::vector<int> cycleVertices;
+        int x = -1;
+        int y = -1;
+        int w0 = -1;
+        int wk = -1;
 
-        // forwardDarts[i] is the tree dart cycleVertices[i - 1] -> cycleVertices[i].
-        // forwardDarts[0] is unused and stays -1.
-        std::vector<int> forwardDarts;
+        // spineVertices = x, y, ..., wk
+        // We intentionally do not materialize the full stem w0 -> ... -> x.
+        std::vector<int> spineVertices;
 
-        int r = -1;
-        int k = -1;
+        // spineForwardDarts[i] is the tree dart spineVertices[i - 1] -> spineVertices[i].
+        // spineForwardDarts[0] is unused and stays -1.
+        std::vector<int> spineForwardDarts;
 
         // dart (wk, w0)
         int closingBackDart = -1;
@@ -38,16 +41,10 @@ private:
     const PreparedPalmTree& P_;
     std::vector<std::list<int>> rotation_;
 
-    // treeDartFromParent_[v] is the tree dart parent[v] -> v.
-    // For the DFS root it stays -1.
-    std::vector<int> treeDartFromParent_;
-
     const Dart& dart(int id) const;
     int rev(int d) const;
     int firstOut(int v) const;
-    void buildTreeDartFromParentIndex();
 
-    std::vector<int> treePathFromAncestorToVertex(int ancestor, int x) const;
     CycleData buildCycleForTreeEdge(int e0) const;
 
     std::list<int> takeTailWithSource(std::list<int>& sourceList, int sourceVertex) const;

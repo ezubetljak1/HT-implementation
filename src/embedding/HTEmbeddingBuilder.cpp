@@ -8,10 +8,8 @@ namespace ht {
 
 HTEmbeddingBuilder::HTEmbeddingBuilder(const PreparedPalmTree& prepared)
     : P_(prepared), 
-    rotation_(prepared.n), 
-    treeDartFromParent_(prepared.n, -1) {
+    rotation_(prepared.n) {
     validateInput();
-    buildTreeDartFromParentIndex();
 }
 
 Embedding HTEmbeddingBuilder::run() {
@@ -72,74 +70,31 @@ int HTEmbeddingBuilder::firstOut(int v) const {
     return P_.orderedOut[v].front();
 }
 
-void HTEmbeddingBuilder::buildTreeDartFromParentIndex() {
-    for (const Dart& d : P_.darts) {
-        if (!d.isTree) {
-            continue;
-        }
-
-        if (d.to < 0 || d.to >= P_.n) {
-            throw std::runtime_error("Tree dart has invalid target vertex.");
-        }
-
-        if (P_.parent[d.to] != d.from) {
-            throw std::runtime_error("Tree dart does not match DFS parent relation.");
-        }
-
-        if (treeDartFromParent_[d.to] != -1) {
-            throw std::runtime_error("Duplicate tree dart for the same child vertex.");
-        }
-
-        treeDartFromParent_[d.to] = d.id;
-    }
-
-    for (int v = 0; v < P_.n; ++v) {
-        if (P_.parent[v] != -1 && treeDartFromParent_[v] == -1) {
-            throw std::runtime_error("Missing tree dart for non-root vertex.");
-        }
-    }
-}
-
-std::vector<int> HTEmbeddingBuilder::treePathFromAncestorToVertex(int ancestor, int x) const {
-    std::vector<int> path;
-    int current = x;
-
-    while (current != -1) {
-        path.push_back(current);
-
-        if (current == ancestor) {
-            std::reverse(path.begin(), path.end());
-            return path;
-        }
-
-        current = P_.parent[current];
-    }
-
-    throw std::runtime_error("Expected ancestor was not found on DFS parent chain.");
-}
-
 HTEmbeddingBuilder::CycleData HTEmbeddingBuilder::buildCycleForTreeEdge(int e0) const {
     if (!dart(e0).isTree) {
         throw std::runtime_error("embedding(e0, t) expects e0 to be a tree dart.");
     }
 
-    const int x = dart(e0).from;
-    const int y = dart(e0).to;
+    CycleData c;
 
-    std::vector<int> spine;
-    spine.push_back(y);
+    c.x = dart(e0).from;
+    c.y = dart(e0).to;
 
-    int current = y;
-    int closingBack = -1;
-    int w0 = -1;
+    c.spineVertices.push_back(c.x);
+    c.spineForwardDarts.push_back(-1);
 
-    // Starting in y, always take the first edge out of the current node until a back edge is found.
+    c.spineVertices.push_back(c.y);
+    c.spineForwardDarts.push_back(e0);
+
+    int current = c.y;
+
     while (true) {
         const int first = firstOut(current);
 
         if (dart(first).isBack) {
-            closingBack = first;
-            w0 = dart(first).to;
+            c.wk = current;
+            c.w0 = dart(first).to;
+            c.closingBackDart = first;
             break;
         }
 
@@ -147,38 +102,21 @@ HTEmbeddingBuilder::CycleData HTEmbeddingBuilder::buildCycleForTreeEdge(int e0) 
             throw std::runtime_error("First outgoing dart is neither tree nor back dart.");
         }
 
-        current = dart(first).to;
-        spine.push_back(current);
+        const int next = dart(first).to;
+
+        c.spineVertices.push_back(next);
+        c.spineForwardDarts.push_back(first);
+
+        current = next;
     }
 
-    std::vector<int> stem = treePathFromAncestorToVertex(w0, x);
-
-    CycleData c;
-    c.cycleVertices = stem;
-    c.cycleVertices.insert(c.cycleVertices.end(), spine.begin(), spine.end());
-
-    c.forwardDarts.assign(c.cycleVertices.size(), -1);
-
-    for (int i = 1; i < static_cast<int>(c.cycleVertices.size()); ++i) {
-        const int parent = c.cycleVertices[i - 1];
-        const int child = c.cycleVertices[i];
-
-        if (P_.parent[child] != parent) {
-            throw std::runtime_error("Cycle path contains vertices that are not in parent-child relation.");
-        }
-
-        const int treeDart = treeDartFromParent_[child];
-
-        if (treeDart == -1) {
-            throw std::runtime_error("Missing precomputed tree dart on cycle path.");
-        }
-
-        c.forwardDarts[i] = treeDart;
+    if (c.w0 == -1 || c.wk == -1 || c.closingBackDart == -1) {
+        throw std::runtime_error("Failed to construct HT cycle data.");
     }
 
-    c.r = static_cast<int>(stem.size()) - 1;
-    c.k = static_cast<int>(c.cycleVertices.size()) - 1;
-    c.closingBackDart = closingBack;
+    if (c.spineVertices.size() != c.spineForwardDarts.size()) {
+        throw std::runtime_error("Spine vertices and spine darts have inconsistent sizes.");
+    }
 
     return c;
 }
@@ -238,9 +176,10 @@ HTEmbeddingBuilder::ReturnedLists HTEmbeddingBuilder::embedding(int e0, Side t) 
     std::list<int> T;
     T.push_back(C.closingBackDart);
 
-    // Walk down the spine: j = k, k - 1, ..., r + 1
-    for (int j = C.k; j >= C.r + 1; --j) {
-        const int wj = C.cycleVertices[j];
+    // Walk down the spine: wk, ..., y.
+    // spineVertices = x, y, ..., wk, so j goes from last index down to 1.
+    for (int j = static_cast<int>(C.spineVertices.size()) - 1; j >= 1; --j) {
+        const int wj = C.spineVertices[j];
         const auto& outgoing = P_.orderedOut[wj];
 
         if (outgoing.empty()) {
@@ -277,9 +216,9 @@ HTEmbeddingBuilder::ReturnedLists HTEmbeddingBuilder::embedding(int e0, Side t) 
             }
         }
 
-        const int wPrev = C.cycleVertices[j - 1];
+        const int wPrev = C.spineVertices[j - 1];
 
-        const int forwardDart = C.forwardDarts[j];
+        const int forwardDart = C.spineForwardDarts[j];
 
         if (forwardDart == -1) {
             throw std::runtime_error("Missing forward dart for cycle edge.");
