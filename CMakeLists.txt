@@ -56,6 +56,7 @@ add_executable(ht_planarity_tests
     tests/WilliamsonSegfoPathBuilderTest.cpp
     tests/KuratowskiSubdivisionVerifierTest.cpp
     tests/WilliamsonFListBuilderTest.cpp
+    tests/WilliamsonPipelineTest.cpp
 )
 
 target_link_libraries(ht_planarity_tests PRIVATE ht_planarity)
