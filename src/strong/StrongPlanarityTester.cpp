@@ -14,10 +14,68 @@ StrongPlanarityTester::StrongPlanarityTester(
     }
 }
 
+const StrongPlanarityFailure& StrongPlanarityTester::failure() const {
+    return failure_;
+}
+
+std::vector<int> StrongPlanarityTester::dequeToVector(const std::deque<int>& values) {
+    return std::vector<int>(values.begin(), values.end());
+}
+
+void StrongPlanarityTester::clearFailure() {
+    failure_ = StrongPlanarityFailure{};
+    runRootTreeDart_ = -1;
+}
+
+void StrongPlanarityTester::recordFailure(
+    StrongPlanarityFailureType type,
+    int rootTreeDart,
+    int currentDart,
+    const CycleInfo& cycle,
+    const Block& block,
+    const std::vector<Block>& stack,
+    const std::string& message
+) {
+    if (failure_.hasFailure()) {
+        return;
+    }
+
+    failure_.type = type;
+    failure_.rootTreeDart = runRootTreeDart_;
+    failure_.cycleRootDart = rootTreeDart;
+    failure_.currentDart = currentDart;
+
+    failure_.x = cycle.x;
+    failure_.y = cycle.y;
+    failure_.w0 = cycle.w0;
+    failure_.wk = cycle.wk;
+    failure_.closingBackDart = cycle.closingBackDart;
+
+    failure_.blockLeftAttachments = dequeToVector(block.Latt);
+    failure_.blockRightAttachments = dequeToVector(block.Ratt);
+    failure_.blockLeftSegments = block.Lseg;
+    failure_.blockRightSegments = block.Rseg;
+
+    if (!stack.empty()) {
+        const Block& top = stack.back();
+
+        failure_.stackTopLeftAttachments = dequeToVector(top.Latt);
+        failure_.stackTopRightAttachments = dequeToVector(top.Ratt);
+        failure_.stackTopLeftSegments = top.Lseg;
+        failure_.stackTopRightSegments = top.Rseg;
+    }
+
+    failure_.message = message;
+}
+
 bool StrongPlanarityTester::run(int rootTreeDart, std::vector<Side>& alpha) {
+    clearFailure();
+
     if (rootTreeDart < 0 || rootTreeDart >= static_cast<int>(P_.darts.size())) {
         throw std::runtime_error("Invalid rootTreeDart in StrongPlanarityTester.");
     }
+
+    runRootTreeDart_ = rootTreeDart;
 
     alpha.assign(P_.darts.size(), Side::Left);
     alpha[rootTreeDart] = Side::Left;
@@ -202,6 +260,16 @@ bool StrongPlanarityTester::stronglyPlanar(
                 }
 
                 if (block.leftInterlace(stack)) {
+                    recordFailure(
+                        StrongPlanarityFailureType::UnresolvableLeftInterlace,
+                        e0,
+                        e,
+                        cycle,
+                        block,
+                        stack,
+                        "Strong-planarity failed: unresolved left interlacing after stack flip."
+                    );
+
                     return false;
                 }
 
@@ -243,6 +311,16 @@ bool StrongPlanarityTester::stronglyPlanar(
             && block.Ratt.front() > dfs_[cycle.w0];
 
         if (bothSidesAttachAboveW0) {
+            recordFailure(
+                StrongPlanarityFailureType::BothSidesAttachAboveW0,
+                e0,
+                -1,
+                cycle,
+                block,
+                stack,
+                "Strong-planarity failed: block has attachments on both sides above w0."
+            );
+
             return false;
         }
 

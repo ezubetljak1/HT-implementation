@@ -30,3 +30,35 @@ HT_TEST(StrongPlanarityRunsOnTriangle) {
     assert(planar);
     assert(alpha.size() == prepared.darts.size());
 }
+
+HT_TEST(StrongPlanarityRecordsFailureForK33) {
+    Graph g = ht::test::buildK33();
+
+    BiconnectedComponentsFinder finder;
+    Components components = finder.find(g);
+
+    assert(components.size() == 1);
+
+    ComponentPreprocessor preprocessor;
+    PreprocessedComponent pc = preprocessor.preprocess(components[0]);
+
+    PreparedPalmTreeBuilder builder;
+    PreparedPalmTree prepared = builder.build(pc);
+
+    assert(prepared.rootTreeDart != -1);
+
+    StrongPlanarityTester tester(prepared, prepared.number);
+    std::vector<Side> alpha;
+
+    bool planar = tester.run(prepared.rootTreeDart, alpha);
+
+    assert(!planar);
+
+    const StrongPlanarityFailure& failure = tester.failure();
+
+    assert(failure.hasFailure());
+    assert(failure.type != StrongPlanarityFailureType::None);
+    assert(failure.rootTreeDart == prepared.rootTreeDart);
+    assert(failure.cycleRootDart != -1);
+    assert(!failure.message.empty());
+}

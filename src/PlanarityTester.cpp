@@ -74,11 +74,16 @@ PlanarityResult PlanarityTester::test(const Graph& graph, bool buildEmbedding) c
         std::vector<Side> alpha;
 
         if (!strongTester.run(prepared.rootTreeDart, alpha)) {
+            const StrongPlanarityFailure& failure = strongTester.failure();
+
             result.planar = false;
-            result.certificate = KuratowskiExtractor().extractFromFailure(prepared);
+            result.certificate = KuratowskiExtractor().extractFromFailure(prepared, failure);
+
             result.message =
                 "Strong-planarity phase reported non-planarity. "
-                "Certificate extraction is still a placeholder.";
+                "Failure witness was recorded. "
+                + failure.message;
+
             return result;
         }
 

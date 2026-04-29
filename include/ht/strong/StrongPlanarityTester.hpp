@@ -2,10 +2,47 @@
 
 #include <deque>
 #include <vector>
+#include <string>
 
 #include "ht/preprocess/PreparedPalmTree.hpp"
 
 namespace ht {
+
+enum class StrongPlanarityFailureType {
+    None,
+    UnresolvableLeftInterlace,
+    BothSidesAttachAboveW0
+};
+
+struct StrongPlanarityFailure {
+    StrongPlanarityFailureType type = StrongPlanarityFailureType::None;
+
+    int rootTreeDart = -1;
+    int cycleRootDart = -1;
+    int currentDart = -1;
+
+    int x = -1;
+    int y = -1;
+    int w0 = -1;
+    int wk = -1;
+    int closingBackDart = -1;
+
+    std::vector<int> blockLeftAttachments;
+    std::vector<int> blockRightAttachments;
+    std::vector<int> blockLeftSegments;
+    std::vector<int> blockRightSegments;
+
+    std::vector<int> stackTopLeftAttachments;
+    std::vector<int> stackTopRightAttachments;
+    std::vector<int> stackTopLeftSegments;
+    std::vector<int> stackTopRightSegments;
+
+    std::string message;
+
+    bool hasFailure() const {
+        return type != StrongPlanarityFailureType::None;
+    }
+};
 
 class StrongPlanarityTester {
 public:
@@ -15,6 +52,8 @@ public:
     );
 
     bool run(int rootTreeDart, std::vector<Side>& alpha);
+
+    const StrongPlanarityFailure& failure() const;
 
 private:
     struct Block {
@@ -62,6 +101,24 @@ private:
         std::vector<int>& attachments,
         std::vector<Side>& alpha
     );
+
+    StrongPlanarityFailure failure_;
+    int runRootTreeDart_ = -1;
+
+    static std::vector<int> dequeToVector(const std::deque<int>& values);
+
+    void clearFailure();
+
+    void recordFailure(
+        StrongPlanarityFailureType type,
+        int rootTreeDart,
+        int currentDart,
+        const CycleInfo& cycle,
+        const Block& block,
+        const std::vector<Block>& stack,
+        const std::string& message
+    );
+
 };
 
 } // namespace ht
