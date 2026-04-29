@@ -37,6 +37,7 @@ struct PipelineOutput {
     bool valid = false;
 
     PreparedPalmTree prepared;
+    WilliamsonContext context;
     WilliamsonKernel kernel;
 
     std::string message;
@@ -44,8 +45,16 @@ struct PipelineOutput {
 
 struct GeneratedEntry {
     std::string graphName;
+
     std::string canonicalKey;
+    std::string roleAwareKey;
+
+    int canonicalFEdge = -1;
+    int canonicalAEdge = -1;
+    int canonicalBEdge = -1;
+
     std::vector<int> selectedCanonicalEdgeIds;
+
     KuratowskiType type = KuratowskiType::Unknown;
 };
 
@@ -171,6 +180,7 @@ PipelineOutput runWilliamsonPipeline(const Graph& graph) {
 
         output.valid = true;
         output.prepared = prepared;
+        output.context = context;
         output.kernel = kernel;
         output.message = "Williamson pipeline succeeded.";
         return output;
@@ -178,6 +188,98 @@ PipelineOutput runWilliamsonPipeline(const Graph& graph) {
 
     output.message = "No non-planar biconnected component was found.";
     return output;
+}
+
+int originalEdgeIdForDart(
+    const PreparedPalmTree& prepared,
+    int dartId
+) {
+    if (dartId < 0 || dartId >= static_cast<int>(prepared.darts.size())) {
+        return -1;
+    }
+
+    return prepared.darts[dartId].originalEdgeId;
+}
+
+int findSkeletonEdgeContainingOriginalEdge(
+    const HomKernelSignature& signature,
+    int originalEdgeId
+) {
+    if (originalEdgeId < 0) {
+        return -1;
+    }
+
+    for (const HomKernelSkeletonEdge& skeletonEdge : signature.skeletonEdges) {
+        for (int edgeId : skeletonEdge.originalEdgeIds) {
+            if (edgeId == originalEdgeId) {
+                return skeletonEdge.id;
+            }
+        }
+    }
+
+    return -1;
+}
+
+int findCanonicalEdgeForSkeletonEdge(
+    const CanonicalHomKernelSignature& canonical,
+    int skeletonEdgeId
+) {
+    if (skeletonEdgeId < 0) {
+        return -1;
+    }
+
+    for (int canonicalEdgeId = 0;
+         canonicalEdgeId < static_cast<int>(canonical.canonicalEdgeToSkeletonEdge.size());
+         ++canonicalEdgeId) {
+        if (canonical.canonicalEdgeToSkeletonEdge[canonicalEdgeId]
+            == skeletonEdgeId) {
+            return canonicalEdgeId;
+        }
+    }
+
+    return -1;
+}
+
+int resolveRoleCanonicalEdge(
+    const PreparedPalmTree& prepared,
+    const HomKernelSignature& signature,
+    const CanonicalHomKernelSignature& canonical,
+    int roleDart
+) {
+    const int originalEdgeId =
+        originalEdgeIdForDart(
+            prepared,
+            roleDart
+        );
+
+    const int skeletonEdgeId =
+        findSkeletonEdgeContainingOriginalEdge(
+            signature,
+            originalEdgeId
+        );
+
+    return findCanonicalEdgeForSkeletonEdge(
+        canonical,
+        skeletonEdgeId
+    );
+}
+
+std::string buildRoleAwareKey(
+    const std::string& canonicalKey,
+    int canonicalFEdge,
+    int canonicalAEdge,
+    int canonicalBEdge
+) {
+    std::ostringstream out;
+
+    out << canonicalKey
+        << "roles="
+        << "F:" << canonicalFEdge
+        << ",A:" << canonicalAEdge
+        << ",B:" << canonicalBEdge
+        << ",";
+
+    return out.str();
 }
 
 const HomKernelSkeletonEdge* findSkeletonEdgeById(
@@ -314,6 +416,7 @@ bool findOfflineKuratowskiSelection(
     KuratowskiSubdivisionVerifier verifier;
 
     std::vector<int> allOriginalEdgeIds;
+
     for (const HomKernelSkeletonEdge& edge : signature.skeletonEdges) {
         allOriginalEdgeIds.insert(
             allOriginalEdgeIds.end(),
@@ -376,7 +479,8 @@ std::vector<int> mapSkeletonSelectionToCanonicalSelection(
         const int skeletonEdgeId =
             canonical.canonicalEdgeToSkeletonEdge[canonicalEdgeId];
 
-        if (selectedSkeletonSet.find(skeletonEdgeId) != selectedSkeletonSet.end()) {
+        if (selectedSkeletonSet.find(skeletonEdgeId)
+            != selectedSkeletonSet.end()) {
             selectedCanonicalEdgeIds.push_back(canonicalEdgeId);
         }
     }
@@ -449,6 +553,43 @@ bool generateEntryForGraph(
         return false;
     }
 
+    const int canonicalFEdge =
+        resolveRoleCanonicalEdge(
+            pipeline.prepared,
+            signature,
+            canonical,
+            pipeline.context.fDart
+        );
+
+    const int canonicalAEdge =
+        resolveRoleCanonicalEdge(
+            pipeline.prepared,
+            signature,
+            canonical,
+            pipeline.context.aDart
+        );
+
+    const int canonicalBEdge =
+        resolveRoleCanonicalEdge(
+            pipeline.prepared,
+            signature,
+            canonical,
+            pipeline.context.bDart
+        );
+
+    if (canonicalFEdge < 0
+        || canonicalAEdge < 0
+        || canonicalBEdge < 0) {
+        std::ostringstream out;
+        out << "Could not resolve F/A/B canonical role edges. "
+            << "F=" << canonicalFEdge
+            << ", A=" << canonicalAEdge
+            << ", B=" << canonicalBEdge;
+
+        message = out.str();
+        return false;
+    }
+
     std::vector<int> selectedCanonicalEdgeIds =
         mapSkeletonSelectionToCanonicalSelection(
             canonical,
@@ -457,10 +598,20 @@ bool generateEntryForGraph(
 
     entry.graphName = namedGraph.name;
     entry.canonicalKey = canonical.key;
+    entry.canonicalFEdge = canonicalFEdge;
+    entry.canonicalAEdge = canonicalAEdge;
+    entry.canonicalBEdge = canonicalBEdge;
+    entry.roleAwareKey =
+        buildRoleAwareKey(
+            canonical.key,
+            canonicalFEdge,
+            canonicalAEdge,
+            canonicalBEdge
+        );
     entry.selectedCanonicalEdgeIds = selectedCanonicalEdgeIds;
     entry.type = verification.type;
 
-    message = "Generated entry.";
+    message = "Generated role-aware entry.";
     return true;
 }
 
@@ -483,7 +634,7 @@ void writeGeneratedTable(
     std::ostream& out,
     const std::map<std::string, GeneratedEntry>& entriesByKey
 ) {
-    out << "// Generated HOMKERNEL lookup table entries.\n";
+    out << "// Generated role-aware HOMKERNEL lookup table entries.\n";
     out << "// This file is produced by tools/HomKernelTableGenerator.cpp.\n";
     out << "// Do not edit manually.\n\n";
 
@@ -502,8 +653,13 @@ void writeGeneratedTable(
         out << "        // source: " << entry.graphName
             << ", type: " << certificateTypeToString(entry.type)
             << "\n";
+        out << "        // canonical roles: F="
+            << entry.canonicalFEdge
+            << ", A=" << entry.canonicalAEdge
+            << ", B=" << entry.canonicalBEdge
+            << "\n";
         out << "        \"";
-        out << entry.canonicalKey;
+        out << entry.roleAwareKey;
         out << "\",\n";
         out << "        "
             << vectorToInitializer(entry.selectedCanonicalEdgeIds)
@@ -519,10 +675,10 @@ void writeReport(
     const std::map<std::string, GeneratedEntry>& entriesByKey,
     const std::vector<std::string>& messages
 ) {
-    out << "HOMKERNEL Table Generator Report\n";
+    out << "Role-aware HOMKERNEL Table Generator Report\n";
     out << "========================================\n\n";
 
-    out << "Generated unique entries: "
+    out << "Generated unique role-aware entries: "
         << entriesByKey.size()
         << "\n\n";
 
@@ -530,8 +686,18 @@ void writeReport(
         out << "----------------------------------------\n";
         out << "Source graph: " << entry.graphName << "\n";
         out << "Type: " << certificateTypeToString(entry.type) << "\n";
+
         out << "Canonical key:\n";
-        out << key << "\n";
+        out << entry.canonicalKey << "\n";
+
+        out << "Canonical role edges:\n";
+        out << "  F = " << entry.canonicalFEdge << "\n";
+        out << "  A = " << entry.canonicalAEdge << "\n";
+        out << "  B = " << entry.canonicalBEdge << "\n";
+
+        out << "Role-aware key:\n";
+        out << entry.roleAwareKey << "\n";
+
         out << "Selected canonical edges: ";
 
         for (int edgeId : entry.selectedCanonicalEdgeIds) {
@@ -543,6 +709,7 @@ void writeReport(
 
     if (!messages.empty()) {
         out << "Messages:\n";
+
         for (const std::string& message : messages) {
             out << "  " << message << "\n";
         }
@@ -584,17 +751,18 @@ int main(int argc, char** argv) {
             continue;
         }
 
-        auto existing = entriesByKey.find(entry.canonicalKey);
+        auto existing = entriesByKey.find(entry.roleAwareKey);
 
         if (existing == entriesByKey.end()) {
-            entriesByKey[entry.canonicalKey] = entry;
+            entriesByKey[entry.roleAwareKey] = entry;
             continue;
         }
 
         if (existing->second.selectedCanonicalEdgeIds
             != entry.selectedCanonicalEdgeIds) {
             messages.push_back(
-                "Conflict for canonical key generated by " + graph.name
+                "Conflict for role-aware key generated by "
+                + graph.name
             );
         }
     }
@@ -628,7 +796,7 @@ int main(int argc, char** argv) {
         messages
     );
 
-    std::cout << "Generated HOMKERNEL table: "
+    std::cout << "Generated role-aware HOMKERNEL table: "
               << tablePath
               << "\n";
 
