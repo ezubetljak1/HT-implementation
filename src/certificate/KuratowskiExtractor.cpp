@@ -110,54 +110,59 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
 
         if (context.valid) {
             WilliamsonKernelBuilder kernelBuilder;
+            WilliamsonKernel kernel;
 
-            WilliamsonBasicCaseDetector basicCaseDetector;
-            WilliamsonBasicCase basicCase =
-                basicCaseDetector.detect(
+            // Preferred Williamson route:
+            // SEGLIST(e) -> SEGFO path B -> ... -> A -> kernel.
+            WilliamsonSegmentListBuilder segmentListBuilder;
+            WilliamsonSegmentList segmentList =
+                segmentListBuilder.build(
                     prepared,
                     pathTree,
-                    metadata,
                     context
                 );
 
-            WilliamsonKernel kernel;
-
-            if (basicCase.valid) {
-                kernel =
-                    kernelBuilder.buildDirectKernel(
+            if (segmentList.valid) {
+                WilliamsonSegfoPathBuilder segfoPathBuilder;
+                WilliamsonSegfoPath segfoPath =
+                    segfoPathBuilder.buildPath(
                         prepared,
                         pathTree,
-                        basicCase
-                    );
-            } else {
-                WilliamsonSegmentListBuilder segmentListBuilder;
-                WilliamsonSegmentList segmentList =
-                    segmentListBuilder.build(
-                        prepared,
-                        pathTree,
+                        metadata,
+                        segmentList,
                         context
                     );
 
-                if (segmentList.valid) {
-                    WilliamsonSegfoPathBuilder segfoPathBuilder;
-                    WilliamsonSegfoPath segfoPath =
-                        segfoPathBuilder.buildPath(
+                if (segfoPath.valid) {
+                    kernel =
+                        kernelBuilder.buildKernelFromSegfoPath(
                             prepared,
                             pathTree,
-                            metadata,
-                            segmentList,
-                            context
+                            context,
+                            segfoPath
                         );
+                }
+            }
 
-                    if (segfoPath.valid) {
-                        kernel =
-                            kernelBuilder.buildKernelFromSegfoPath(
-                                prepared,
-                                pathTree,
-                                context,
-                                segfoPath
-                            );
-                    }
+            // Fallback only if the general SEGFO path was not found.
+            // This covers direct Williamson basic case 1: F dl B dl A dl F.
+            if (!kernel.valid) {
+                WilliamsonBasicCaseDetector basicCaseDetector;
+                WilliamsonBasicCase basicCase =
+                    basicCaseDetector.detect(
+                        prepared,
+                        pathTree,
+                        metadata,
+                        context
+                    );
+
+                if (basicCase.valid) {
+                    kernel =
+                        kernelBuilder.buildDirectKernel(
+                            prepared,
+                            pathTree,
+                            basicCase
+                        );
                 }
             }
 

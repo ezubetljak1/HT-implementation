@@ -148,12 +148,7 @@ HT_TEST(WilliamsonSegfoPathBuilderHandlesSubdividedK5Context) {
             context
         );
 
-    // Subdivided K5 may require the general SEGFO path, so do not force validity yet.
-    if (path.valid) {
-        assertValidPathUsesContextEnds(path, context);
-    } else {
-        assert(!path.message.empty());
-    }
+    assertValidPathUsesContextEnds(path, context);
 }
 
 HT_TEST(WilliamsonSegfoPathBuilderRejectsInvalidInputs) {
@@ -219,4 +214,31 @@ HT_TEST(WilliamsonSegfoPathBuilderPathDoesNotRepeatNodesForK33) {
 
         seen[nodeId] = 1;
     }
+}
+
+HT_TEST(WilliamsonSegfoPathBuilderFindsPathForK5) {
+    Graph g = ht::test::buildK5();
+
+    PreparedPalmTree prepared = prepareSingleComponent(g);
+    PathTree pathTree = buildPathTree(prepared);
+    SegmentMetadataTable metadata = buildMetadata(prepared, pathTree);
+    StrongPlanarityFailure failure = computeFailure(prepared);
+
+    WilliamsonContext context =
+        buildContext(prepared, pathTree, metadata, failure);
+
+    WilliamsonSegmentList segmentList =
+        buildSegmentList(prepared, pathTree, context);
+
+    WilliamsonSegfoPathBuilder builder;
+    WilliamsonSegfoPath path =
+        builder.buildPath(
+            prepared,
+            pathTree,
+            metadata,
+            segmentList,
+            context
+        );
+
+    assertValidPathUsesContextEnds(path, context);
 }
