@@ -121,6 +121,7 @@ HT_TEST(WilliamsonSegfoPathBuilderFindsPathForK33) {
         );
 
     assertValidPathUsesContextEnds(path, context);
+    assert(path.segmentPathNodes.size() >= 2);
 }
 
 HT_TEST(WilliamsonSegfoPathBuilderHandlesSubdividedK5Context) {
@@ -178,4 +179,44 @@ HT_TEST(WilliamsonSegfoPathBuilderRejectsInvalidInputs) {
     assert(!path.valid);
     assert(path.segmentPathNodes.empty());
     assert(!path.message.empty());
+}
+
+HT_TEST(WilliamsonSegfoPathBuilderPathDoesNotRepeatNodesForK33) {
+    Graph g = ht::test::buildK33();
+
+    PreparedPalmTree prepared = prepareSingleComponent(g);
+    PathTree pathTree = buildPathTree(prepared);
+    SegmentMetadataTable metadata = buildMetadata(prepared, pathTree);
+    StrongPlanarityFailure failure = computeFailure(prepared);
+
+    WilliamsonContext context =
+        buildContext(prepared, pathTree, metadata, failure);
+
+    WilliamsonSegmentList segmentList =
+        buildSegmentList(prepared, pathTree, context);
+
+    WilliamsonSegfoPathBuilder builder;
+    WilliamsonSegfoPath path =
+        builder.buildPath(
+            prepared,
+            pathTree,
+            metadata,
+            segmentList,
+            context
+        );
+
+    assertValidPathUsesContextEnds(path, context);
+
+    std::vector<char> seen(
+        static_cast<std::size_t>(pathTree.nodes.size()),
+        0
+    );
+
+    for (int nodeId : path.segmentPathNodes) {
+        assert(nodeId >= 0);
+        assert(nodeId < static_cast<int>(pathTree.nodes.size()));
+        assert(!seen[nodeId]);
+
+        seen[nodeId] = 1;
+    }
 }
