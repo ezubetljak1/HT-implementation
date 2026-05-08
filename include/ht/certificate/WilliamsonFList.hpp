@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "ht/certificate/SegmentMetadata.hpp"
+
 namespace ht {
 
 struct WilliamsonFList {
@@ -15,7 +17,14 @@ struct WilliamsonFList {
 
     // HEAD(Z), materialized only for segments in FLIST.
     // Indexed by path-tree node id.
+    //
+    // Kept for compatibility with existing SEGFO code.
     std::vector<std::vector<int>> headsByNode;
+
+    // Concrete HEAD witnesses for each segment.
+    // This is the important part for Williamson certificate construction:
+    // each witness contains the actual back dart tail -> head.
+    std::vector<std::vector<SegmentHeadWitness>> headWitnessesByNode;
 
     // FxLIST[x] = segments Z in FLIST such that x is in HEAD(Z).
     // Indexed by prepared vertex id.

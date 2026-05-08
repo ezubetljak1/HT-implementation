@@ -18,6 +18,7 @@ WilliamsonFList WilliamsonFListBuilder::buildFromSegmentList(
     result.segmentNodes = segmentList.segmentNodes;
     result.positionByNode.assign(pathTree.nodes.size(), -1);
     result.headsByNode.resize(pathTree.nodes.size());
+    result.headWitnessesByNode.resize(pathTree.nodes.size());
     result.fxListByVertex.resize(prepared.n);
     result.fNode = fNode;
 
@@ -37,19 +38,26 @@ WilliamsonFList WilliamsonFListBuilder::buildFromSegmentList(
 
         result.positionByNode[nodeId] = i;
 
-        result.headsByNode[nodeId] =
-            directLinkTester.headVerticesForNode(nodeId);
+        const std::vector<SegmentHeadWitness> witnesses =
+            directLinkTester.headWitnessesForNode(nodeId);
 
-        for (int headVertex : result.headsByNode[nodeId]) {
+        result.headWitnessesByNode[nodeId] = witnesses;
+
+        for (const SegmentHeadWitness& witness : witnesses) {
+            const int headVertex = witness.headVertex;
+
             if (headVertex < 0 || headVertex >= prepared.n) {
                 continue;
             }
 
+            result.headsByNode[nodeId].push_back(headVertex);
             result.fxListByVertex[headVertex].push_back(nodeId);
         }
     }
 
-    result.fPosition = positionOf(result.positionByNode, fNode);
+    result.fPosition =
+        positionOf(result.positionByNode, fNode);
+
     result.valid = result.fPosition != -1;
 
     return result;

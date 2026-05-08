@@ -32,6 +32,7 @@ add_library(ht_planarity
     src/certificate/KuratowskiSubdivisionVerifier.cpp
     src/certificate/KuratowskiExtractor.cpp
     src/debug/DebugPrinter.cpp
+    src/certificate/WilliamsonPathKernelBuilder.cpp
 )
 
 target_include_directories(ht_planarity PUBLIC include)
@@ -56,6 +57,7 @@ add_executable(ht_planarity_tests
     tests/KuratowskiSubdivisionVerifierTest.cpp
     tests/WilliamsonFListBuilderTest.cpp
     tests/WilliamsonPipelineTest.cpp
+    tests/WilliamsonPathKernelBuilderTest.cpp
 )
 
 target_link_libraries(ht_planarity_tests PRIVATE ht_planarity)

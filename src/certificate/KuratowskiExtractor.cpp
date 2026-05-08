@@ -7,9 +7,74 @@
 #include "ht/certificate/WilliamsonKernelBuilder.hpp"
 #include "ht/certificate/WilliamsonSegmentListBuilder.hpp"
 #include "ht/certificate/WilliamsonSegfoPathBuilder.hpp"
-#include "ht/certificate/KuratowskiKernelSelector.hpp"
 
 #include <sstream>
+#include <string>
+#include <vector>
+
+namespace {
+
+std::vector<int> collectAllPreparedOriginalEdgeIds(
+    const ht::PreparedPalmTree& prepared
+) {
+    int maxOriginalEdgeId = -1;
+
+    for (const ht::Dart& dart : prepared.darts) {
+        if (dart.originalEdgeId > maxOriginalEdgeId) {
+            maxOriginalEdgeId = dart.originalEdgeId;
+        }
+    }
+
+    if (maxOriginalEdgeId < 0) {
+        return {};
+    }
+
+    std::vector<char> seen(
+        static_cast<std::size_t>(maxOriginalEdgeId + 1),
+        0
+    );
+
+    std::vector<int> originalEdgeIds;
+
+    for (const ht::Dart& dart : prepared.darts) {
+        const int originalEdgeId = dart.originalEdgeId;
+
+        if (originalEdgeId < 0 ||
+            originalEdgeId >= static_cast<int>(seen.size())) {
+            continue;
+        }
+
+        if (seen[originalEdgeId]) {
+            continue;
+        }
+
+        seen[originalEdgeId] = 1;
+        originalEdgeIds.push_back(originalEdgeId);
+    }
+
+    return originalEdgeIds;
+}
+
+ht::KuratowskiCertificate makeCertificateFromVerification(
+    const ht::KuratowskiSubdivisionVerification& verification,
+    const std::string& prefixMessage
+) {
+    ht::KuratowskiCertificate certificate;
+
+    if (!verification.valid) {
+        certificate.type = ht::KuratowskiType::Unknown;
+        certificate.message = prefixMessage + verification.message;
+        return certificate;
+    }
+
+    certificate.type = verification.type;
+    certificate.originalEdgeIds = verification.originalEdgeIds;
+    certificate.message = prefixMessage + verification.message;
+
+    return certificate;
+}
+
+} // namespace
 
 namespace ht {
 
@@ -34,6 +99,27 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
 ) const {
     KuratowskiCertificate certificate;
     certificate.type = KuratowskiType::Unknown;
+
+    {
+        const std::vector<int> wholeComponentCandidate =
+            collectAllPreparedOriginalEdgeIds(prepared);
+
+        KuratowskiSubdivisionVerifier verifier;
+
+        const KuratowskiSubdivisionVerification verification =
+            verifier.verify(
+                prepared,
+                wholeComponentCandidate
+            );
+
+        if (verification.valid) {
+            return makeCertificateFromVerification(
+                verification,
+                "The entire prepared component is already a verified "
+                "Kuratowski subdivision. "
+            );
+        }
+    }
 
     bool usedWilliamsonKernel = false;
     bool verifiedSubdivision = false;
@@ -87,6 +173,7 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
                         kernelBuilder.buildKernelFromSegfoPath(
                             prepared,
                             pathTree,
+                            metadata,
                             context,
                             segfoPath
                         );
@@ -109,15 +196,6 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
                 prepared,
                 certificate.originalEdgeIds
             );
-
-        if (!verification.valid && usedWilliamsonKernel) {
-            KuratowskiKernelSelector selector;
-            verification =
-                selector.select(
-                    prepared,
-                    certificate.originalEdgeIds
-                );
-        }
 
         if (verification.valid) {
             certificate.type = verification.type;
