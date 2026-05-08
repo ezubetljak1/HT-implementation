@@ -8,6 +8,20 @@
 
 namespace ht {
 
+struct DirectLinkWitness {
+    bool exists = false;
+
+    // HEAD(SEG(sourceNode)) intersects OSPAN(spanNode).
+    int sourceNode = -1;
+    int spanNode = -1;
+
+    // Concrete back dart proving the direct link.
+    int backDart = -1;
+    int backTailVertex = -1;
+    int headVertex = -1;
+    int headDfs = -1;
+};
+
 class DirectLinkTester {
 public:
     DirectLinkTester(
@@ -16,21 +30,49 @@ public:
         const SegmentMetadataTable& metadataTable
     );
 
-    // Targeted HEAD(SEG(nodeId)).
-    // This is not precomputed for all nodes to avoid non-linear eager materialization.
+    // Old API kept for compatibility.
     std::vector<int> headVerticesForNode(int nodeId) const;
 
-    // Williamson check used when earlierNode is F and laterNode is Y_i:
-    // does HEAD(Y_i) contain a vertex in OSPAN(F), i.e. between LOW1(F) and TAIL(F)?
+    // New API: returns concrete HEAD witnesses from SEG(nodeId).
+    std::vector<SegmentHeadWitness> headWitnessesForNode(int nodeId) const;
+
+    // Old API kept for compatibility.
     bool directlyLinkedToEarlierSegment(
         int earlierNodeId,
         int laterNodeId
     ) const;
 
+    // Old API kept for compatibility.
     bool hasHeadInOpenDfsInterval(
         int nodeId,
         int lowExclusiveDfs,
         int highExclusiveDfs
+    ) const;
+
+    // New API: finds a concrete witness that HEAD(SEG(nodeId))
+    // intersects the open DFS interval (lowExclusiveDfs, highExclusiveDfs).
+    SegmentHeadWitness findHeadWitnessInOpenDfsInterval(
+        int nodeId,
+        int lowExclusiveDfs,
+        int highExclusiveDfs
+    ) const;
+
+    // New API: returns the concrete back dart proving:
+    //
+    //     SEG(laterNodeId) dl SEG(earlierNodeId)
+    //
+    // meaning HEAD(SEG(laterNodeId)) intersects OSPAN(earlierNodeId).
+    DirectLinkWitness findDirectLinkToEarlierSegment(
+        int earlierNodeId,
+        int laterNodeId
+    ) const;
+
+    // Same as above, but named for kernel construction:
+    //
+    //     sourceNode has a back edge into OSPAN(spanNode).
+    DirectLinkWitness findPathFromSegmentToOpenSpan(
+        int sourceNodeId,
+        int spanNodeId
     ) const;
 
 private:
@@ -41,16 +83,16 @@ private:
     const Dart& dart(int dartId) const;
     const SegmentMetadata& metadata(int nodeId) const;
 
-    void collectHeadVerticesFromSubtree(
+    void collectHeadWitnessesFromSubtree(
         int nodeId,
         std::vector<char>& seenVertex,
-        std::vector<int>& headVertices
+        std::vector<SegmentHeadWitness>& witnesses
     ) const;
 
-    void addHeadVertexFromDart(
+    void addHeadWitnessFromDart(
         int dartId,
         std::vector<char>& seenVertex,
-        std::vector<int>& headVertices
+        std::vector<SegmentHeadWitness>& witnesses
     ) const;
 };
 

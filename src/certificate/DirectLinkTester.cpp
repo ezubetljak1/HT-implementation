@@ -35,58 +35,78 @@ const SegmentMetadata& DirectLinkTester::metadata(int nodeId) const {
 }
 
 std::vector<int> DirectLinkTester::headVerticesForNode(int nodeId) const {
+    const std::vector<SegmentHeadWitness> witnesses =
+        headWitnessesForNode(nodeId);
+
+    std::vector<int> vertices;
+    vertices.reserve(witnesses.size());
+
+    for (const SegmentHeadWitness& witness : witnesses) {
+        vertices.push_back(witness.headVertex);
+    }
+
+    return vertices;
+}
+
+std::vector<SegmentHeadWitness> DirectLinkTester::headWitnessesForNode(
+    int nodeId
+) const {
     if (nodeId < 0 || nodeId >= static_cast<int>(pathTree_.nodes.size())) {
-        throw std::runtime_error("Invalid path-tree node id in headVerticesForNode.");
+        throw std::runtime_error("Invalid path-tree node id in headWitnessesForNode.");
     }
 
     std::vector<char> seenVertex(static_cast<std::size_t>(prepared_.n), 0);
-    std::vector<int> headVertices;
+    std::vector<SegmentHeadWitness> witnesses;
 
-    collectHeadVerticesFromSubtree(
+    collectHeadWitnessesFromSubtree(
         nodeId,
         seenVertex,
-        headVertices
+        witnesses
     );
 
-    return headVertices;
+    return witnesses;
 }
 
-void DirectLinkTester::collectHeadVerticesFromSubtree(
+void DirectLinkTester::collectHeadWitnessesFromSubtree(
     int nodeId,
     std::vector<char>& seenVertex,
-    std::vector<int>& headVertices
+    std::vector<SegmentHeadWitness>& witnesses
 ) const {
+    if (nodeId < 0 || nodeId >= static_cast<int>(pathTree_.nodes.size())) {
+        throw std::runtime_error("Invalid node id while collecting head witnesses.");
+    }
+
     const PathNode& node = pathTree_.nodes[nodeId];
 
     for (int dartId : node.pathDarts) {
-        addHeadVertexFromDart(
+        addHeadWitnessFromDart(
             dartId,
             seenVertex,
-            headVertices
+            witnesses
         );
     }
 
     for (int childNodeId : node.children) {
-        if (childNodeId < 0 || childNodeId >= static_cast<int>(pathTree_.nodes.size())) {
-            throw std::runtime_error("Invalid child node id in DirectLinkTester.");
-        }
-
-        collectHeadVerticesFromSubtree(
+        collectHeadWitnessesFromSubtree(
             childNodeId,
             seenVertex,
-            headVertices
+            witnesses
         );
     }
 }
 
-void DirectLinkTester::addHeadVertexFromDart(
+void DirectLinkTester::addHeadWitnessFromDart(
     int dartId,
     std::vector<char>& seenVertex,
-    std::vector<int>& headVertices
+    std::vector<SegmentHeadWitness>& witnesses
 ) const {
     const Dart& d = dart(dartId);
 
-    // HEAD contribution comes from directed back edge f=(tail, head).
+    // HEAD contribution comes only from active directed back edge:
+    //
+    //     backTailVertex -> headVertex
+    //
+    // This concrete dart is exactly what we need later for Kuratowski paths.
     if (!d.isBack) {
         return;
     }
@@ -101,8 +121,21 @@ void DirectLinkTester::addHeadVertexFromDart(
         return;
     }
 
+    const int headDfs = prepared_.number[headVertex];
+
+    if (headDfs <= 0) {
+        return;
+    }
+
     seenVertex[headVertex] = 1;
-    headVertices.push_back(headVertex);
+
+    SegmentHeadWitness witness;
+    witness.headVertex = headVertex;
+    witness.headDfs = headDfs;
+    witness.backDart = dartId;
+    witness.backTailVertex = d.from;
+
+    witnesses.push_back(witness);
 }
 
 bool DirectLinkTester::hasHeadInOpenDfsInterval(
@@ -110,43 +143,89 @@ bool DirectLinkTester::hasHeadInOpenDfsInterval(
     int lowExclusiveDfs,
     int highExclusiveDfs
 ) const {
+    return findHeadWitnessInOpenDfsInterval(
+        nodeId,
+        lowExclusiveDfs,
+        highExclusiveDfs
+    ).backDart != -1;
+}
+
+SegmentHeadWitness DirectLinkTester::findHeadWitnessInOpenDfsInterval(
+    int nodeId,
+    int lowExclusiveDfs,
+    int highExclusiveDfs
+) const {
+    SegmentHeadWitness empty;
+
     if (lowExclusiveDfs >= highExclusiveDfs) {
-        return false;
+        return empty;
     }
 
-    const std::vector<int> heads =
-        headVerticesForNode(nodeId);
+    const std::vector<SegmentHeadWitness> witnesses =
+        headWitnessesForNode(nodeId);
 
-    for (int vertex : heads) {
-        if (vertex < 0 || vertex >= prepared_.n) {
-            continue;
-        }
-
-        const int dfs = prepared_.number[vertex];
-
-        if (dfs > lowExclusiveDfs && dfs < highExclusiveDfs) {
-            return true;
+    for (const SegmentHeadWitness& witness : witnesses) {
+        if (witness.headDfs > lowExclusiveDfs &&
+            witness.headDfs < highExclusiveDfs) {
+            return witness;
         }
     }
 
-    return false;
+    return empty;
 }
 
 bool DirectLinkTester::directlyLinkedToEarlierSegment(
     int earlierNodeId,
     int laterNodeId
 ) const {
-    const SegmentMetadata& earlier = metadata(earlierNodeId);
+    return findDirectLinkToEarlierSegment(
+        earlierNodeId,
+        laterNodeId
+    ).exists;
+}
 
-    if (earlier.low1Dfs == -1 || earlier.tailDfsNumber == -1) {
-        return false;
+DirectLinkWitness DirectLinkTester::findDirectLinkToEarlierSegment(
+    int earlierNodeId,
+    int laterNodeId
+) const {
+    return findPathFromSegmentToOpenSpan(
+        laterNodeId,
+        earlierNodeId
+    );
+}
+
+DirectLinkWitness DirectLinkTester::findPathFromSegmentToOpenSpan(
+    int sourceNodeId,
+    int spanNodeId
+) const {
+    DirectLinkWitness result;
+    result.sourceNode = sourceNodeId;
+    result.spanNode = spanNodeId;
+
+    const SegmentMetadata& span = metadata(spanNodeId);
+
+    if (span.low1Dfs == -1 || span.tailDfsNumber == -1) {
+        return result;
     }
 
-    return hasHeadInOpenDfsInterval(
-        laterNodeId,
-        earlier.low1Dfs,
-        earlier.tailDfsNumber
-    );
+    SegmentHeadWitness witness =
+        findHeadWitnessInOpenDfsInterval(
+            sourceNodeId,
+            span.low1Dfs,
+            span.tailDfsNumber
+        );
+
+    if (witness.backDart == -1) {
+        return result;
+    }
+
+    result.exists = true;
+    result.backDart = witness.backDart;
+    result.backTailVertex = witness.backTailVertex;
+    result.headVertex = witness.headVertex;
+    result.headDfs = witness.headDfs;
+
+    return result;
 }
 
 } // namespace ht
