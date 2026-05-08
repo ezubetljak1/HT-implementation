@@ -7,6 +7,7 @@
 #include "ht/certificate/WilliamsonKernelBuilder.hpp"
 #include "ht/certificate/WilliamsonSegmentListBuilder.hpp"
 #include "ht/certificate/WilliamsonSegfoPathBuilder.hpp"
+#include "ht/certificate/KuratowskiKernelSelector.hpp"
 
 #include <sstream>
 #include <string>
@@ -124,6 +125,11 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
     bool usedWilliamsonKernel = false;
     bool verifiedSubdivision = false;
 
+    std::string contextMessage;
+    std::string segmentListMessage;
+    std::string segfoPathMessage;
+    std::string kernelMessage;
+
     if (failure.hasFailure()) {
         PathTreeBuilder pathTreeBuilder;
         PathTree pathTree =
@@ -145,6 +151,8 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
                 failure
             );
 
+        contextMessage = context.message;
+
         if (context.valid) {
             WilliamsonKernelBuilder kernelBuilder;
             WilliamsonKernel kernel;
@@ -156,6 +164,8 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
                     pathTree,
                     context
                 );
+            
+            segmentListMessage = segmentList.message;
 
             if (segmentList.valid) {
                 WilliamsonSegfoPathBuilder segfoPathBuilder;
@@ -167,6 +177,8 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
                         segmentList,
                         context
                     );
+                
+                segfoPathMessage = segfoPath.message;
 
                 if (segfoPath.valid) {
                     kernel =
@@ -177,6 +189,8 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
                             context,
                             segfoPath
                         );
+                    
+                    kernelMessage = kernel.message;
                 }
             }
 
@@ -191,16 +205,31 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
 
     if (!certificate.originalEdgeIds.empty()) {
         KuratowskiSubdivisionVerifier verifier;
+
         KuratowskiSubdivisionVerification verification =
             verifier.verify(
                 prepared,
                 certificate.originalEdgeIds
             );
 
+        // This is now legitimate Williamson HOMKERNEL selection.
+        //
+        // Important:
+        // We only call the selector after a path-only Williamson kernel was built.
+        // We are NOT using it as a fallback for the old full-subtree SEG union.
+        if (!verification.valid && usedWilliamsonKernel) {
+            KuratowskiKernelSelector selector;
+
+            verification =
+                selector.select(
+                    prepared,
+                    certificate.originalEdgeIds
+                );
+        }
+
         if (verification.valid) {
             certificate.type = verification.type;
-            certificate.originalEdgeIds =
-                verification.originalEdgeIds;
+            certificate.originalEdgeIds = verification.originalEdgeIds;
             verifiedSubdivision = true;
         }
     }
@@ -226,6 +255,11 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
         certificate.message = oss.str();
         return certificate;
     }
+
+    oss << "Williamson context: " << contextMessage << ". ";
+    oss << "SEGLIST: " << segmentListMessage << ". ";
+    oss << "SEGFO path: " << segfoPathMessage << ". ";
+    oss << "Kernel: " << kernelMessage << ". ";
 
     oss << "Failure type = ";
 

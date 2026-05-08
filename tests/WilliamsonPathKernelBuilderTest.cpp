@@ -380,3 +380,46 @@ HT_TEST(WilliamsonPathKernelBuilderRejectsNonBasicCase1SegfoPath) {
     assert(!kernel.valid);
     assert(kernel.originalEdgeIds.empty());
 }
+
+HT_TEST(WilliamsonPathKernelBuilderReducesInternalYiLinkedToFIntoBasicCase1) {
+    PreparedPalmTree prepared =
+        makePreparedPalmTreeForBasicCase1();
+
+    PathTree pathTree =
+        makePathTreeForBasicCase1();
+
+    SegmentMetadataTable metadata =
+        makeMetadataForBasicCase1();
+
+    WilliamsonContext context =
+        makeContextForBasicCase1();
+
+    // We fake a longer path:
+    //
+    //   B, Y1, A
+    //
+    // where Y1 is actually the old A node and is directly linked to F.
+    // Because Y1 has odd Williamson index, normalization keeps B ... Y1,
+    // which becomes B, A and therefore Basic Case 1.
+    WilliamsonSegfoPath segfoPath;
+    segfoPath.valid = true;
+    segfoPath.segmentPathNodes = {
+        context.bNode,
+        context.aNode,
+        context.aNode
+    };
+
+    WilliamsonPathKernelBuilder builder;
+
+    WilliamsonKernel kernel =
+        builder.build(
+            prepared,
+            pathTree,
+            metadata,
+            context,
+            segfoPath
+        );
+
+    assert(kernel.valid);
+    assert(!kernel.originalEdgeIds.empty());
+}

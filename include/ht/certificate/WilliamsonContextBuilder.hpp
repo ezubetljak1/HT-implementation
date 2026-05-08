@@ -46,13 +46,13 @@ private:
         const std::vector<int>& dartIds
     );
 
-    static bool directlyLinkedEitherDirection(
+    static bool segmentLinksToSpan(
         const DirectLinkTester& tester,
-        int firstNode,
-        int secondNode
+        int sourceNode,
+        int spanNode
     );
 
-    static int findFirstNodeLinkedToF(
+    static int findFirstNodeLinkingToF(
         const DirectLinkTester& tester,
         int fNode,
         const std::vector<int>& candidateNodes
@@ -67,24 +67,20 @@ private:
         int cycleNode
     );
 
-    static bool containsNode(
-        const std::vector<int>& nodes,
-        int nodeId
-    );
-
-    static std::vector<int> collectSegmentNodesAroundCycle(
+    static WilliamsonContext buildBothSidesAttachAboveW0Context(
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
+        const SegmentMetadataTable& metadata,
+        const StrongPlanarityFailure& failure,
         int cycleNode
     );
 
-    static bool contextNodesAppearAroundCycle(
+    static WilliamsonContext buildGenericContext(
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
-        int cycleNode,
-        int fNode,
-        int aNode,
-        int bNode
+        const SegmentMetadataTable& metadata,
+        const StrongPlanarityFailure& failure,
+        int cycleNode
     );
 };
 

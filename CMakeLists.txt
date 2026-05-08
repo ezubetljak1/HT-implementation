@@ -33,6 +33,7 @@ add_library(ht_planarity
     src/certificate/KuratowskiExtractor.cpp
     src/debug/DebugPrinter.cpp
     src/certificate/WilliamsonPathKernelBuilder.cpp
+    src/certificate/WilliamsonSecondCaseKernelBuilder.cpp
 )
 
 target_include_directories(ht_planarity PUBLIC include)

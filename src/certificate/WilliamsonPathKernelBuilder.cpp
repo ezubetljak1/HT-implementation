@@ -1,4 +1,5 @@
 #include "ht/certificate/WilliamsonPathKernelBuilder.hpp"
+#include "ht/certificate/WilliamsonSecondCaseKernelBuilder.hpp"
 
 #include <stdexcept>
 
@@ -80,6 +81,488 @@ const SegmentMetadata& WilliamsonPathKernelBuilder::segmentMetadata(
     }
 
     return metadata.segments[segmentId];
+}
+
+WilliamsonKernel WilliamsonPathKernelBuilder::build(
+    const PreparedPalmTree& prepared,
+    const PathTree& pathTree,
+    const SegmentMetadataTable& metadata,
+    const WilliamsonContext& context,
+    const WilliamsonSegfoPath& segfoPath
+) const {
+    WilliamsonKernel kernel;
+    kernel.context = context;
+    kernel.segfoPath = segfoPath;
+
+    const NormalizedPath normalized =
+        normalizeToBasicCase(
+            prepared,
+            pathTree,
+            metadata,
+            context,
+            segfoPath
+        );
+
+    if (!normalized.valid) {
+        kernel.message =
+            "Could not normalize Williamson SEGFO path. " +
+            normalized.message;
+        return kernel;
+    }
+
+    if (normalized.isBasicCase1) {
+        return buildBasicCase1(
+            prepared,
+            pathTree,
+            metadata,
+            normalized.context,
+            normalized.segfoPath
+        );
+    }
+
+    if (normalized.isBasicCase2) {
+        WilliamsonSecondCaseKernelBuilder secondCaseBuilder;
+
+        return secondCaseBuilder.build(
+            prepared,
+            pathTree,
+            metadata,
+            normalized.context,
+            normalized.segfoPath
+        );
+    }
+
+    kernel.message =
+        "Williamson path normalized, but it is neither Basic Case 1 nor Basic Case 2.";
+
+    return kernel;
+}
+
+WilliamsonPathKernelBuilder::NormalizedPath
+WilliamsonPathKernelBuilder::normalizeToBasicCase(
+    const PreparedPalmTree& prepared,
+    const PathTree& pathTree,
+    const SegmentMetadataTable& metadata,
+    const WilliamsonContext& context,
+    const WilliamsonSegfoPath& segfoPath
+) {
+    NormalizedPath result;
+
+    if (!context.valid) {
+        result.message = "Invalid Williamson context.";
+        return result;
+    }
+
+    if (!segfoPath.valid || segfoPath.segmentPathNodes.size() < 2) {
+        result.message = "Invalid SEGFO path.";
+        return result;
+    }
+
+    WilliamsonContext currentContext = context;
+    WilliamsonSegfoPath currentPath = segfoPath;
+
+    bool changed = true;
+
+    while (changed) {
+        changed = false;
+
+        const std::vector<int>& nodes = currentPath.segmentPathNodes;
+
+        if (nodes.size() < 2) {
+            result.message = "SEGFO path became too short during normalization.";
+            return result;
+        }
+
+        currentContext.bNode = nodes.front();
+        currentContext.aNode = nodes.back();
+        currentContext.aLinkedToF =
+            internalNodeLinksToF(
+                prepared,
+                pathTree,
+                metadata,
+                currentContext.aNode,
+                currentContext.fNode
+            );
+
+        currentContext.bLinkedToF =
+            internalNodeLinksToF(
+                prepared,
+                pathTree,
+                metadata,
+                currentContext.bNode,
+                currentContext.fNode
+            );
+
+        if (!currentContext.aLinkedToF || !currentContext.bLinkedToF) {
+            result.message =
+                "Path endpoints are not both directly linked to F.";
+            return result;
+        }
+
+        if (nodes.size() == 2) {
+            const int firstNode = nodes[0];
+            const int secondNode = nodes[1];
+
+            DirectLinkTester direct(
+                prepared,
+                pathTree,
+                metadata
+            );
+
+            const bool secondLinksFirst =
+                direct.findPathFromSegmentToOpenSpan(
+                    secondNode,
+                    firstNode
+                ).exists;
+
+            const bool firstLinksSecond =
+                direct.findPathFromSegmentToOpenSpan(
+                    firstNode,
+                    secondNode
+                ).exists;
+
+            // Builder convention for Basic Case 1:
+            //
+            //     path = B, A
+            //
+            // and the required direct-link is:
+            //
+            //     A dl B
+            //
+            // i.e. second node links into the first node's open span.
+            if (secondLinksFirst) {
+                currentContext.bNode = firstNode;
+                currentContext.aNode = secondNode;
+
+                currentContext.bLinkedToF =
+                    internalNodeLinksToF(
+                        prepared,
+                        pathTree,
+                        metadata,
+                        currentContext.bNode,
+                        currentContext.fNode
+                    );
+
+                currentContext.aLinkedToF =
+                    internalNodeLinksToF(
+                        prepared,
+                        pathTree,
+                        metadata,
+                        currentContext.aNode,
+                        currentContext.fNode
+                    );
+
+                if (!currentContext.aLinkedToF || !currentContext.bLinkedToF) {
+                    result.message =
+                        "Two-node SEGFO path has A dl B, but endpoints do not both link F.";
+                    return result;
+                }
+
+                currentPath.segmentPathNodes = {
+                    currentContext.bNode,
+                    currentContext.aNode
+                };
+
+                currentPath.valid = true;
+                currentPath.message =
+                    "Oriented two-node SEGFO path as B -> A for Basic Case 1.";
+
+                result.valid = true;
+                result.isBasicCase1 = true;
+                result.context = currentContext;
+                result.segfoPath = currentPath;
+                result.message =
+                    "Normalized to Williamson Basic Case 1 with A dl B.";
+                return result;
+            }
+
+            // If the returned pair is reversed, flip it.
+            //
+            // Input pair:
+            //     first, second
+            //
+            // If first dl second, then the Basic Case 1 orientation should be:
+            //     B = second
+            //     A = first
+            if (firstLinksSecond) {
+                currentContext.bNode = secondNode;
+                currentContext.aNode = firstNode;
+
+                currentContext.bLinkedToF =
+                    internalNodeLinksToF(
+                        prepared,
+                        pathTree,
+                        metadata,
+                        currentContext.bNode,
+                        currentContext.fNode
+                    );
+
+                currentContext.aLinkedToF =
+                    internalNodeLinksToF(
+                        prepared,
+                        pathTree,
+                        metadata,
+                        currentContext.aNode,
+                        currentContext.fNode
+                    );
+
+                if (!currentContext.aLinkedToF || !currentContext.bLinkedToF) {
+                    result.message =
+                        "Reversed two-node SEGFO path has A dl B, but endpoints do not both link F.";
+                    return result;
+                }
+
+                currentPath.segmentPathNodes = {
+                    currentContext.bNode,
+                    currentContext.aNode
+                };
+
+                currentPath.valid = true;
+                currentPath.message =
+                    "Reversed two-node SEGFO path to B -> A for Basic Case 1.";
+
+                result.valid = true;
+                result.isBasicCase1 = true;
+                result.context = currentContext;
+                result.segfoPath = currentPath;
+                result.message =
+                    "Normalized reversed two-node SEGFO path to Williamson Basic Case 1.";
+                return result;
+            }
+
+            result.message =
+                "Two-node SEGFO path cannot be oriented as Basic Case 1: "
+                "neither node directly links into the other's open span.";
+            return result;
+        }
+
+        // Williamson transition:
+        //
+        // If some internal Yi directly links F, choose the first such Yi
+        // and reduce the path.
+        //
+        // Path indices:
+        //   nodes[0] = B
+        //   nodes[1] = Y1
+        //   ...
+        //   nodes[p] = Yp
+        //   nodes[p + 1] = A
+        //
+        // If Yi links F:
+        //   i odd  -> new path B ... Yi
+        //   i even -> new path Yi ... A
+        //
+        // This keeps the number of internal Y nodes even.
+        for (int i = 1; i < static_cast<int>(nodes.size()) - 1; ++i) {
+            const int yiNode = nodes[i];
+
+            const bool yiLinksF =
+                internalNodeLinksToF(
+                    prepared,
+                    pathTree,
+                    metadata,
+                    yiNode,
+                    currentContext.fNode
+                );
+
+            if (!yiLinksF) {
+                continue;
+            }
+
+            if (i % 2 == 1) {
+                // Yi has odd Williamson index.
+                // Keep B ... Yi.
+                currentPath =
+                    makeReducedPath(
+                        nodes,
+                        0,
+                        i
+                    );
+
+                currentContext =
+                    makeReducedContext(
+                        currentContext,
+                        currentPath.segmentPathNodes.front(),
+                        currentPath.segmentPathNodes.back()
+                    );
+            } else {
+                // Yi has even Williamson index.
+                // Keep Yi ... A.
+                currentPath =
+                    makeReducedPath(
+                        nodes,
+                        i,
+                        static_cast<int>(nodes.size()) - 1
+                    );
+
+                currentContext =
+                    makeReducedContext(
+                        currentContext,
+                        currentPath.segmentPathNodes.front(),
+                        currentPath.segmentPathNodes.back()
+                    );
+            }
+
+            changed = true;
+            break;
+        }
+    }
+
+    if (isCleanBasicCase2(
+            prepared,
+            pathTree,
+            metadata,
+            currentContext,
+            currentPath
+        )) {
+        result.valid = true;
+        result.isBasicCase2 = true;
+        result.context = currentContext;
+        result.segfoPath = currentPath;
+        result.message =
+            "Normalized to clean Williamson Basic Case 2.";
+        return result;
+    }
+
+    result.message =
+        "SEGFO path has no internal Yi linked to F, but does not satisfy clean Basic Case 2.";
+
+    return result;
+}
+
+bool WilliamsonPathKernelBuilder::internalNodeLinksToF(
+    const PreparedPalmTree& prepared,
+    const PathTree& pathTree,
+    const SegmentMetadataTable& metadata,
+    int nodeId,
+    int fNode
+) {
+    DirectLinkTester direct(
+        prepared,
+        pathTree,
+        metadata
+    );
+
+    return direct.findPathFromSegmentToOpenSpan(
+        nodeId,
+        fNode
+    ).exists;
+}
+
+WilliamsonContext WilliamsonPathKernelBuilder::makeReducedContext(
+    const WilliamsonContext& oldContext,
+    int newBNode,
+    int newANode
+) {
+    WilliamsonContext context = oldContext;
+
+    context.bNode = newBNode;
+    context.aNode = newANode;
+
+    context.bDart = -1;
+    context.aDart = -1;
+
+    context.aLinkedToF = true;
+    context.bLinkedToF = true;
+
+    context.message =
+        "Williamson context reduced by internal Yi directly linked to F.";
+
+    return context;
+}
+
+WilliamsonSegfoPath WilliamsonPathKernelBuilder::makeReducedPath(
+    const std::vector<int>& oldPath,
+    int startIndex,
+    int endIndex
+) {
+    WilliamsonSegfoPath path;
+
+    if (startIndex < 0 ||
+        endIndex < startIndex ||
+        endIndex >= static_cast<int>(oldPath.size())) {
+        path.valid = false;
+        path.message = "Invalid reduced SEGFO path interval.";
+        return path;
+    }
+
+    path.segmentPathNodes.assign(
+        oldPath.begin() + startIndex,
+        oldPath.begin() + endIndex + 1
+    );
+
+    path.valid = path.segmentPathNodes.size() >= 2;
+    path.message = "Reduced SEGFO path after internal Yi linked to F.";
+
+    return path;
+}
+
+bool WilliamsonPathKernelBuilder::isCleanBasicCase2(
+    const PreparedPalmTree& prepared,
+    const PathTree& pathTree,
+    const SegmentMetadataTable& metadata,
+    const WilliamsonContext& context,
+    const WilliamsonSegfoPath& segfoPath
+) {
+    if (!context.valid || !segfoPath.valid) {
+        return false;
+    }
+
+    const std::vector<int>& nodes = segfoPath.segmentPathNodes;
+
+    if (nodes.size() <= 2) {
+        return false;
+    }
+
+    if (nodes.front() != context.bNode ||
+        nodes.back() != context.aNode) {
+        return false;
+    }
+
+    // Number of internal Y nodes must be even:
+    //
+    //   B, Y1, ..., Yp, A
+    //
+    // nodes.size() = p + 2
+    // p even  <=>  nodes.size() even
+    if (nodes.size() % 2 != 0) {
+        return false;
+    }
+
+    if (!internalNodeLinksToF(
+            prepared,
+            pathTree,
+            metadata,
+            context.bNode,
+            context.fNode
+        )) {
+        return false;
+    }
+
+    if (!internalNodeLinksToF(
+            prepared,
+            pathTree,
+            metadata,
+            context.aNode,
+            context.fNode
+        )) {
+        return false;
+    }
+
+    // Clean second case requires Yi ndl F for all internal Yi.
+    for (int i = 1; i < static_cast<int>(nodes.size()) - 1; ++i) {
+        if (internalNodeLinksToF(
+                prepared,
+                pathTree,
+                metadata,
+                nodes[i],
+                context.fNode
+            )) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 WilliamsonKernel WilliamsonPathKernelBuilder::buildBasicCase1(

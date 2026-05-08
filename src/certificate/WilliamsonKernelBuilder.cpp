@@ -14,7 +14,7 @@ WilliamsonKernel WilliamsonKernelBuilder::buildKernelFromSegfoPath(
 ) const {
     WilliamsonPathKernelBuilder pathKernelBuilder;
 
-    return pathKernelBuilder.buildBasicCase1(
+    return pathKernelBuilder.build(
         prepared,
         pathTree,
         metadata,

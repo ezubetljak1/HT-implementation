@@ -14,17 +14,9 @@
 
 namespace ht {
 
-class WilliamsonPathKernelBuilder {
+class WilliamsonSecondCaseKernelBuilder {
 public:
     WilliamsonKernel build(
-        const PreparedPalmTree& prepared,
-        const PathTree& pathTree,
-        const SegmentMetadataTable& metadata,
-        const WilliamsonContext& context,
-        const WilliamsonSegfoPath& segfoPath
-    ) const;
-
-    WilliamsonKernel buildBasicCase1(
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
         const SegmentMetadataTable& metadata,
@@ -44,17 +36,6 @@ private:
         void addDarts(const std::vector<int>& dartIds);
     };
 
-    struct NormalizedPath {
-        bool valid = false;
-        bool isBasicCase1 = false;
-        bool isBasicCase2 = false;
-
-        WilliamsonContext context;
-        WilliamsonSegfoPath segfoPath;
-
-        std::string message;
-    };
-
     static int maxOriginalEdgeId(const PreparedPalmTree& prepared);
 
     static const SegmentMetadata& segmentMetadata(
@@ -62,7 +43,7 @@ private:
         int nodeId
     );
 
-    static NormalizedPath normalizeToBasicCase(
+    static bool isCleanSecondCaseShape(
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
         const SegmentMetadataTable& metadata,
@@ -70,40 +51,12 @@ private:
         const WilliamsonSegfoPath& segfoPath
     );
 
-    static bool internalNodeLinksToF(
+    static bool segmentLinksToSpan(
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
         const SegmentMetadataTable& metadata,
-        int nodeId,
-        int fNode
-    );
-
-    static WilliamsonContext makeReducedContext(
-        const WilliamsonContext& oldContext,
-        int newBNode,
-        int newANode
-    );
-
-    static WilliamsonSegfoPath makeReducedPath(
-        const std::vector<int>& oldPath,
-        int startIndex,
-        int endIndex
-    );
-
-    static bool isBasicCase1(
-        const PreparedPalmTree& prepared,
-        const PathTree& pathTree,
-        const SegmentMetadataTable& metadata,
-        const WilliamsonContext& context,
-        const WilliamsonSegfoPath& segfoPath
-    );
-
-    static bool isCleanBasicCase2(
-        const PreparedPalmTree& prepared,
-        const PathTree& pathTree,
-        const SegmentMetadataTable& metadata,
-        const WilliamsonContext& context,
-        const WilliamsonSegfoPath& segfoPath
+        int sourceNode,
+        int spanNode
     );
 
     static bool addReducedSegment(
