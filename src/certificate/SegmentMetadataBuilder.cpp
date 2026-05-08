@@ -64,11 +64,14 @@ void SegmentMetadataBuilder::initializeSegment(const PathNode& node) {
         throw std::runtime_error("Invalid DFS number for TAIL vertex.");
     }
 
-    // In Williamson notation, HEAD(SEG) is induced by back-edge heads in the segment.
-    // For a node defined by a back dart f=(tail, head), the direct head contribution is f.to.
-    // Tree nodes receive head contributions from their descendant path nodes.
+    // In Williamson notation, HEAD(SEG) is induced by back-edge heads
+    // in the segment subtree.
+    //
+    // If this node itself is defined by a back dart f = (tail, head),
+    // then the direct head contribution is f.to, and f is the concrete
+    // witness edge needed later for REDSEG/direct-link extraction.
     if (defining.isBack) {
-        addHeadCandidate(metadata, defining.to);
+        addHeadCandidate(metadata, defining.to, defining.id);
         metadata.headCount = 1;
     }
 
@@ -77,7 +80,7 @@ void SegmentMetadataBuilder::initializeSegment(const PathNode& node) {
 
 void SegmentMetadataBuilder::computeSubtreeHeadSummaries() {
     // PathTreeBuilder already computed preorder intervals.
-    // Children appear after parents in preorder, so reverse preorder is postorder enough
+    // Children appear after parents in preorder, so reverse preorder is enough
     // for aggregating child summaries into parents.
     for (int i = static_cast<int>(pathTree_->preorderNodes.size()) - 1; i >= 0; --i) {
         const int nodeId = pathTree_->preorderNodes[i];
@@ -105,24 +108,38 @@ void SegmentMetadataBuilder::finalizeRangeLowValues() {
         metadata.low2Dfs = -1;
         metadata.low1Vertex = -1;
         metadata.low2Vertex = -1;
+        metadata.low1Witness = SegmentHeadWitness{};
+        metadata.low2Witness = SegmentHeadWitness{};
 
         // RANGE(SEG) contains TAIL(SEG).
+        // This candidate has no back-edge witness. That is okay:
+        // TAIL is a range boundary, not a back-edge head.
         addRangeCandidate(metadata, metadata.tailVertex);
 
-        // RANGE(SEG) also contains HEAD(SEG); we only need first two lows eagerly.
+        // RANGE(SEG) also contains HEAD(SEG).
+        // These candidates must preserve their concrete back-edge witnesses.
         if (metadata.headLow1Vertex != -1) {
-            addRangeCandidate(metadata, metadata.headLow1Vertex);
+            addRangeCandidateWithWitness(
+                metadata,
+                metadata.headLow1Vertex,
+                metadata.headLow1Witness
+            );
         }
 
         if (metadata.headLow2Vertex != -1) {
-            addRangeCandidate(metadata, metadata.headLow2Vertex);
+            addRangeCandidateWithWitness(
+                metadata,
+                metadata.headLow2Vertex,
+                metadata.headLow2Witness
+            );
         }
     }
 }
 
 void SegmentMetadataBuilder::addHeadCandidate(
     SegmentMetadata& metadata,
-    int vertex
+    int vertex,
+    int backDart
 ) const {
     if (vertex < 0 || vertex >= prepared_->n) {
         return;
@@ -134,13 +151,25 @@ void SegmentMetadataBuilder::addHeadCandidate(
         return;
     }
 
-    addDfsCandidate(
+    SegmentHeadWitness witness;
+    witness.headVertex = vertex;
+    witness.headDfs = dfsNumber;
+    witness.backDart = backDart;
+
+    if (backDart >= 0 && backDart < static_cast<int>(prepared_->darts.size())) {
+        witness.backTailVertex = prepared_->darts[backDart].from;
+    }
+
+    addDfsCandidateWithWitness(
         vertex,
         dfsNumber,
+        witness,
         metadata.headLow1Dfs,
         metadata.headLow2Dfs,
         metadata.headLow1Vertex,
-        metadata.headLow2Vertex
+        metadata.headLow2Vertex,
+        metadata.headLow1Witness,
+        metadata.headLow2Witness
     );
 }
 
@@ -165,6 +194,34 @@ void SegmentMetadataBuilder::addRangeCandidate(
         metadata.low2Dfs,
         metadata.low1Vertex,
         metadata.low2Vertex
+    );
+}
+
+void SegmentMetadataBuilder::addRangeCandidateWithWitness(
+    SegmentMetadata& metadata,
+    int vertex,
+    const SegmentHeadWitness& witness
+) const {
+    if (vertex < 0 || vertex >= prepared_->n) {
+        return;
+    }
+
+    const int dfsNumber = prepared_->number[vertex];
+
+    if (dfsNumber <= 0) {
+        return;
+    }
+
+    addDfsCandidateWithWitness(
+        vertex,
+        dfsNumber,
+        witness,
+        metadata.low1Dfs,
+        metadata.low2Dfs,
+        metadata.low1Vertex,
+        metadata.low2Vertex,
+        metadata.low1Witness,
+        metadata.low2Witness
     );
 }
 
@@ -195,6 +252,39 @@ void SegmentMetadataBuilder::addDfsCandidate(
     }
 }
 
+void SegmentMetadataBuilder::addDfsCandidateWithWitness(
+    int vertex,
+    int dfsNumber,
+    const SegmentHeadWitness& witness,
+    int& low1Dfs,
+    int& low2Dfs,
+    int& low1Vertex,
+    int& low2Vertex,
+    SegmentHeadWitness& low1Witness,
+    SegmentHeadWitness& low2Witness
+) const {
+    if (low1Dfs == dfsNumber || low2Dfs == dfsNumber) {
+        return;
+    }
+
+    if (low1Dfs == -1 || dfsNumber < low1Dfs) {
+        low2Dfs = low1Dfs;
+        low2Vertex = low1Vertex;
+        low2Witness = low1Witness;
+
+        low1Dfs = dfsNumber;
+        low1Vertex = vertex;
+        low1Witness = witness;
+        return;
+    }
+
+    if (low2Dfs == -1 || dfsNumber < low2Dfs) {
+        low2Dfs = dfsNumber;
+        low2Vertex = vertex;
+        low2Witness = witness;
+    }
+}
+
 void SegmentMetadataBuilder::mergeHeadSummary(
     SegmentMetadata& target,
     const SegmentMetadata& child
@@ -202,11 +292,19 @@ void SegmentMetadataBuilder::mergeHeadSummary(
     target.headCount += child.headCount;
 
     if (child.headLow1Vertex != -1) {
-        addHeadCandidate(target, child.headLow1Vertex);
+        addHeadCandidate(
+            target,
+            child.headLow1Vertex,
+            child.headLow1Witness.backDart
+        );
     }
 
     if (child.headLow2Vertex != -1) {
-        addHeadCandidate(target, child.headLow2Vertex);
+        addHeadCandidate(
+            target,
+            child.headLow2Vertex,
+            child.headLow2Witness.backDart
+        );
     }
 }
 

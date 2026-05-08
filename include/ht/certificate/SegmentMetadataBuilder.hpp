@@ -28,12 +28,19 @@ private:
 
     void addHeadCandidate(
         SegmentMetadata& metadata,
-        int vertex
+        int vertex,
+        int backDart
     ) const;
 
     void addRangeCandidate(
         SegmentMetadata& metadata,
         int vertex
+    ) const;
+
+    void addRangeCandidateWithWitness(
+        SegmentMetadata& metadata,
+        int vertex,
+        const SegmentHeadWitness& witness
     ) const;
 
     void addDfsCandidate(
@@ -43,6 +50,18 @@ private:
         int& low2Dfs,
         int& low1Vertex,
         int& low2Vertex
+    ) const;
+
+    void addDfsCandidateWithWitness(
+        int vertex,
+        int dfsNumber,
+        const SegmentHeadWitness& witness,
+        int& low1Dfs,
+        int& low2Dfs,
+        int& low1Vertex,
+        int& low2Vertex,
+        SegmentHeadWitness& low1Witness,
+        SegmentHeadWitness& low2Witness
     ) const;
 
     void mergeHeadSummary(
