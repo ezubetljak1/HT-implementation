@@ -1,6 +1,7 @@
 #pragma once
 
-#include "ht/certificate/DirectLinkTester.hpp"
+#include <vector>
+
 #include "ht/certificate/PathTree.hpp"
 #include "ht/certificate/SegmentMetadata.hpp"
 #include "ht/certificate/WilliamsonFList.hpp"
@@ -20,9 +21,33 @@ public:
     ) const;
 
 private:
+    struct ActiveSegment {
+        int nodeId = -1;
+        int subtreeEnd = -1;
+    };
+
     static int positionOf(
         const std::vector<int>& positionByNode,
         int nodeId
+    );
+
+    static void addWitnessToSegment(
+        const PreparedPalmTree& prepared,
+        WilliamsonFList& result,
+        int segmentNode,
+        const SegmentHeadWitness& witness
+    );
+
+    static void addWitnessesFromPathNode(
+        const PreparedPalmTree& prepared,
+        const PathTree& pathTree,
+        int pathNodeId,
+        std::vector<SegmentHeadWitness>& witnesses
+    );
+
+    static SegmentHeadWitness witnessFromBackDart(
+        const PreparedPalmTree& prepared,
+        int dartId
     );
 };
 

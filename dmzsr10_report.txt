@@ -858,10 +858,10 @@ Message:
   Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
 
 Kuratowski certificate:
-  type = Unknown
-  originalEdgeIds [size=14]: 12 5 10 4 14 7 8 13 2 3 9 11 1 0 
+  type = K33Subdivision
+  originalEdgeIds [size=12]: 12 10 13 11 8 9 5 4 3 2 1 0 
   message:
-    A Williamson SEGFO/kernel candidate was constructed. The candidate was not verified as a Kuratowski subdivision. Williamson context: Mapped BothSidesAttachAboveW0 failure to Williamson context using directed links A dl F and B dl F.. SEGLIST: Built Williamson SEGLIST(e) containing F, A and B.. SEGFO path: Built direct SEGFO path using FLIST: B -> A.. Kernel: Built Williamson Basic Case 1 kernel from CYCLE(e), REDSEG(A/B/F), and direct-link witness paths.. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 10, currentDart = -1, cycle vertices: x=7, y=5, w0=0, wk=4, closingBackDart=25, cycleSpineDartCount=2, cycleStemDartCount=6, cycleTreeDartCount=8, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 10 vertices and 15 edges. Certificate original edge count = 14.
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified/selected as a Kuratowski subdivision. Williamson context: Mapped BothSidesAttachAboveW0 failure to Williamson context using directed links A dl F and B dl F.. SEGLIST: Built Williamson SEGLIST(e) containing F, A and B.. SEGFO path: Built direct SEGFO path using FLIST: B -> A.. Kernel: Built Williamson Basic Case 1 kernel from CYCLE(e), REDSEG(A/B/F), and direct-link witness paths.. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 10, currentDart = -1, cycle vertices: x=7, y=5, w0=0, wk=4, closingBackDart=25, cycleSpineDartCount=2, cycleStemDartCount=6, cycleTreeDartCount=8, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 10 vertices and 15 edges. Certificate original edge count = 12.
 
 ========================================
 Graph: Octahedral graph
@@ -1049,10 +1049,10 @@ Message:
   Strong-planarity phase reported non-planarity. Failure witness was recorded. Strong-planarity failed: block has attachments on both sides above w0.
 
 Kuratowski certificate:
-  type = K33Subdivision
-  originalEdgeIds [size=12]: 8 15 14 17 6 16 9 13 2 12 5 0 
+  type = Unknown
+  originalEdgeIds [size=13]: 8 15 14 12 13 16 6 5 0 4 2 17 9 
   message:
-    A Williamson SEGFO/kernel candidate was constructed. The candidate was verified/selected as a Kuratowski subdivision. Williamson context: Mapped BothSidesAttachAboveW0 failure to Williamson context using directed links A dl F and B dl F.. SEGLIST: Built Williamson SEGLIST(e) containing F, A and B.. SEGFO path: Built direct SEGFO path using FLIST: B -> A.. Kernel: Built Williamson Basic Case 1 kernel from CYCLE(e), REDSEG(A/B/F), and direct-link witness paths.. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 14, currentDart = -1, cycle vertices: x=7, y=5, w0=0, wk=6, closingBackDart=32, cycleSpineDartCount=2, cycleStemDartCount=5, cycleTreeDartCount=7, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 10 vertices and 18 edges. Certificate original edge count = 12.
+    A Williamson SEGFO/kernel candidate was constructed. The candidate was not verified as a Kuratowski subdivision. Williamson context: Mapped BothSidesAttachAboveW0 failure to Williamson context using directed links A dl F and B dl F.. SEGLIST: Built Williamson SEGLIST(e) containing F, A and B.. SEGFO path: Built direct SEGFO path using FLIST: B -> A.. Kernel: Built Williamson Basic Case 1 kernel from CYCLE(e), REDSEG(A/B/F), and direct-link witness paths.. Failure type = BothSidesAttachAboveW0, rootTreeDart = 0, cycleRootDart = 14, currentDart = -1, cycle vertices: x=7, y=5, w0=0, wk=6, closingBackDart=32, cycleSpineDartCount=2, cycleStemDartCount=5, cycleTreeDartCount=7, cycleEmanatingDartCount=2, cycleRootEmanatingDartCount=1, prepared graph has 10 vertices and 18 edges. Certificate original edge count = 13.
 
 ========================================
 Graph: DM zsr 14

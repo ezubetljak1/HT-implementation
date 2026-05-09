@@ -7,7 +7,7 @@
 #include "ht/certificate/WilliamsonKernelBuilder.hpp"
 #include "ht/certificate/WilliamsonSegmentListBuilder.hpp"
 #include "ht/certificate/WilliamsonSegfoPathBuilder.hpp"
-#include "ht/certificate/KuratowskiKernelSelector.hpp"
+#include "ht/certificate/KuratowskiSkeletonSelector.hpp"
 #include "ht/certificate/WilliamsonFListBuilder.hpp"
 
 #include <sstream>
@@ -232,7 +232,7 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
         // We only call the selector after a path-only Williamson kernel was built.
         // We are NOT using it as a fallback for the old full-subtree SEG union.
         if (!verification.valid && usedWilliamsonKernel) {
-            KuratowskiKernelSelector selector;
+            KuratowskiSkeletonSelector selector;
 
             verification =
                 selector.select(

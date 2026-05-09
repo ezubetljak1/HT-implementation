@@ -1,8 +1,11 @@
 #include "TestSupport.hpp"
-
 #include "TestGraphs.hpp"
+
 #include "ht/Graph.hpp"
+#include "ht/PlanarityTester.hpp"
 #include "ht/bcc/BiconnectedComponents.hpp"
+#include "ht/certificate/KuratowskiCertificate.hpp"
+#include "ht/certificate/KuratowskiSkeletonSelector.hpp"
 #include "ht/certificate/KuratowskiSubdivisionVerifier.hpp"
 #include "ht/certificate/PathTreeBuilder.hpp"
 #include "ht/certificate/SegmentMetadataBuilder.hpp"
@@ -16,9 +19,6 @@
 #include "ht/strong/StrongPlanarityTester.hpp"
 
 #include <vector>
-
-#include "ht/PlanarityTester.hpp"
-#include "ht/certificate/KuratowskiCertificate.hpp"
 
 using namespace ht;
 
@@ -48,15 +48,23 @@ PreparedPalmTree prepareSingleComponent(const Graph& graph) {
         preprocessor.preprocess(components[0]);
 
     PreparedPalmTreeBuilder builder;
+
     return builder.build(pc);
 }
 
 StrongPlanarityFailure computeFailure(const PreparedPalmTree& prepared) {
-    StrongPlanarityTester tester(prepared, prepared.number);
+    StrongPlanarityTester tester(
+        prepared,
+        prepared.number
+    );
+
     std::vector<Side> alpha;
 
     const bool planar =
-        tester.run(prepared.rootTreeDart, alpha);
+        tester.run(
+            prepared.rootTreeDart,
+            alpha
+        );
 
     assert(!planar);
 
@@ -136,6 +144,8 @@ WilliamsonPipelineOutput runWilliamsonPipeline(const Graph& graph) {
         kernelBuilder.buildKernelFromSegfoPath(
             output.prepared,
             output.pathTree,
+            output.metadata,
+            output.fList,
             output.context,
             output.segfoPath
         );
@@ -149,6 +159,16 @@ WilliamsonPipelineOutput runWilliamsonPipeline(const Graph& graph) {
             output.prepared,
             output.kernel.originalEdgeIds
         );
+
+    if (!output.verification.valid) {
+        KuratowskiSkeletonSelector selector;
+
+        output.verification =
+            selector.select(
+                output.prepared,
+                output.kernel.originalEdgeIds
+            );
+    }
 
     assert(output.verification.valid);
 
@@ -235,38 +255,54 @@ HT_TEST(WilliamsonPipelineVerifiesK33Certificate) {
 HT_TEST(WilliamsonPipelineVerifiesK5Certificate) {
     Graph g = ht::test::buildK5();
 
-    WilliamsonPipelineOutput output =
-        runWilliamsonPipeline(g);
+    PlanarityTester tester;
+    PlanarityResult result =
+        tester.test(
+            g,
+            false
+        );
 
-    assert(output.verification.type == KuratowskiType::K5Subdivision);
-    assert(output.verification.originalEdgeIds.size() == 10);
-    assertNoDuplicateOriginalEdges(output.verification.originalEdgeIds);
+    assert(!result.planar);
+    assert(result.certificate.type == KuratowskiType::K5Subdivision);
+    assert(result.certificate.originalEdgeIds.size() == 10);
+    assertNoDuplicateOriginalEdges(result.certificate.originalEdgeIds);
 }
 
 HT_TEST(WilliamsonPipelineVerifiesSubdividedK5Certificate) {
     Graph g = ht::test::buildSubdividedK5();
 
-    WilliamsonPipelineOutput output =
-        runWilliamsonPipeline(g);
+    PlanarityTester tester;
+    PlanarityResult result =
+        tester.test(
+            g,
+            false
+        );
 
-    assert(output.verification.type == KuratowskiType::K5Subdivision);
-    assert(output.verification.originalEdgeIds.size() == 20);
-    assertNoDuplicateOriginalEdges(output.verification.originalEdgeIds);
+    assert(!result.planar);
+    assert(result.certificate.type == KuratowskiType::K5Subdivision);
+    assert(result.certificate.originalEdgeIds.size() == 20);
+    assertNoDuplicateOriginalEdges(result.certificate.originalEdgeIds);
 }
 
 HT_TEST(WilliamsonPipelineVerifiesSubdividedK33Certificate) {
     Graph g = ht::test::buildSubdividedK33();
 
-    WilliamsonPipelineOutput output =
-        runWilliamsonPipeline(g);
+    PlanarityTester tester;
+    PlanarityResult result =
+        tester.test(
+            g,
+            false
+        );
 
-    assert(output.verification.type == KuratowskiType::K33Subdivision);
-    assert(output.verification.originalEdgeIds.size() == 18);
-    assertNoDuplicateOriginalEdges(output.verification.originalEdgeIds);
+    assert(!result.planar);
+    assert(result.certificate.type == KuratowskiType::K33Subdivision);
+    assert(result.certificate.originalEdgeIds.size() == 18);
+    assertNoDuplicateOriginalEdges(result.certificate.originalEdgeIds);
 }
 
 HT_TEST(WilliamsonPipelineHandlesReverseRelabeledSubdividedK5) {
-    Graph base = ht::test::buildSubdividedK5();
+    Graph base =
+        ht::test::buildSubdividedK5();
 
     Graph g =
         relabelGraph(
@@ -275,7 +311,11 @@ HT_TEST(WilliamsonPipelineHandlesReverseRelabeledSubdividedK5) {
         );
 
     PlanarityTester tester;
-    PlanarityResult result = tester.test(g, false);
+    PlanarityResult result =
+        tester.test(
+            g,
+            false
+        );
 
     assert(!result.planar);
     assert(result.certificate.type == KuratowskiType::K5Subdivision);
@@ -283,7 +323,8 @@ HT_TEST(WilliamsonPipelineHandlesReverseRelabeledSubdividedK5) {
 }
 
 HT_TEST(WilliamsonPipelineHandlesRotateRelabeledSubdividedK5) {
-    Graph base = ht::test::buildSubdividedK5();
+    Graph base =
+        ht::test::buildSubdividedK5();
 
     Graph g =
         relabelGraph(
@@ -292,7 +333,11 @@ HT_TEST(WilliamsonPipelineHandlesRotateRelabeledSubdividedK5) {
         );
 
     PlanarityTester tester;
-    PlanarityResult result = tester.test(g, false);
+    PlanarityResult result =
+        tester.test(
+            g,
+            false
+        );
 
     assert(!result.planar);
     assert(result.certificate.type == KuratowskiType::K5Subdivision);
