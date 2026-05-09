@@ -3,13 +3,16 @@
 #include <string>
 #include <vector>
 
-#include "ht/certificate/DirectLinkTester.hpp"
 #include "ht/certificate/PathTree.hpp"
 #include "ht/certificate/PathTreeQueries.hpp"
 #include "ht/certificate/SegmentMetadata.hpp"
 #include "ht/certificate/WilliamsonContext.hpp"
+#include "ht/certificate/WilliamsonFList.hpp"
+#include "ht/certificate/WilliamsonFListBuilder.hpp"
 #include "ht/certificate/WilliamsonKernel.hpp"
+#include "ht/certificate/WilliamsonLinkOracle.hpp"
 #include "ht/certificate/WilliamsonSegfoPath.hpp"
+#include "ht/certificate/WilliamsonSegmentList.hpp"
 #include "ht/preprocess/PreparedPalmTree.hpp"
 
 namespace ht {
@@ -20,6 +23,24 @@ public:
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
         const SegmentMetadataTable& metadata,
+        const WilliamsonFList& fList,
+        const WilliamsonContext& context,
+        const WilliamsonSegfoPath& segfoPath
+    ) const;
+
+    WilliamsonKernel build(
+        const PreparedPalmTree& prepared,
+        const PathTree& pathTree,
+        const SegmentMetadataTable& metadata,
+        const WilliamsonContext& context,
+        const WilliamsonSegfoPath& segfoPath
+    ) const;
+
+    WilliamsonKernel buildBasicCase1(
+        const PreparedPalmTree& prepared,
+        const PathTree& pathTree,
+        const SegmentMetadataTable& metadata,
+        const WilliamsonFList& fList,
         const WilliamsonContext& context,
         const WilliamsonSegfoPath& segfoPath
     ) const;
@@ -66,6 +87,7 @@ private:
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
         const SegmentMetadataTable& metadata,
+        const WilliamsonFList& fList,
         const WilliamsonContext& context,
         const WilliamsonSegfoPath& segfoPath
     );
@@ -74,6 +96,7 @@ private:
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
         const SegmentMetadataTable& metadata,
+        const WilliamsonFList& fList,
         int nodeId,
         int fNode
     );
@@ -94,6 +117,7 @@ private:
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
         const SegmentMetadataTable& metadata,
+        const WilliamsonFList& fList,
         const WilliamsonContext& context,
         const WilliamsonSegfoPath& segfoPath
     );
@@ -102,6 +126,7 @@ private:
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
         const SegmentMetadataTable& metadata,
+        const WilliamsonFList& fList,
         const WilliamsonContext& context,
         const WilliamsonSegfoPath& segfoPath
     );
@@ -126,6 +151,7 @@ private:
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
         const SegmentMetadataTable& metadata,
+        const WilliamsonFList& fList,
         int sourceNode,
         int spanNode,
         EdgeCollector& out

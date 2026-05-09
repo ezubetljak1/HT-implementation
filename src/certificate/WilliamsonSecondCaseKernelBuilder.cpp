@@ -4,6 +4,27 @@
 
 namespace ht {
 
+namespace {
+
+void addUniqueNode(
+    std::vector<int>& nodes,
+    int nodeId
+) {
+    if (nodeId < 0) {
+        return;
+    }
+
+    for (int existing : nodes) {
+        if (existing == nodeId) {
+            return;
+        }
+    }
+
+    nodes.push_back(nodeId);
+}
+
+} // namespace
+
 WilliamsonSecondCaseKernelBuilder::EdgeCollector::EdgeCollector(
     const PreparedPalmTree& prepared
 ) : prepared(prepared) {
@@ -88,6 +109,7 @@ WilliamsonKernel WilliamsonSecondCaseKernelBuilder::build(
     const PreparedPalmTree& prepared,
     const PathTree& pathTree,
     const SegmentMetadataTable& metadata,
+    const WilliamsonFList& fList,
     const WilliamsonContext& context,
     const WilliamsonSegfoPath& segfoPath
 ) const {
@@ -99,6 +121,7 @@ WilliamsonKernel WilliamsonSecondCaseKernelBuilder::build(
             prepared,
             pathTree,
             metadata,
+            fList,
             context,
             segfoPath
         )) {
@@ -114,12 +137,10 @@ WilliamsonKernel WilliamsonSecondCaseKernelBuilder::build(
     EdgeCollector collector(prepared);
     PathTreeQueries queries(prepared, pathTree);
 
-    // CYCLE(e)
     collector.addDarts(
         queries.cycleDartsForNode(context.cycleNode)
     );
 
-    // REDSEG(F)
     if (!addReducedSegment(
             prepared,
             pathTree,
@@ -132,7 +153,6 @@ WilliamsonKernel WilliamsonSecondCaseKernelBuilder::build(
         return kernel;
     }
 
-    // REDSEG(B), REDSEG(Y1), ..., REDSEG(Yp), REDSEG(A)
     for (int nodeId : nodes) {
         if (!addReducedSegment(
                 prepared,
@@ -148,11 +168,6 @@ WilliamsonKernel WilliamsonSecondCaseKernelBuilder::build(
         }
     }
 
-    // Direct-link paths along:
-    //
-    //     B <- Y1 <- Y2 <- ... <- Yp <- A
-    //
-    // In this representation, each later node has a HEAD inside OSPAN(previous).
     for (int i = 0; i + 1 < static_cast<int>(nodes.size()); ++i) {
         const int previousNode = nodes[i];
         const int laterNode = nodes[i + 1];
@@ -161,6 +176,7 @@ WilliamsonKernel WilliamsonSecondCaseKernelBuilder::build(
                 prepared,
                 pathTree,
                 metadata,
+                fList,
                 laterNode,
                 previousNode,
                 collector
@@ -172,16 +188,11 @@ WilliamsonKernel WilliamsonSecondCaseKernelBuilder::build(
         }
     }
 
-    // Endpoint links:
-    //
-    //     B -> F
-    //     A -> F
-    //
-    // These are part of F dl B ... A dl F.
     if (!addDirectLinkPath(
             prepared,
             pathTree,
             metadata,
+            fList,
             context.bNode,
             context.fNode,
             collector
@@ -195,6 +206,7 @@ WilliamsonKernel WilliamsonSecondCaseKernelBuilder::build(
             prepared,
             pathTree,
             metadata,
+            fList,
             context.aNode,
             context.fNode,
             collector
@@ -220,13 +232,65 @@ WilliamsonKernel WilliamsonSecondCaseKernelBuilder::build(
     return kernel;
 }
 
-bool WilliamsonSecondCaseKernelBuilder::isCleanSecondCaseShape(
+WilliamsonKernel WilliamsonSecondCaseKernelBuilder::build(
     const PreparedPalmTree& prepared,
     const PathTree& pathTree,
     const SegmentMetadataTable& metadata,
     const WilliamsonContext& context,
     const WilliamsonSegfoPath& segfoPath
+) const {
+    WilliamsonSegmentList segmentList;
+    segmentList.valid = true;
+    segmentList.message =
+        "Compatibility SEGLIST built from SEGFO path and F node.";
+
+    for (int nodeId : segfoPath.segmentPathNodes) {
+        addUniqueNode(segmentList.segmentNodes, nodeId);
+    }
+
+    addUniqueNode(segmentList.segmentNodes, context.fNode);
+
+    WilliamsonFListBuilder fListBuilder;
+
+    WilliamsonFList fList =
+        fListBuilder.buildFromSegmentList(
+            prepared,
+            pathTree,
+            metadata,
+            segmentList,
+            context.fNode
+        );
+
+    if (!fList.valid) {
+        WilliamsonKernel kernel;
+        kernel.context = context;
+        kernel.segfoPath = segfoPath;
+        kernel.valid = false;
+        kernel.message =
+            "Compatibility WilliamsonSecondCaseKernelBuilder overload failed to build FLIST.";
+        return kernel;
+    }
+
+    return build(
+        prepared,
+        pathTree,
+        metadata,
+        fList,
+        context,
+        segfoPath
+    );
+}
+
+bool WilliamsonSecondCaseKernelBuilder::isCleanSecondCaseShape(
+    const PreparedPalmTree& prepared,
+    const PathTree& pathTree,
+    const SegmentMetadataTable& metadata,
+    const WilliamsonFList& fList,
+    const WilliamsonContext& context,
+    const WilliamsonSegfoPath& segfoPath
 ) {
+    (void) pathTree;
+
     if (!context.valid || !segfoPath.valid) {
         return false;
     }
@@ -238,24 +302,19 @@ bool WilliamsonSecondCaseKernelBuilder::isCleanSecondCaseShape(
         return false;
     }
 
-    // nodes = B, Y1, ..., Yp, A
     if (nodes.front() != context.bNode ||
         nodes.back() != context.aNode) {
         return false;
     }
 
-    // p even and p > 0.
-    //
-    // nodes.size() = p + 2
-    // p even <=> nodes.size() even.
     if (nodes.size() % 2 != 0) {
         return false;
     }
 
     if (!segmentLinksToSpan(
             prepared,
-            pathTree,
             metadata,
+            fList,
             context.bNode,
             context.fNode
         )) {
@@ -264,20 +323,19 @@ bool WilliamsonSecondCaseKernelBuilder::isCleanSecondCaseShape(
 
     if (!segmentLinksToSpan(
             prepared,
-            pathTree,
             metadata,
+            fList,
             context.aNode,
             context.fNode
         )) {
         return false;
     }
 
-    // Internal Yi must NOT directly link F.
     for (int i = 1; i < static_cast<int>(nodes.size()) - 1; ++i) {
         if (segmentLinksToSpan(
                 prepared,
-                pathTree,
                 metadata,
+                fList,
                 nodes[i],
                 context.fNode
             )) {
@@ -285,17 +343,11 @@ bool WilliamsonSecondCaseKernelBuilder::isCleanSecondCaseShape(
         }
     }
 
-    // Consecutive SEGFO links must exist:
-    //
-    //     Y1 -> B,
-    //     Y2 -> Y1,
-    //     ...
-    //     A  -> Yp.
     for (int i = 0; i + 1 < static_cast<int>(nodes.size()); ++i) {
         if (!segmentLinksToSpan(
                 prepared,
-                pathTree,
                 metadata,
+                fList,
                 nodes[i + 1],
                 nodes[i]
             )) {
@@ -308,21 +360,21 @@ bool WilliamsonSecondCaseKernelBuilder::isCleanSecondCaseShape(
 
 bool WilliamsonSecondCaseKernelBuilder::segmentLinksToSpan(
     const PreparedPalmTree& prepared,
-    const PathTree& pathTree,
     const SegmentMetadataTable& metadata,
+    const WilliamsonFList& fList,
     int sourceNode,
     int spanNode
 ) {
-    DirectLinkTester direct(
+    WilliamsonLinkOracle oracle(
         prepared,
-        pathTree,
-        metadata
+        metadata,
+        fList
     );
 
-    return direct.findPathFromSegmentToOpenSpan(
+    return oracle.linksToOpenSpan(
         sourceNode,
         spanNode
-    ).exists;
+    );
 }
 
 bool WilliamsonSecondCaseKernelBuilder::addReducedSegment(
@@ -395,18 +447,19 @@ bool WilliamsonSecondCaseKernelBuilder::addDirectLinkPath(
     const PreparedPalmTree& prepared,
     const PathTree& pathTree,
     const SegmentMetadataTable& metadata,
+    const WilliamsonFList& fList,
     int sourceNode,
     int spanNode,
     EdgeCollector& out
 ) {
-    DirectLinkTester direct(
+    WilliamsonLinkOracle oracle(
         prepared,
-        pathTree,
-        metadata
+        metadata,
+        fList
     );
 
-    const DirectLinkWitness witness =
-        direct.findPathFromSegmentToOpenSpan(
+    const WilliamsonLinkWitness witness =
+        oracle.findLinkToOpenSpan(
             sourceNode,
             spanNode
         );

@@ -1,4 +1,5 @@
 #include "ht/certificate/WilliamsonPathKernelBuilder.hpp"
+
 #include "ht/certificate/WilliamsonSecondCaseKernelBuilder.hpp"
 
 #include <stdexcept>
@@ -87,6 +88,7 @@ WilliamsonKernel WilliamsonPathKernelBuilder::build(
     const PreparedPalmTree& prepared,
     const PathTree& pathTree,
     const SegmentMetadataTable& metadata,
+    const WilliamsonFList& fList,
     const WilliamsonContext& context,
     const WilliamsonSegfoPath& segfoPath
 ) const {
@@ -99,6 +101,7 @@ WilliamsonKernel WilliamsonPathKernelBuilder::build(
             prepared,
             pathTree,
             metadata,
+            fList,
             context,
             segfoPath
         );
@@ -115,6 +118,7 @@ WilliamsonKernel WilliamsonPathKernelBuilder::build(
             prepared,
             pathTree,
             metadata,
+            fList,
             normalized.context,
             normalized.segfoPath
         );
@@ -127,6 +131,7 @@ WilliamsonKernel WilliamsonPathKernelBuilder::build(
             prepared,
             pathTree,
             metadata,
+            fList,
             normalized.context,
             normalized.segfoPath
         );
@@ -138,11 +143,83 @@ WilliamsonKernel WilliamsonPathKernelBuilder::build(
     return kernel;
 }
 
+WilliamsonKernel WilliamsonPathKernelBuilder::build(
+    const PreparedPalmTree& prepared,
+    const PathTree& pathTree,
+    const SegmentMetadataTable& metadata,
+    const WilliamsonContext& context,
+    const WilliamsonSegfoPath& segfoPath
+) const {
+    WilliamsonSegmentList segmentList;
+    segmentList.valid = true;
+    segmentList.message =
+        "Compatibility SEGLIST built from SEGFO path and F node.";
+
+    for (int nodeId : segfoPath.segmentPathNodes) {
+        bool exists = false;
+
+        for (int existing : segmentList.segmentNodes) {
+            if (existing == nodeId) {
+                exists = true;
+                break;
+            }
+        }
+
+        if (!exists && nodeId >= 0) {
+            segmentList.segmentNodes.push_back(nodeId);
+        }
+    }
+
+    bool hasF = false;
+
+    for (int existing : segmentList.segmentNodes) {
+        if (existing == context.fNode) {
+            hasF = true;
+            break;
+        }
+    }
+
+    if (!hasF && context.fNode >= 0) {
+        segmentList.segmentNodes.push_back(context.fNode);
+    }
+
+    WilliamsonFListBuilder fListBuilder;
+
+    WilliamsonFList fList =
+        fListBuilder.buildFromSegmentList(
+            prepared,
+            pathTree,
+            metadata,
+            segmentList,
+            context.fNode
+        );
+
+    if (!fList.valid) {
+        WilliamsonKernel kernel;
+        kernel.context = context;
+        kernel.segfoPath = segfoPath;
+        kernel.valid = false;
+        kernel.message =
+            "Compatibility WilliamsonPathKernelBuilder overload failed to build FLIST.";
+        return kernel;
+    }
+
+    return build(
+        prepared,
+        pathTree,
+        metadata,
+        fList,
+        context,
+        segfoPath
+    );
+}
+
 WilliamsonPathKernelBuilder::NormalizedPath
 WilliamsonPathKernelBuilder::normalizeToBasicCase(
     const PreparedPalmTree& prepared,
     const PathTree& pathTree,
     const SegmentMetadataTable& metadata,
+    const WilliamsonFList& fList,
     const WilliamsonContext& context,
     const WilliamsonSegfoPath& segfoPath
 ) {
@@ -175,11 +252,13 @@ WilliamsonPathKernelBuilder::normalizeToBasicCase(
 
         currentContext.bNode = nodes.front();
         currentContext.aNode = nodes.back();
+
         currentContext.aLinkedToF =
             internalNodeLinksToF(
                 prepared,
                 pathTree,
                 metadata,
+                fList,
                 currentContext.aNode,
                 currentContext.fNode
             );
@@ -189,6 +268,7 @@ WilliamsonPathKernelBuilder::normalizeToBasicCase(
                 prepared,
                 pathTree,
                 metadata,
+                fList,
                 currentContext.bNode,
                 currentContext.fNode
             );
@@ -203,33 +283,24 @@ WilliamsonPathKernelBuilder::normalizeToBasicCase(
             const int firstNode = nodes[0];
             const int secondNode = nodes[1];
 
-            DirectLinkTester direct(
+            WilliamsonLinkOracle oracle(
                 prepared,
-                pathTree,
-                metadata
+                metadata,
+                fList
             );
 
             const bool secondLinksFirst =
-                direct.findPathFromSegmentToOpenSpan(
+                oracle.linksToOpenSpan(
                     secondNode,
                     firstNode
-                ).exists;
+                );
 
             const bool firstLinksSecond =
-                direct.findPathFromSegmentToOpenSpan(
+                oracle.linksToOpenSpan(
                     firstNode,
                     secondNode
-                ).exists;
+                );
 
-            // Builder convention for Basic Case 1:
-            //
-            //     path = B, A
-            //
-            // and the required direct-link is:
-            //
-            //     A dl B
-            //
-            // i.e. second node links into the first node's open span.
             if (secondLinksFirst) {
                 currentContext.bNode = firstNode;
                 currentContext.aNode = secondNode;
@@ -239,6 +310,7 @@ WilliamsonPathKernelBuilder::normalizeToBasicCase(
                         prepared,
                         pathTree,
                         metadata,
+                        fList,
                         currentContext.bNode,
                         currentContext.fNode
                     );
@@ -248,6 +320,7 @@ WilliamsonPathKernelBuilder::normalizeToBasicCase(
                         prepared,
                         pathTree,
                         metadata,
+                        fList,
                         currentContext.aNode,
                         currentContext.fNode
                     );
@@ -276,14 +349,6 @@ WilliamsonPathKernelBuilder::normalizeToBasicCase(
                 return result;
             }
 
-            // If the returned pair is reversed, flip it.
-            //
-            // Input pair:
-            //     first, second
-            //
-            // If first dl second, then the Basic Case 1 orientation should be:
-            //     B = second
-            //     A = first
             if (firstLinksSecond) {
                 currentContext.bNode = secondNode;
                 currentContext.aNode = firstNode;
@@ -293,6 +358,7 @@ WilliamsonPathKernelBuilder::normalizeToBasicCase(
                         prepared,
                         pathTree,
                         metadata,
+                        fList,
                         currentContext.bNode,
                         currentContext.fNode
                     );
@@ -302,6 +368,7 @@ WilliamsonPathKernelBuilder::normalizeToBasicCase(
                         prepared,
                         pathTree,
                         metadata,
+                        fList,
                         currentContext.aNode,
                         currentContext.fNode
                     );
@@ -336,23 +403,6 @@ WilliamsonPathKernelBuilder::normalizeToBasicCase(
             return result;
         }
 
-        // Williamson transition:
-        //
-        // If some internal Yi directly links F, choose the first such Yi
-        // and reduce the path.
-        //
-        // Path indices:
-        //   nodes[0] = B
-        //   nodes[1] = Y1
-        //   ...
-        //   nodes[p] = Yp
-        //   nodes[p + 1] = A
-        //
-        // If Yi links F:
-        //   i odd  -> new path B ... Yi
-        //   i even -> new path Yi ... A
-        //
-        // This keeps the number of internal Y nodes even.
         for (int i = 1; i < static_cast<int>(nodes.size()) - 1; ++i) {
             const int yiNode = nodes[i];
 
@@ -361,6 +411,7 @@ WilliamsonPathKernelBuilder::normalizeToBasicCase(
                     prepared,
                     pathTree,
                     metadata,
+                    fList,
                     yiNode,
                     currentContext.fNode
                 );
@@ -370,8 +421,6 @@ WilliamsonPathKernelBuilder::normalizeToBasicCase(
             }
 
             if (i % 2 == 1) {
-                // Yi has odd Williamson index.
-                // Keep B ... Yi.
                 currentPath =
                     makeReducedPath(
                         nodes,
@@ -386,8 +435,6 @@ WilliamsonPathKernelBuilder::normalizeToBasicCase(
                         currentPath.segmentPathNodes.back()
                     );
             } else {
-                // Yi has even Williamson index.
-                // Keep Yi ... A.
                 currentPath =
                     makeReducedPath(
                         nodes,
@@ -412,6 +459,7 @@ WilliamsonPathKernelBuilder::normalizeToBasicCase(
             prepared,
             pathTree,
             metadata,
+            fList,
             currentContext,
             currentPath
         )) {
@@ -434,19 +482,22 @@ bool WilliamsonPathKernelBuilder::internalNodeLinksToF(
     const PreparedPalmTree& prepared,
     const PathTree& pathTree,
     const SegmentMetadataTable& metadata,
+    const WilliamsonFList& fList,
     int nodeId,
     int fNode
 ) {
-    DirectLinkTester direct(
+    (void) pathTree;
+
+    WilliamsonLinkOracle oracle(
         prepared,
-        pathTree,
-        metadata
+        metadata,
+        fList
     );
 
-    return direct.findPathFromSegmentToOpenSpan(
+    return oracle.linksToOpenSpan(
         nodeId,
         fNode
-    ).exists;
+    );
 }
 
 WilliamsonContext WilliamsonPathKernelBuilder::makeReducedContext(
@@ -501,6 +552,7 @@ bool WilliamsonPathKernelBuilder::isCleanBasicCase2(
     const PreparedPalmTree& prepared,
     const PathTree& pathTree,
     const SegmentMetadataTable& metadata,
+    const WilliamsonFList& fList,
     const WilliamsonContext& context,
     const WilliamsonSegfoPath& segfoPath
 ) {
@@ -519,12 +571,6 @@ bool WilliamsonPathKernelBuilder::isCleanBasicCase2(
         return false;
     }
 
-    // Number of internal Y nodes must be even:
-    //
-    //   B, Y1, ..., Yp, A
-    //
-    // nodes.size() = p + 2
-    // p even  <=>  nodes.size() even
     if (nodes.size() % 2 != 0) {
         return false;
     }
@@ -533,6 +579,7 @@ bool WilliamsonPathKernelBuilder::isCleanBasicCase2(
             prepared,
             pathTree,
             metadata,
+            fList,
             context.bNode,
             context.fNode
         )) {
@@ -543,18 +590,19 @@ bool WilliamsonPathKernelBuilder::isCleanBasicCase2(
             prepared,
             pathTree,
             metadata,
+            fList,
             context.aNode,
             context.fNode
         )) {
         return false;
     }
 
-    // Clean second case requires Yi ndl F for all internal Yi.
     for (int i = 1; i < static_cast<int>(nodes.size()) - 1; ++i) {
         if (internalNodeLinksToF(
                 prepared,
                 pathTree,
                 metadata,
+                fList,
                 nodes[i],
                 context.fNode
             )) {
@@ -569,6 +617,7 @@ WilliamsonKernel WilliamsonPathKernelBuilder::buildBasicCase1(
     const PreparedPalmTree& prepared,
     const PathTree& pathTree,
     const SegmentMetadataTable& metadata,
+    const WilliamsonFList& fList,
     const WilliamsonContext& context,
     const WilliamsonSegfoPath& segfoPath
 ) const {
@@ -577,12 +626,14 @@ WilliamsonKernel WilliamsonPathKernelBuilder::buildBasicCase1(
     kernel.segfoPath = segfoPath;
 
     if (!context.valid) {
-        kernel.message = "Cannot build Basic Case 1 kernel: invalid Williamson context.";
+        kernel.message =
+            "Cannot build Basic Case 1 kernel: invalid Williamson context.";
         return kernel;
     }
 
     if (!segfoPath.valid || segfoPath.segmentPathNodes.empty()) {
-        kernel.message = "Cannot build Basic Case 1 kernel: invalid SEGFO path.";
+        kernel.message =
+            "Cannot build Basic Case 1 kernel: invalid SEGFO path.";
         return kernel;
     }
 
@@ -590,6 +641,7 @@ WilliamsonKernel WilliamsonPathKernelBuilder::buildBasicCase1(
             prepared,
             pathTree,
             metadata,
+            fList,
             context,
             segfoPath
         )) {
@@ -602,17 +654,6 @@ WilliamsonKernel WilliamsonPathKernelBuilder::buildBasicCase1(
     EdgeCollector collector(prepared);
     PathTreeQueries queries(prepared, pathTree);
 
-    // Williamson Basic Case 1 kernel:
-    //
-    //     CYCLE(e)
-    //   + REDSEG(A)
-    //   + REDSEG(B)
-    //   + REDSEG(F)
-    //   + direct-link path A -> B
-    //   + direct-link path A -> F
-    //   + direct-link path B -> F
-    //
-    // Important: we do NOT add whole SEG(A), SEG(B), or SEG(F).
     collector.addDarts(
         queries.cycleDartsForNode(context.cycleNode)
     );
@@ -649,6 +690,7 @@ WilliamsonKernel WilliamsonPathKernelBuilder::buildBasicCase1(
             prepared,
             pathTree,
             metadata,
+            fList,
             context.aNode,
             context.bNode,
             collector
@@ -659,6 +701,7 @@ WilliamsonKernel WilliamsonPathKernelBuilder::buildBasicCase1(
             prepared,
             pathTree,
             metadata,
+            fList,
             context.aNode,
             context.fNode,
             collector
@@ -669,6 +712,7 @@ WilliamsonKernel WilliamsonPathKernelBuilder::buildBasicCase1(
             prepared,
             pathTree,
             metadata,
+            fList,
             context.bNode,
             context.fNode,
             collector
@@ -701,23 +745,36 @@ WilliamsonKernel WilliamsonPathKernelBuilder::buildBasicCase1(
     return kernel;
 }
 
-bool WilliamsonPathKernelBuilder::isBasicCase1(
+WilliamsonKernel WilliamsonPathKernelBuilder::buildBasicCase1(
     const PreparedPalmTree& prepared,
     const PathTree& pathTree,
     const SegmentMetadataTable& metadata,
     const WilliamsonContext& context,
     const WilliamsonSegfoPath& segfoPath
+) const {
+    return build(
+        prepared,
+        pathTree,
+        metadata,
+        context,
+        segfoPath
+    );
+}
+
+bool WilliamsonPathKernelBuilder::isBasicCase1(
+    const PreparedPalmTree& prepared,
+    const PathTree& pathTree,
+    const SegmentMetadataTable& metadata,
+    const WilliamsonFList& fList,
+    const WilliamsonContext& context,
+    const WilliamsonSegfoPath& segfoPath
 ) {
+    (void) pathTree;
+
     if (!context.valid || !segfoPath.valid) {
         return false;
     }
 
-    // Basic Case 1:
-    //
-    //     F dl B dl A dl F
-    //
-    // In the current path representation this means the SEGFO path from
-    // B to A has exactly two nodes: B, A.
     if (segfoPath.segmentPathNodes.size() != 2) {
         return false;
     }
@@ -727,29 +784,29 @@ bool WilliamsonPathKernelBuilder::isBasicCase1(
         return false;
     }
 
-    DirectLinkTester direct(
+    WilliamsonLinkOracle oracle(
         prepared,
-        pathTree,
-        metadata
+        metadata,
+        fList
     );
 
     const bool aToB =
-        direct.findPathFromSegmentToOpenSpan(
+        oracle.linksToOpenSpan(
             context.aNode,
             context.bNode
-        ).exists;
+        );
 
     const bool aToF =
-        direct.findPathFromSegmentToOpenSpan(
+        oracle.linksToOpenSpan(
             context.aNode,
             context.fNode
-        ).exists;
+        );
 
     const bool bToF =
-        direct.findPathFromSegmentToOpenSpan(
+        oracle.linksToOpenSpan(
             context.bNode,
             context.fNode
-        ).exists;
+        );
 
     return aToB && aToF && bToF;
 }
@@ -824,18 +881,19 @@ bool WilliamsonPathKernelBuilder::addDirectLinkPath(
     const PreparedPalmTree& prepared,
     const PathTree& pathTree,
     const SegmentMetadataTable& metadata,
+    const WilliamsonFList& fList,
     int sourceNode,
     int spanNode,
     EdgeCollector& out
 ) {
-    DirectLinkTester direct(
+    WilliamsonLinkOracle oracle(
         prepared,
-        pathTree,
-        metadata
+        metadata,
+        fList
     );
 
-    const DirectLinkWitness witness =
-        direct.findPathFromSegmentToOpenSpan(
+    const WilliamsonLinkWitness witness =
+        oracle.findLinkToOpenSpan(
             sourceNode,
             spanNode
         );

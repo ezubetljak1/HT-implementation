@@ -34,6 +34,7 @@ add_library(ht_planarity
     src/debug/DebugPrinter.cpp
     src/certificate/WilliamsonPathKernelBuilder.cpp
     src/certificate/WilliamsonSecondCaseKernelBuilder.cpp
+    src/certificate/WilliamsonLinkOracle.cpp
 )
 
 target_include_directories(ht_planarity PUBLIC include)

@@ -3,19 +3,31 @@
 #include <string>
 #include <vector>
 
-#include "ht/certificate/DirectLinkTester.hpp"
 #include "ht/certificate/PathTree.hpp"
 #include "ht/certificate/PathTreeQueries.hpp"
 #include "ht/certificate/SegmentMetadata.hpp"
 #include "ht/certificate/WilliamsonContext.hpp"
+#include "ht/certificate/WilliamsonFList.hpp"
+#include "ht/certificate/WilliamsonFListBuilder.hpp"
 #include "ht/certificate/WilliamsonKernel.hpp"
+#include "ht/certificate/WilliamsonLinkOracle.hpp"
 #include "ht/certificate/WilliamsonSegfoPath.hpp"
+#include "ht/certificate/WilliamsonSegmentList.hpp"
 #include "ht/preprocess/PreparedPalmTree.hpp"
 
 namespace ht {
 
 class WilliamsonSecondCaseKernelBuilder {
 public:
+    WilliamsonKernel build(
+        const PreparedPalmTree& prepared,
+        const PathTree& pathTree,
+        const SegmentMetadataTable& metadata,
+        const WilliamsonFList& fList,
+        const WilliamsonContext& context,
+        const WilliamsonSegfoPath& segfoPath
+    ) const;
+
     WilliamsonKernel build(
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
@@ -47,14 +59,15 @@ private:
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
         const SegmentMetadataTable& metadata,
+        const WilliamsonFList& fList,
         const WilliamsonContext& context,
         const WilliamsonSegfoPath& segfoPath
     );
 
     static bool segmentLinksToSpan(
         const PreparedPalmTree& prepared,
-        const PathTree& pathTree,
         const SegmentMetadataTable& metadata,
+        const WilliamsonFList& fList,
         int sourceNode,
         int spanNode
     );
@@ -79,6 +92,7 @@ private:
         const PreparedPalmTree& prepared,
         const PathTree& pathTree,
         const SegmentMetadataTable& metadata,
+        const WilliamsonFList& fList,
         int sourceNode,
         int spanNode,
         EdgeCollector& out

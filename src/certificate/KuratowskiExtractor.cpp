@@ -8,6 +8,7 @@
 #include "ht/certificate/WilliamsonSegmentListBuilder.hpp"
 #include "ht/certificate/WilliamsonSegfoPathBuilder.hpp"
 #include "ht/certificate/KuratowskiKernelSelector.hpp"
+#include "ht/certificate/WilliamsonFListBuilder.hpp"
 
 #include <sstream>
 #include <string>
@@ -168,29 +169,42 @@ KuratowskiCertificate KuratowskiExtractor::extractFromFailure(
             segmentListMessage = segmentList.message;
 
             if (segmentList.valid) {
-                WilliamsonSegfoPathBuilder segfoPathBuilder;
-                WilliamsonSegfoPath segfoPath =
-                    segfoPathBuilder.buildPath(
+                WilliamsonFListBuilder fListBuilder;
+                WilliamsonFList fList =
+                    fListBuilder.buildFromSegmentList(
                         prepared,
                         pathTree,
                         metadata,
                         segmentList,
-                        context
+                        context.fNode
                     );
-                
-                segfoPathMessage = segfoPath.message;
 
-                if (segfoPath.valid) {
-                    kernel =
-                        kernelBuilder.buildKernelFromSegfoPath(
+                if (fList.valid) {
+                    WilliamsonSegfoPathBuilder segfoPathBuilder;
+                    WilliamsonSegfoPath segfoPath =
+                        segfoPathBuilder.buildPathFromFList(
                             prepared,
                             pathTree,
                             metadata,
-                            context,
-                            segfoPath
+                            fList,
+                            context
                         );
-                    
-                    kernelMessage = kernel.message;
+
+                    segfoPathMessage = segfoPath.message;
+
+                    if (segfoPath.valid) {
+                        kernel =
+                            kernelBuilder.buildKernelFromSegfoPath(
+                                prepared,
+                                pathTree,
+                                metadata,
+                                fList,
+                                context,
+                                segfoPath
+                            );
+
+                        kernelMessage = kernel.message;
+                    }
                 }
             }
 
