@@ -27,7 +27,7 @@ add_library(ht_planarity
     src/certificate/WilliamsonKernelBuilder.cpp
     src/certificate/HomKernelSignatureBuilder.cpp
     src/certificate/HomKernelCanonicalizer.cpp
-    src/certificate/HomKernelLookupTable.cpp
+    src/certificate/HomKernelLookupTable.cp
     src/certificate/KuratowskiKernelSelector.cpp
     src/certificate/KuratowskiSubdivisionVerifier.cpp
     src/certificate/KuratowskiExtractor.cpp
